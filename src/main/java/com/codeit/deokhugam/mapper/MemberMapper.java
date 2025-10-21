@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MemberMapper {
 
+  //푸쉬테스트
   //  @Mapping(target = "id", ignore = true)
 //  @Mapping(target = "createdAt", ignore = true)
 //  @Mapping(target = "updatedAt", ignore = true)

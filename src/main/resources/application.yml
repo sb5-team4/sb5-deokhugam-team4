@@ -1,3 +1,5 @@
 spring:
   application:
     name: deokhugam
+  profiles:
+    active: dev   # dev, prod 선택 가능

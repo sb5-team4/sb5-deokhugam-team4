@@ -11,6 +11,7 @@ import com.codeit.deokhugam.repository.ReviewLikeRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.transaction.Transactional;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -64,8 +65,8 @@ public class ReviewServiceImpl implements ReviewService {
         .likeCount(review.getLikeCount())
         .commentCount(review.getCommentCount())
         .likedByMe(isLikedByMe)
-        .createdAt(review.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")))
-        .updatedAt(review.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")))
+        .createdAt(OffsetDateTime.ofInstant(review.getCreatedAt(), ZoneId.of("Asia/Seoul")))
+        .createdAt(OffsetDateTime.ofInstant(review.getUpdatedAt(), ZoneId.of("Asia/Seoul")))
         .build();
   }
 

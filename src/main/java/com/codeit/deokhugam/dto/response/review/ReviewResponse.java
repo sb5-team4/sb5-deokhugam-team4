@@ -1,6 +1,6 @@
 package com.codeit.deokhugam.dto.response.review;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +21,6 @@ public class ReviewResponse {
   private final Long likeCount;
   private final Long commentCount;
   private final boolean likedByMe;
-  private final ZonedDateTime createdAt;
-  private final ZonedDateTime updatedAt;
+  private final OffsetDateTime createdAt;
+  private final OffsetDateTime updatedAt;
 }

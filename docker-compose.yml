@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: deokhugam1234
+      POSTGRES_USER: deokhugam_user
+      POSTGRES_DB: deokhugam
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+#      - ./schema:/docker-entrypoint-initdb.d

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.controller.review.ReviewController;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
@@ -31,7 +32,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest
+@WebMvcTest(ReviewController.class)
 @Import(GlobalExceptionHandler.class)
 public class ReviewControllerTest {
 

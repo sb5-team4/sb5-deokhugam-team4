@@ -3,8 +3,20 @@ package com.codeit.deokhugam.domain.entity;
 import com.codeit.deokhugam.domain.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Entity
+@Getter
+@Setter
+@SuperBuilder
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class Member extends BaseUpdatableEntity {
 
   @Column(nullable = false, unique = true)

@@ -19,7 +19,6 @@ public abstract class DataBaseConnectionSupport {
         .withDatabaseName("db_name")
         .withUsername("root")
         .withPassword("password")
-        .withEnv("DOCKER_HOST", "unix:///var/run/docker.sock")
         .withNetworkAliases("db_container");
 
     postgreSQLContainer.start();

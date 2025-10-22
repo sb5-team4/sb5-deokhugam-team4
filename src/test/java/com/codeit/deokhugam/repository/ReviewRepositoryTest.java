@@ -46,7 +46,7 @@ public class ReviewRepositoryTest extends DataBaseConnectionSupport {
         .description("description")
         .publisher("publisher")
         .published_date(LocalDate.now())
-        .review_count(0)
+        .reviewCount(0)
         .rating(BigDecimal.valueOf(1.1))
         .deleted(false)
         .isbn("isbn")

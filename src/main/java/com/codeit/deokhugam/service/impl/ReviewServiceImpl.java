@@ -70,7 +70,7 @@ public class ReviewServiceImpl implements ReviewService {
         .commentCount(review.getCommentCount())
         .likedByMe(isLikedByMe)
         .createdAt(OffsetDateTime.ofInstant(review.getCreatedAt(), ZoneId.of("Asia/Seoul")))
-        .createdAt(OffsetDateTime.ofInstant(review.getUpdatedAt(), ZoneId.of("Asia/Seoul")))
+        .updatedAt(OffsetDateTime.ofInstant(review.getUpdatedAt(), ZoneId.of("Asia/Seoul")))
         .build();
   }
 

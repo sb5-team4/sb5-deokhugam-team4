@@ -15,7 +15,7 @@ public abstract class DataBaseConnectionSupport {
   protected static final PostgreSQLContainer<?> postgreSQLContainer;
 
   static {
-    postgreSQLContainer = new PostgreSQLContainer<>("postgres:17-alpine")
+    postgreSQLContainer = new PostgreSQLContainer<>("postgres:15-alpine")
         .withDatabaseName("db_name")
         .withUsername("root")
         .withPassword("password")

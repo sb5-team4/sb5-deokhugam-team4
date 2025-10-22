@@ -6,24 +6,16 @@ spring:
     init:
       mode: always  # 테스트일 때도 항상 실행
       schema-locations: classpath:schema.sql
-#      data-locations: classpath:data.sql
+  #      data-locations: classpath:data.sql
 
-
-
-#  todo 테스트 컨테이너로 수정해야함
-#  datasource:
-#    url: jdbc:h2:mem:discodeit;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;INIT=SET TIME ZONE 'Asia/Seoul'
-#    # 인메모리 (권장)
-#    # 임베디드 (data가 넣어지지 않음)
-#    #    url: jdbc:h2:file:./data/blogdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;AUTO_SERVER=TRUE
-#    # 서버모드 -> h2 DB 실행 필요
-#    #    url: jdbc:h2:tcp://localhost:9092/~/blogdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
-#    driver-class-name: org.h2.Driver
-#    username: sa
-#    password:
-#  jpa:
-#    hibernate:
-#      ddl-auto: create-drop
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8083

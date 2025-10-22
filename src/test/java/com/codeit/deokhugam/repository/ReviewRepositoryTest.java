@@ -45,12 +45,12 @@ public class ReviewRepositoryTest extends DataBaseConnectionSupport {
         .author("author")
         .description("description")
         .publisher("publisher")
-        .published_date(LocalDate.now())
+        .publishedDate(LocalDate.now())
         .reviewCount(0)
         .rating(BigDecimal.valueOf(1.1))
         .deleted(false)
         .isbn("isbn")
-        .thumbnail_url("thumbnail_url")
+        .thumbnailUrl("thumbnail_url")
         .build();
     bookRepository.save(book);
 

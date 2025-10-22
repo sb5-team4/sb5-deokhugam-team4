@@ -1,0 +1,37 @@
+package com.codeit.deokhugam.controller;
+
+import com.codeit.deokhugam.dto.command.MemberCreateCommand;
+import com.codeit.deokhugam.dto.request.MemberCreateRequest;
+import com.codeit.deokhugam.dto.response.MemberCreatedResponse;
+import com.codeit.deokhugam.dto.result.MemberCreatedResult;
+import com.codeit.deokhugam.mapper.MemberMapper;
+import com.codeit.deokhugam.service.impl.MemberService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/users")
+public class MemberController {
+
+  private final MemberService memberService;
+  private final MemberMapper memberMapper;
+
+
+  @PostMapping
+  public ResponseEntity<MemberCreatedResponse> create(
+      @Valid @RequestBody MemberCreateRequest member
+  ) {
+    MemberCreateCommand memberCreateCommand = memberMapper.toMemberCreateCommand(member);
+    MemberCreatedResult created = memberService.create(memberCreateCommand);
+    MemberCreatedResponse memberCreatedResponse = memberMapper.toMemberCreatedResponse(created);
+    return ResponseEntity.status(HttpStatus.CREATED).body(memberCreatedResponse);
+
+  }
+}

@@ -8,6 +8,7 @@ import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +26,12 @@ public class MemberController {
 
   @PostMapping
   public ResponseEntity<MemberCreatedResponse> create(
-      @Valid @RequestBody MemberCreateRequest user
+      @Valid @RequestBody MemberCreateRequest member
   ) {
-    MemberCreateCommand memberCreateCommand = memberMapper.toMemberCreateCommand(user);
+    MemberCreateCommand memberCreateCommand = memberMapper.toMemberCreateCommand(member);
     MemberCreatedResult created = memberService.create(memberCreateCommand);
     MemberCreatedResponse memberCreatedResponse = memberMapper.toMemberCreatedResponse(created);
-    return ResponseEntity.ok().body(memberCreatedResponse);
+    return ResponseEntity.status(HttpStatus.CREATED).body(memberCreatedResponse);
+
   }
 }

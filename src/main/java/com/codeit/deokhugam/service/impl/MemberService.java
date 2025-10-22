@@ -33,7 +33,6 @@ public class MemberService {
     //record는 setter불가라 엔티티 변환후 패스워드 암호화
     String encodedPw = passwordEncoder.encode(createMember.getPassword());
     createMember.setPassword(encodedPw);
-    log.info("Creating member with password {}", createMember.getPassword());
     Member returnMember = memberRepository.save(createMember);
     return memberMapper.toMemberCreatedResult(returnMember);
 

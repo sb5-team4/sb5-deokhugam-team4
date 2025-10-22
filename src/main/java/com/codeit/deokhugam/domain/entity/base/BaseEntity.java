@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
 @Getter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 public abstract class BaseEntity {
 
   @Id

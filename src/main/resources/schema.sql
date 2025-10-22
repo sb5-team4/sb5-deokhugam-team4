@@ -86,7 +86,6 @@ CREATE TABLE notification
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     member_Id  BIGINT                                          NOT NULL,
     review_Id  BIGINT                                          NOT NULL,
-    comment_id BIGINT                                          NOT NULL,
     content    VARCHAR(50)                                     NOT NULL,
     confirmed  BOOLEAN                                         NOT NULL,
     created_at timestamp with time zone                        NOT NULL,
@@ -216,16 +215,6 @@ ALTER TABLE notification
         )
         REFERENCES review (
                            id
-            )
-        ON DELETE CASCADE
-;
-
-ALTER TABLE notification
-    ADD CONSTRAINT FK_comment_TO_notification_1 FOREIGN KEY (
-                                                             comment_id
-        )
-        REFERENCES comment (
-                            id
             )
         ON DELETE CASCADE
 ;

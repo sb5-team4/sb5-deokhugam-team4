@@ -12,7 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 public abstract class BaseUpdatableEntity extends BaseEntity {
 
   @LastModifiedDate

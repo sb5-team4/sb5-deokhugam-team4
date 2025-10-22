@@ -6,7 +6,10 @@ services:
       POSTGRES_USER: deokhugam_user
       POSTGRES_DB: deokhugam
     ports:
-      - "5432:5432"
+      - "5555:5432"
     volumes:
       - db:/var/lib/postgresql/data
 #      - ./schema:/docker-entrypoint-initdb.d
+
+volumes:
+  db:

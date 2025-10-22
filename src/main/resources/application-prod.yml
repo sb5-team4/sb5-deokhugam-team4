@@ -10,7 +10,7 @@ spring:
     #    username: ${DB_USERNAME}
     #    password: ${DB_PASSWORD}
     # for RDS
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/deokhugam}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5555/deokhugam}
     username: ${SPRING_DATASOURCE_USERNAME:deokhugam_user}
     password: ${SPRING_DATASOURCE_PASSWORD:deokhugam1234}
 

@@ -29,10 +29,8 @@ public class Notification extends BaseUpdatableEntity {
   @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
+
   @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "review_id", nullable = false)
   private Review review;
-  @ManyToOne(cascade = CascadeType.REMOVE)
-  @JoinColumn(name = "comment_id", nullable = false)
-  private Comment comment;
 }

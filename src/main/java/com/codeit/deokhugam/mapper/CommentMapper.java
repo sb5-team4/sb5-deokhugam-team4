@@ -14,9 +14,6 @@ import org.mapstruct.Mapping;
 public interface CommentMapper {
 
   // CommentCreateRequest -> CommentCreateCommand로 매핑
-  @Mapping(source = "request.reviewId", target = "reviewId")
-  @Mapping(source = "memberId", target = "memberId")
-  @Mapping(source = "request.content", target = "content")
   CommentCreateCommand toCommentCreateCommand(CommentCreateRequest request, Long memberId);
 
   // CommentCreateCommand -> Comment로 매핑

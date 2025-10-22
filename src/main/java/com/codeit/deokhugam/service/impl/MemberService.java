@@ -8,6 +8,7 @@ import com.codeit.deokhugam.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +18,8 @@ public class MemberService {
 
   private final MemberMapper memberMapper;
   private final MemberRepository memberRepository;
+  private final PasswordEncoder passwordEncoder;
+
 
   @Transactional
   public MemberCreatedResult create(MemberCreateCommand memberCreateCommand) {
@@ -27,6 +30,10 @@ public class MemberService {
       throw new RuntimeException("Nickname already exists");
     }
     Member createMember = memberMapper.toMember(memberCreateCommand);
+    //record는 setter불가라 엔티티 변환후 패스워드 암호화
+    String encodedPw = passwordEncoder.encode(createMember.getPassword());
+    createMember.setPassword(encodedPw);
+    log.info("Creating member with password {}", createMember.getPassword());
     Member returnMember = memberRepository.save(createMember);
     return memberMapper.toMemberCreatedResult(returnMember);
 

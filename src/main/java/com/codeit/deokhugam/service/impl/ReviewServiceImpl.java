@@ -28,10 +28,14 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   @Transactional
-  public CreateReviewResult createReview(CreateReviewCommand command) {
+  public CreateReviewResult createReview(
+      CreateReviewCommand command) {
 
     Long bookId = command.getBookId();
     Book book = bookRepository.findById(bookId).orElseThrow(NoSuchElementException::new);
+    // book의 review_count 증가
+    book.setReviewCount(book.getReviewCount() + 1);
+
     Long memberId = command.getUserId();
     Member member = memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
 

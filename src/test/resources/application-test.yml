@@ -2,6 +2,11 @@ spring:
   config:
     activate:
       on-profile: test
+  sql:
+    init:
+      mode: always  # 테스트일 때도 항상 실행
+      schema-locations: classpath:schema.sql
+#      data-locations: classpath:data.sql
 
 
 

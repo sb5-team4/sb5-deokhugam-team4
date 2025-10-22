@@ -1,7 +1,6 @@
 package com.codeit.deokhugam.controller;
 
 import com.codeit.deokhugam.dto.response.BookResponse;
-import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
   private final BookService bookService;
-  private final BookRepository bookRepository;
 
   @GetMapping("/{bookId}")
   public ResponseEntity<BookResponse> getBook(@PathVariable Long bookId) {

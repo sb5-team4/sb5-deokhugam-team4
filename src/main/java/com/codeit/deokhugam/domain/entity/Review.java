@@ -13,13 +13,9 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Getter
+@Builder
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Builder
 public class Review extends BaseUpdatableEntity {
 
   @Column(nullable = false)

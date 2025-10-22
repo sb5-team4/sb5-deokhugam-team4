@@ -1,15 +1,21 @@
-package com.codeit.deokhugam.domain;
+package com.codeit.deokhugam.domain.entity;
 
-import com.codeit.deokhugam.domain.entity.Comment;
-import com.codeit.deokhugam.domain.entity.Member;
-import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.domain.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
 @Entity
 public class Notification extends BaseUpdatableEntity {
 

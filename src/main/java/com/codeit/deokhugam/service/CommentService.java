@@ -43,9 +43,17 @@ public class CommentService {
     // 댓글 DB에 저장
     Comment savedComment = commentRepository.save(comment);
 
-    // mapper에 있는 Result로 매핑해주는 메서드를 사용해서 Result로 변환
+
+    // 알림
+    // 리뷰 작성자와 댓글 작성자가 다를 경우에만 알림 생성
+    if (!review.getMember().getId().equals(member.getId())) {
+
+    // NotificationService의 create 메소드 호출
+    notificationService.create(review.getMember(), review, savedComment);
+    }
+
+  // mapper에 있는 Result로 매핑해주는 메서드를 사용해서 Result로 변환
     return commentMapper.toCommentCreateResult(savedComment);
   }
-
 
 }

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
@@ -19,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class ReviewControllerTest {
   Long bookId;
   Long userId;
   String content;
-  int rating;
+  short rating;
 
   Long id;
   String bookTitle;
@@ -68,7 +68,7 @@ public class ReviewControllerTest {
     bookId = 1L;
     userId = 1L;
     content = "This is a test review";
-    rating = 1;
+    rating = (short) 1;
     id = 1L;
     bookTitle = "This is a test book";
     bookThumbnailUrl = "This is a test book thumbnail";
@@ -145,7 +145,7 @@ public class ReviewControllerTest {
         .andExpect(jsonPath("$.userId").value(userId))
         .andExpect(jsonPath("$.userNickname").value(userNickname))
         .andExpect(jsonPath("$.content").value(content))
-        .andExpect(jsonPath("$.rating").value(rating))
+        .andExpect(jsonPath("$.rating").value("" + rating))
         .andExpect(jsonPath("$.likeCount").value(likeCount))
         .andExpect(jsonPath("$.commentCount").value(commentCount))
         .andExpect(jsonPath("$.likedByMe").value(likedByMe)).andReturn();
@@ -169,7 +169,7 @@ public class ReviewControllerTest {
   @DisplayName("post - 리뷰 생성 테스트 - 404 응답 확인")
   public void postReviewWithNotFoundException() throws Exception {
 
-    given(channelService.createReview(any())).willThrow(NoSuchElementException.class);
+    given(channelService.createReview(any())).willThrow(ResourceNotFoundException.class);
     CreateReviewRequest request = CreateReviewRequest.builder()
         .bookId(bookId)
         .userId(userId)

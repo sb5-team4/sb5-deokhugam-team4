@@ -1,5 +1,6 @@
 package com.codeit.deokhugam.service.impl;
 
+import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -13,7 +14,7 @@ import com.codeit.deokhugam.service.ReviewService;
 import jakarta.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +33,16 @@ public class ReviewServiceImpl implements ReviewService {
       CreateReviewCommand command) {
 
     Long bookId = command.getBookId();
-    Book book = bookRepository.findById(bookId).orElseThrow(NoSuchElementException::new);
+    Book book = bookRepository.findById(bookId).orElseThrow(
+        () -> new ResourceNotFoundException("bookId with" + bookId + " not found", bookId));
     // book의 review_count 증가
     book.setReviewCount(book.getReviewCount() + 1);
 
     Long memberId = command.getUserId();
-    Member member = memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(
+            () -> new ResourceNotFoundException("memberId with " + memberId + " not found",
+                bookId));
 
     int rate = command.getRating();
     String content = command.getContent();
@@ -56,9 +61,9 @@ public class ReviewServiceImpl implements ReviewService {
         .findByMemberIdAndReviewId(memberId, review.getId())
         .isPresent();
 
-    reviewRepository.save(review);
+    Review savedReview = reviewRepository.save(review);
     return CreateReviewResult.builder()
-        .id(review.getId())
+        .id(savedReview.getId())
         .bookId(bookId)
         .bookTitle(book.getTitle())
         .bookThumbnailUrl(book.getThumbnailUrl())
@@ -66,11 +71,15 @@ public class ReviewServiceImpl implements ReviewService {
         .userNickname(member.getNickname())
         .content(content)
         .rating((short) rate)
-        .likeCount(review.getLikeCount())
-        .commentCount(review.getCommentCount())
+        .likeCount(savedReview.getLikeCount())
+        .commentCount(savedReview.getCommentCount())
         .likedByMe(isLikedByMe)
-        .createdAt(OffsetDateTime.ofInstant(review.getCreatedAt(), ZoneId.of("Asia/Seoul")))
-        .updatedAt(OffsetDateTime.ofInstant(review.getUpdatedAt(), ZoneId.of("Asia/Seoul")))
+        .createdAt(Optional.ofNullable(savedReview.getCreatedAt())
+            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
+            .orElse(null))
+        .updatedAt(Optional.ofNullable(savedReview.getUpdatedAt())
+            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
+            .orElse(null))
         .build();
   }
 

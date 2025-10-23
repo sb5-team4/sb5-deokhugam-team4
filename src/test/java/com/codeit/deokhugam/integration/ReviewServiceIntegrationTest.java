@@ -6,9 +6,11 @@ import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
+import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.DataBaseConnectionSupport;
 import com.codeit.deokhugam.repository.MemberRepository;
+import com.codeit.deokhugam.repository.ReviewRepository;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -32,6 +34,8 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
   private MemberRepository memberRepository;
   @Autowired
   private EntityManager em;
+  @Autowired
+  private ReviewRepository reviewRepository;
 
   Book book;
   Member member;
@@ -107,7 +111,26 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
   @Test
   @DisplayName("리뷰 삭제시 Book review_count 필드 감소 확인")
   void BookReviewCountDownTestWhenReviewCreate() {
-    //todo
+    // Given
+    book.setReviewCount(book.getReviewCount() + 1);
+    bookRepository.save(book);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    int beforeCount = book.getReviewCount();
+
+    SoftDeleteReviewCommand command = SoftDeleteReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    reviewService.softDelete(command);
+    em.flush();
+    em.clear();
+
+    int afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
+
+    assertThat(afterCount).isEqualTo(beforeCount - 1);
   }
 
 }

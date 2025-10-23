@@ -98,6 +98,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
     targetReview.setDeleted(false);
 
+    Book targetBook = targetReview.getBook();
+    targetBook.setReviewCount(targetBook.getReviewCount() - 1);
+
     return true;
   }
 

@@ -6,6 +6,7 @@ import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
+import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
 import com.codeit.deokhugam.repository.BookRepository;
@@ -86,6 +87,7 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
+  @Transactional
   public boolean softDelete(SoftDeleteReviewCommand command) {
     long memberId = command.getMemberId();
     long reviewId = command.getReviewId();
@@ -96,10 +98,34 @@ public class ReviewServiceImpl implements ReviewService {
     if (targetReview.getMember().getId() != memberId) {
       throw new AuthorizationException("허용 되지 않은 연산입니다.");
     }
-    targetReview.setDeleted(false);
+    targetReview.setDeleted(true);
 
     Book targetBook = targetReview.getBook();
     targetBook.setReviewCount(targetBook.getReviewCount() - 1);
+
+    return true;
+  }
+
+  @Override
+  @Transactional
+  public boolean hardDelete(HardDeleteReviewCommand command) {
+    long memberId = command.getMemberId();
+    long reviewId = command.getReviewId();
+
+    Review targetReview = reviewRepository.findById(reviewId).orElseThrow(
+        () -> new ResourceNotFoundException("reviewId with " + reviewId + " not found", reviewId));
+
+    if (targetReview.getMember().getId() != memberId) {
+      throw new AuthorizationException("허용 되지 않은 연산입니다.");
+    }
+
+    // 만약 review 가 "softDeleted 상태가 아니면" ReviewCount 감소
+    if (!targetReview.isDeleted()) {
+      Book targetBook = targetReview.getBook();
+      targetBook.setReviewCount(targetBook.getReviewCount() - 1);
+    }
+
+    reviewRepository.deleteById(reviewId);
 
     return true;
   }

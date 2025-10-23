@@ -1,5 +1,6 @@
 package com.codeit.deokhugam.controller.review;
 
+import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
@@ -43,6 +44,20 @@ public class ReviewController {
   ) {
 
     reviewService.softDelete(SoftDeleteReviewCommand.builder()
+        .reviewId(reviewId)
+        .memberId(memberId)
+        .build());
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @DeleteMapping("/{reviewId}/hard")
+  public ResponseEntity<Void> hardDeleteReview(
+      @PathVariable Long reviewId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long memberId
+  ) {
+
+    reviewService.hardDelete(HardDeleteReviewCommand.builder()
         .reviewId(reviewId)
         .memberId(memberId)
         .build());

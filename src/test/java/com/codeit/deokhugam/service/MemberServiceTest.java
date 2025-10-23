@@ -17,6 +17,7 @@ import com.codeit.deokhugam.dto.result.MemberLoginResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.service.impl.MemberService;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -107,7 +108,7 @@ public class MemberServiceTest {
 
     // 레포지토리 stub
     given(memberRepository.existsByEmail(eq(email))).willReturn(true);
-    given(memberRepository.findByEmail(eq(email))).willReturn(member);
+    given(memberRepository.findByEmail(eq(email))).willReturn(Optional.of(member));
 
     // 패스워드 encoder stub
     given(passwordEncoder.matches(eq(password), eq(member.getPassword()))).willReturn(true);
@@ -132,7 +133,7 @@ public class MemberServiceTest {
 
     // 레포지토리 stub
     given(memberRepository.existsByEmail(eq(email))).willReturn(true);
-    given(memberRepository.findByEmail(eq(email))).willReturn(member);
+    given(memberRepository.findByEmail(eq(email))).willReturn(Optional.of(member));
 
     // 패스워드 매치 실패
     given(passwordEncoder.matches(eq(command.password()), eq(member.getPassword()))).willReturn(

@@ -49,7 +49,9 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
     em.clear();
 
     // 조회
-    Member found = memberRepository.findByEmail(member.getEmail());
+    Member found = memberRepository.findByEmail(member.getEmail())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+    ;
 
     // 검증
     assertNotNull(found);
@@ -66,7 +68,8 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    Member found = memberRepository.findByEmail(member.getEmail());
+    Member found = memberRepository.findByEmail(member.getEmail())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
     assertNotNull(found);
 
     // 평문 비밀번호와 DB 해시 비교

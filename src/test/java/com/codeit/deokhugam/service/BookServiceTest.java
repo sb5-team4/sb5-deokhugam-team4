@@ -8,11 +8,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codeit.deokhugam.domain.entity.Book;
-import com.codeit.deokhugam.dto.request.BookUpdateRequest;
-import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.fixture.BookFixture;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -45,18 +46,33 @@ public class BookServiceTest {
   private BookService bookService;
 
   private Book testBook;
-  private BookUpdateRequest testBookUpdateRequest;
+  private BookUpdateCommand testBookUpdateCommand;
+  private BookUpdateResult testBookUpdateResult;
 
   @BeforeEach
   void setUp() {
     testBook = BookFixture.createBookWithAllFields();
 
-    testBookUpdateRequest = new BookUpdateRequest();
-    testBookUpdateRequest.setTitle("수정된 제목");
-    testBookUpdateRequest.setAuthor("수정된 저자");
-    testBookUpdateRequest.setDescription("수정된 소개");
-    testBookUpdateRequest.setPublisher("수정된 출판사");
-    testBookUpdateRequest.setPublishedDate(LocalDate.of(2000, 1, 1));
+    testBookUpdateCommand = BookUpdateCommand.builder()
+        .title("수정된 제목")
+        .author("수정된 저자")
+        .description("수정된 소개")
+        .publisher("수정된 출판사")
+        .publishedDate(LocalDate.of(2000, 1, 1))
+        .build();
+
+    testBookUpdateResult = BookUpdateResult.builder()
+        .id(1L)
+        .title("수정된 제목")
+        .author("수정된 저자")
+        .description("수정된 소개")
+        .publisher("수정된 출판사")
+        .publishedDate(LocalDate.of(2000, 1, 1))
+        .isbn("1234567890123")
+        .thumbnailUrl("testThumbnailUrl.png")
+        .reviewCount(5)
+        .rating(new BigDecimal("2.31"))
+        .build();
   }
 
   @Test
@@ -65,36 +81,46 @@ public class BookServiceTest {
     // Given
     when(bookRepository.findById(1L)).thenReturn(Optional.of(testBook));
     when(bookRepository.save(any(Book.class))).thenReturn(testBook);
+    when(bookMapper.toBookUpdateResult(any(Book.class))).thenReturn(testBookUpdateResult);
 
     // When
-    BookResponse response = bookService.updateBook(1L, testBookUpdateRequest, null);
+    BookUpdateResult result = bookService.updateBook(1L, testBookUpdateCommand, null);
 
     // Then
-    assertThat(response).isNotNull();
+    assertThat(result).isNotNull();
+    assertThat(result.getTitle()).isEqualTo("수정된 제목");
+    assertThat(result.getAuthor()).isEqualTo("수정된 저자");
+
     verify(bookRepository).findById(1L);
-    verify(bookMapper).toBookUpdateCommand(testBookUpdateRequest);
-    verify(bookMapper).updateBookFromCommand(any(), any(Book.class));
-    verify(s3Service, never()).uploadFile(any());
+    verify(bookMapper).updateBookFromCommand(testBookUpdateCommand, testBook);
+    verify(s3Service, never()).uploadFile(any()); // S3 업로드는 호출되지 않아야 함
     verify(bookRepository).save(testBook);
+    verify(bookMapper).toBookUpdateResult(testBook);
   }
 
   @Test
   @DisplayName("도서 정보 수정(썸네일 포함) - 성공")
   void updateBookWithImage_Success() {
     // Given
+    String uploadedUrl = "https://s3.amazonaws.com/bucket/new-thumbnail.png";
+
     when(bookRepository.findById(1L)).thenReturn(Optional.of(testBook));
+    when(thumbnailImage.isEmpty()).thenReturn(false); // 이미지가 비어있지 않음
+    when(s3Service.uploadFile(thumbnailImage)).thenReturn(uploadedUrl);
     when(bookRepository.save(any(Book.class))).thenReturn(testBook);
+    when(bookMapper.toBookUpdateResult(any(Book.class))).thenReturn(testBookUpdateResult);
 
     // When
-    BookResponse response = bookService.updateBook(1L, testBookUpdateRequest, thumbnailImage);
+    BookUpdateResult result = bookService.updateBook(1L, testBookUpdateCommand, thumbnailImage);
 
     // Then
-    assertThat(response).isNotNull();
+    assertThat(result).isNotNull();
+
     verify(bookRepository).findById(1L);
-    verify(bookMapper).toBookUpdateCommand(testBookUpdateRequest);
-    verify(bookMapper).updateBookFromCommand(any(), any(Book.class));
+    verify(bookMapper).updateBookFromCommand(testBookUpdateCommand, testBook);
     verify(s3Service).uploadFile(thumbnailImage);
     verify(bookRepository).save(testBook);
+    verify(bookMapper).toBookUpdateResult(testBook);
   }
 
   @Test
@@ -104,11 +130,31 @@ public class BookServiceTest {
     when(bookRepository.findById(99999L)).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> bookService.updateBook(99999L, testBookUpdateRequest, thumbnailImage))
+    assertThatThrownBy(() -> bookService.updateBook(99999L, testBookUpdateCommand, thumbnailImage))
         .isInstanceOf(NoSuchElementException.class)
         .hasMessageContaining("해당하는 도서 ID가 존재하지 않습니다");
 
     verify(bookRepository).findById(99999L);
     verify(bookRepository, never()).save(any());
+    verify(bookMapper, never()).updateBookFromCommand(any(), any());
+    verify(s3Service, never()).uploadFile(any());
+  }
+
+  @Test
+  @DisplayName("도서 정보 수정 - 400 실패 (삭제된 도서)")
+  void updateBook_DeletedBook() {
+    // Given
+    Book deletedBook = BookFixture.createDeletedBook();
+    when(bookRepository.findById(1L)).thenReturn(Optional.of(deletedBook));
+
+    // When & Then
+    assertThatThrownBy(() -> bookService.updateBook(1L, testBookUpdateCommand, thumbnailImage))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("삭제된 도서는 수정할 수 없습니다");
+
+    verify(bookRepository).findById(1L);
+    verify(bookRepository, never()).save(any());
+    verify(bookMapper, never()).updateBookFromCommand(any(), any());
+    verify(s3Service, never()).uploadFile(any());
   }
 }

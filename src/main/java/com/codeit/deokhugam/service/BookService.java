@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class BookService {
 
   private final BookRepository bookRepository;
-  private final BookMapper bookMapper;  // MapStruct가 생성한 구현체 자동 주입
+  private final BookMapper bookMapper;
   private final S3Service s3Service;
 
   public BookResponse getBook(Long id) {

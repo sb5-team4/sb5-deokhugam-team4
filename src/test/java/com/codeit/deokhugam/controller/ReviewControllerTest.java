@@ -3,10 +3,12 @@ package com.codeit.deokhugam.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
@@ -42,9 +44,9 @@ public class ReviewControllerTest {
   ObjectMapper objectMapper;
 
   @MockitoBean
-  ReviewService channelService;
+  ReviewService reviewService;
   @MockitoBean
-  ReviewMapper channelMapper;
+  ReviewMapper reviewMapper;
   @MockitoBean
   JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
@@ -123,9 +125,9 @@ public class ReviewControllerTest {
         .updatedAt(updatedAt)
         .build();
 
-    given(channelService.createReview(any())).willReturn(result);
-    given(channelMapper.toCommand(any())).willReturn(command);
-    given(channelMapper.toResponse(any())).willReturn(response);
+    given(reviewService.createReview(any())).willReturn(result);
+    given(reviewMapper.toCommand(any())).willReturn(command);
+    given(reviewMapper.toResponse(any())).willReturn(response);
 
     CreateReviewRequest request = CreateReviewRequest.builder()
         .bookId(bookId)
@@ -169,7 +171,7 @@ public class ReviewControllerTest {
   @DisplayName("post - 리뷰 생성 테스트 - 404 응답 확인")
   public void postReviewWithNotFoundException() throws Exception {
 
-    given(channelService.createReview(any())).willThrow(ResourceNotFoundException.class);
+    given(reviewService.createReview(any())).willThrow(ResourceNotFoundException.class);
     CreateReviewRequest request = CreateReviewRequest.builder()
         .bookId(bookId)
         .userId(userId)
@@ -188,7 +190,7 @@ public class ReviewControllerTest {
   @DisplayName("post - 리뷰 생성 테스트 - 500 응답 확인")
   public void postReviewWithInternalServerException() throws Exception {
 
-    given(channelService.createReview(any())).willThrow(RuntimeException.class);
+    given(reviewService.createReview(any())).willThrow(RuntimeException.class);
     CreateReviewRequest request = CreateReviewRequest.builder()
         .bookId(bookId)
         .userId(userId)
@@ -203,4 +205,75 @@ public class ReviewControllerTest {
 
   }
 
+  @Test
+  @DisplayName("post - 리뷰 논리 삭제 테스트")
+  public void softDeleteReview() throws Exception {
+
+    Long reviewId = 1L;
+    Long MemberId = 1L;
+
+    given(reviewService.softDelete(any())).willReturn(true);
+
+    mockMvc.perform(delete("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+        )
+        .andExpect(status().isNoContent());
+  }
+
+
+  @Test
+  @DisplayName("post - 리뷰 논리 삭제 테스트 - 잘못된 요청 (400 에러)")
+  public void softDeleteReviewWithBadRequest() throws Exception {
+
+    long reviewId = 1L;
+    mockMvc.perform(delete("/api/reviews/" + reviewId)
+        )
+        .andExpect(status().isBadRequest());
+
+  }
+
+  @Test
+  @DisplayName("post - 리뷰 논리 삭제 테스트 - 권한없음 (403 에러)")
+  public void softDeleteReviewWithNotAllowed() throws Exception {
+
+    Long reviewId = 1L;
+    Long MemberId = 1L;
+    given(reviewService.softDelete(any())).willThrow(AuthorizationException.class);
+
+    mockMvc.perform(delete("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+        )
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("post - 리뷰 논리 삭제 테스트 - 리뷰 없음 (404 에러)")
+  public void softDeleteReviewWithNotFound() throws Exception {
+    Long reviewId = 1L;
+    Long MemberId = 1L;
+    given(reviewService.softDelete(any())).willThrow(ResourceNotFoundException.class);
+
+    mockMvc.perform(delete("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+        )
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("post - 리뷰 논리 삭제 테스트 - 예상치 못한 에러 (500 에러)")
+  public void softDeleteReviewWithInternalServerError() throws Exception {
+
+    Long reviewId = 1L;
+    Long MemberId = 1L;
+    given(reviewService.softDelete(any())).willThrow(RuntimeException.class);
+
+    mockMvc.perform(delete("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+        )
+        .andExpect(status().isInternalServerError());
+  }
 }

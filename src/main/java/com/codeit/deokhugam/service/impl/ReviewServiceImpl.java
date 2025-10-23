@@ -5,6 +5,7 @@ import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
+import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.MemberRepository;
@@ -29,7 +30,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   @Transactional
-  public CreateReviewResult createReview(
+  public CreateReviewResult createReview( // todo 409에러 처리
       CreateReviewCommand command) {
 
     Long bookId = command.getBookId();
@@ -81,6 +82,11 @@ public class ReviewServiceImpl implements ReviewService {
             .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
             .orElse(null))
         .build();
+  }
+
+  @Override
+  public boolean softDelete(SoftDeleteReviewCommand command) {
+    return false;
   }
 
 }

@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Getter
+@Builder
 @Entity
 public class Review extends BaseUpdatableEntity {
 

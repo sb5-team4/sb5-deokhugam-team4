@@ -7,12 +7,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
-import com.codeit.deokhugam.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,13 +1,18 @@
 package com.codeit.deokhugam.controller;
 
+import com.codeit.deokhugam.dto.request.BookUpdateRequest;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.service.BookService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/books")
@@ -22,4 +27,12 @@ public class BookController {
     return ResponseEntity.ok(response);
   }
 
+  @PatchMapping("/{bookId}")
+  public ResponseEntity<BookResponse> updateBook(
+      @PathVariable Long bookId,
+      @RequestPart("bookData") @Valid BookUpdateRequest request,
+      @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage) {
+    BookResponse response = bookService.updateBook(bookId, request, thumbnailImage);
+    return ResponseEntity.ok(response);
+  }
 }

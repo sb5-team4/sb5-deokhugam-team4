@@ -2,54 +2,42 @@ package com.codeit.deokhugam.mapper;
 
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.MemberCreateCommand;
+import com.codeit.deokhugam.dto.command.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.MemberCreateRequest;
+import com.codeit.deokhugam.dto.request.MemberLoginRequest;
 import com.codeit.deokhugam.dto.response.MemberCreatedResponse;
+import com.codeit.deokhugam.dto.response.MemberLoginResponse;
 import com.codeit.deokhugam.dto.result.MemberCreatedResult;
-import org.springframework.stereotype.Component;
+import com.codeit.deokhugam.dto.result.MemberLoginResult;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class MemberMapper {
+@Mapper(componentModel = "spring")
+public abstract class MemberMapper {
 
-  //푸쉬테스트
   //  @Mapping(target = "id", ignore = true)
 //  @Mapping(target = "createdAt", ignore = true)
 //  @Mapping(target = "updatedAt", ignore = true)
-  public MemberCreateCommand toMemberCreateCommand(
-      MemberCreateRequest memberCreateRequest) {
-    return new MemberCreateCommand(
-        memberCreateRequest.email(),
-        memberCreateRequest.nickname(),
-        memberCreateRequest.password()
-    );
 
-  }
+  //create
+  public abstract MemberCreateCommand toMemberCreateCommand(
+      MemberCreateRequest memberCreateRequest);
 
-  public Member toMember(MemberCreateCommand memberCreateCommand) {
-    return new Member(
-        memberCreateCommand.email(),
-        memberCreateCommand.nickname(),
-        memberCreateCommand.password(),
-        false
-    );
-  }
+  @Mapping(target = "deleted", constant = "false")
+  public abstract Member toMember(MemberCreateCommand memberCreateCommand);
 
-  public MemberCreatedResult toMemberCreatedResult(Member member) {
-    return new MemberCreatedResult(
-        member.getId(),
-        member.getNickname(),
-        member.getEmail(),
-        member.getCreatedAt()
-    );
-  }
+  public abstract MemberCreatedResult toMemberCreatedResult(Member member);
 
-  public MemberCreatedResponse toMemberCreatedResponse(
-      MemberCreatedResult memberCreatedResult) {
-    return new MemberCreatedResponse(
-        memberCreatedResult.id(),
-        memberCreatedResult.nickname(),
-        memberCreatedResult.email(),
-        memberCreatedResult.createdAt()
-    );
-  }
+  public abstract MemberCreatedResponse toMemberCreatedResponse(
+      MemberCreatedResult memberCreatedResult);
+
+  //login
+  public abstract MemberLoginCommand toMemberLoginCommand(
+      MemberLoginRequest memberLoginRequest);
+
+  public abstract MemberLoginResult toMemberLoginResult(Member member);
+
+  public abstract MemberLoginResponse toMemberLoginResponse(
+      MemberLoginResult memberLogindResult);
 
 }

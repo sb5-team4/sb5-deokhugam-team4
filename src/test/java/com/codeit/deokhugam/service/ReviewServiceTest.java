@@ -3,12 +3,15 @@ package com.codeit.deokhugam.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
+import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
+import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.MemberRepository;
@@ -25,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -135,13 +137,13 @@ public class ReviewServiceTest {
   @DisplayName("리뷰 생성 테스트 -  올바른 입력값이 주어졌을 때")
   void createReviewWithRightInput() {
     // GIVEN
-    BDDMockito.given(bookRepository.findById(any())).willReturn(Optional.of(book));
-    BDDMockito.given(memberRepository.findById(any())).willReturn(Optional.of(member));
+    given(bookRepository.findById(any())).willReturn(Optional.of(book));
+    given(memberRepository.findById(any())).willReturn(Optional.of(member));
 
-    BDDMockito.given(reviewLikeRepository.findByMemberIdAndReviewId(any(), any()))
+    given(reviewLikeRepository.findByMemberIdAndReviewId(any(), any()))
         .willReturn(Optional.empty());
 
-    BDDMockito.given(reviewRepository.save(any())).willReturn(review);
+    given(reviewRepository.save(any())).willReturn(review);
 
     // WHEN
     CreateReviewResult result = reviewService.createReview(createReviewCommand);
@@ -170,7 +172,7 @@ public class ReviewServiceTest {
   @Test
   @DisplayName("리뷰 생성 테스트 -  존재하지않은 Book 입력")
   void createReviewWithNotFoundBookId() {
-    BDDMockito.given(bookRepository.findById(any())).willReturn(Optional.empty());
+    given(bookRepository.findById(any())).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> reviewService.createReview(createReviewCommand))
         .isInstanceOf(ResourceNotFoundException.class)
@@ -180,13 +182,83 @@ public class ReviewServiceTest {
   @Test
   @DisplayName("리뷰 생성 테스트 -  존재하지않은 Member 입력")
   void createReviewWithNotFoundMemberId() {
-    BDDMockito.given(bookRepository.findById(any())).willReturn(Optional.of(book));
-    BDDMockito.given(memberRepository.findById(any())).willReturn(Optional.empty());
+    given(bookRepository.findById(any())).willReturn(Optional.of(book));
+    given(memberRepository.findById(any())).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> reviewService.createReview(createReviewCommand))
         .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("memberId with");
   }
 
+  @Test
+  @DisplayName("리뷰 삭제 테스트 -  정상 동작")
+  void softDeleteReview() {
+    // Given
+    given(reviewRepository.findById(any())).willReturn(Optional.of(review));
+
+    // When
+    boolean result = reviewService.softDelete(SoftDeleteReviewCommand.builder()
+        .reviewId(review.getId())
+        .memberId(member.getId())
+        .build());
+
+    // Then
+    assertThat(result).isTrue();
+
+
+  }
+
+  @Test
+  @DisplayName("리뷰 삭제 테스트 - 권한이 없을 때")
+  void softDeleteReviewWithNotAllowed() {
+    // Given
+    Member anotherMember = Member.builder()
+        .id(2L)
+        .email(email)
+        .nickname(nickname)
+        .password(password)
+        .deleted(false)
+        .build();
+    Review NotAllowedReview = Review.builder()
+        .id(1L)
+        .member(anotherMember)
+        .book(book)
+        .deleted(deleted)
+        .likeCount(0L)
+        .commentCount(0L)
+        .rating(rating)
+        .content(content)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .build();
+
+    given(reviewRepository.findById(any())).willReturn(Optional.of(NotAllowedReview));
+    SoftDeleteReviewCommand command = SoftDeleteReviewCommand.builder()
+        .reviewId(NotAllowedReview.getId())
+        .memberId(member.getId())
+        .build();
+
+    // When // Then
+    assertThatThrownBy(() -> reviewService.softDelete(command))
+        .isInstanceOf(AuthorizationException.class)
+        .hasMessageContaining("허용 되지 않은 연산입니다.");
+
+  }
+
+  @Test
+  @DisplayName("리뷰 삭제 테스트 - 리뷰가 없을 때")
+  void softDeleteReviewWithNotFoundReview() {
+    // Given
+    given(reviewRepository.findById(any())).willReturn(Optional.empty());
+    SoftDeleteReviewCommand command = SoftDeleteReviewCommand.builder()
+        .reviewId(review.getId())
+        .memberId(member.getId())
+        .build();
+
+    // When Then
+    assertThatThrownBy(() -> reviewService.softDelete(command))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("reviewId with " + review.getId() + " not found");
+  }
 
 }

@@ -206,7 +206,7 @@ public class ReviewControllerTest {
   }
 
   @Test
-  @DisplayName("post - 리뷰 논리 삭제 테스트")
+  @DisplayName("delete - 리뷰 논리 삭제 테스트")
   public void softDeleteReview() throws Exception {
 
     Long reviewId = 1L;
@@ -223,7 +223,7 @@ public class ReviewControllerTest {
 
 
   @Test
-  @DisplayName("post - 리뷰 논리 삭제 테스트 - 잘못된 요청 (400 에러)")
+  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 잘못된 요청 (400 에러)")
   public void softDeleteReviewWithBadRequest() throws Exception {
 
     long reviewId = 1L;
@@ -234,7 +234,7 @@ public class ReviewControllerTest {
   }
 
   @Test
-  @DisplayName("post - 리뷰 논리 삭제 테스트 - 권한없음 (403 에러)")
+  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 권한없음 (403 에러)")
   public void softDeleteReviewWithNotAllowed() throws Exception {
 
     Long reviewId = 1L;
@@ -249,7 +249,7 @@ public class ReviewControllerTest {
   }
 
   @Test
-  @DisplayName("post - 리뷰 논리 삭제 테스트 - 리뷰 없음 (404 에러)")
+  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 리뷰 없음 (404 에러)")
   public void softDeleteReviewWithNotFound() throws Exception {
     Long reviewId = 1L;
     Long MemberId = 1L;
@@ -263,7 +263,7 @@ public class ReviewControllerTest {
   }
 
   @Test
-  @DisplayName("post - 리뷰 논리 삭제 테스트 - 예상치 못한 에러 (500 에러)")
+  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 예상치 못한 에러 (500 에러)")
   public void softDeleteReviewWithInternalServerError() throws Exception {
 
     Long reviewId = 1L;

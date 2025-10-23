@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
-  @ExceptionHandler(MissingRequestHeaderException.class) // todo 검증해야함
+  @ExceptionHandler(MissingRequestHeaderException.class)
   public ResponseEntity<ErrorResponse> handleValidationExceptions(
       MissingRequestHeaderException ex) {
     String headerName = ex.getHeaderName();

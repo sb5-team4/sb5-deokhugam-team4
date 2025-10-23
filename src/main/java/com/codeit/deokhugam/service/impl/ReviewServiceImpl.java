@@ -1,5 +1,6 @@
 package com.codeit.deokhugam.service.impl;
 
+import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
@@ -86,7 +87,18 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   public boolean softDelete(SoftDeleteReviewCommand command) {
-    return false;
+    long memberId = command.getMemberId();
+    long reviewId = command.getReviewId();
+
+    Review targetReview = reviewRepository.findById(reviewId).orElseThrow(
+        () -> new ResourceNotFoundException("reviewId with " + reviewId + " not found", reviewId));
+
+    if (targetReview.getMember().getId() != memberId) {
+      throw new AuthorizationException("허용 되지 않은 연산입니다.");
+    }
+    targetReview.setDeleted(false);
+
+    return true;
   }
 
 }

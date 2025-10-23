@@ -2,7 +2,9 @@ package com.codeit.deokhugam.service.impl;
 
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.MemberCreateCommand;
+import com.codeit.deokhugam.dto.command.MemberLoginCommand;
 import com.codeit.deokhugam.dto.result.MemberCreatedResult;
+import com.codeit.deokhugam.dto.result.MemberLoginResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -35,7 +37,19 @@ public class MemberService {
     createMember.setPassword(encodedPw);
     Member returnMember = memberRepository.save(createMember);
     return memberMapper.toMemberCreatedResult(returnMember);
+  }
 
+  public MemberLoginResult login(MemberLoginCommand memberLoginCommand) {
+    Member member;
+    if (memberRepository.existsByEmail(memberLoginCommand.email())) {
+      member = memberRepository.findByEmail(memberLoginCommand.email());
 
+      if (!passwordEncoder.matches(memberLoginCommand.password(), member.getPassword())) {
+        throw new RuntimeException("Wrong password");
+      }
+    } else {
+      throw new RuntimeException("존재하지않는 이메일입니다.");
+    }
+    return memberMapper.toMemberLoginResult(member);
   }
 }

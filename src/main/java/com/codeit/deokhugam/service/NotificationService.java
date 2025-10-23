@@ -25,9 +25,9 @@ public class NotificationService {
     Notification notification = Notification.builder()
         .member(recipient) // 알림 받는 사람
         .review(review)
-        .comment(comment)
         .content(content)
-        .confirmed(false) // 처음엔 안 읽음 상태
+        .confirmed(false)
+        .deleted(false)
         .build();
 
     notificationRepository.save(notification);

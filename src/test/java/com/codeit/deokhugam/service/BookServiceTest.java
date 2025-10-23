@@ -56,7 +56,7 @@ public class BookServiceTest {
     testBookUpdateRequest.setAuthor("수정된 저자");
     testBookUpdateRequest.setDescription("수정된 소개");
     testBookUpdateRequest.setPublisher("수정된 출판사");
-    testBookUpdateRequest.setPublishedDate(LocalDate.of(2000, 01, 01));
+    testBookUpdateRequest.setPublishedDate(LocalDate.of(2000, 1, 1));
   }
 
   @Test

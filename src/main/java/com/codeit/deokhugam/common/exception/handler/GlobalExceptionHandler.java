@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,6 +27,15 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
     ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+  }
+    
+  @ExceptionHandler(MissingRequestHeaderException.class)
+  public ResponseEntity<ErrorResponse> handleValidationExceptions(
+      MissingRequestHeaderException ex) {
+    String headerName = ex.getHeaderName();
+    String message = headerName + " 헤더가 요청에 포함되어야 합니다.";
+    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
   // Service에서 Review나 Member를 찾지 못했을 때

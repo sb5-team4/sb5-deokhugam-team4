@@ -99,7 +99,7 @@ CREATE TABLE member
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     email      VARCHAR(50)                                     NOT NULL UNIQUE,
     nickname   VARCHAR(50)                                     NOT NULL UNIQUE,
-    password   VARCHAR(50)                                     NOT NULL, --'bcrypt'
+    password   VARCHAR(100)                                     NOT NULL, --'bcrypt'
     created_at timestamp with time zone                        NOT NULL,
     updated_at timestamp with time zone                        NULL,
     deleted    BOOLEAN                                         NOT NULL

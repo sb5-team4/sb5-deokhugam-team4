@@ -9,7 +9,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @ActiveProfiles("test")
+//Spring Boot가 자동으로 테스트용 DB(H2 등)로 교체하지 않도록 함.
+//실제 Testcontainers PostgreSQL 컨테이너를 그대로 사용하려고 설정.
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+//컨테이너 기반 데이터베이스(PostgreSQL 등)를 테스트 환경에서 실행 가능하게 함.
 public abstract class DataBaseConnectionSupport {
 
   protected static final PostgreSQLContainer<?> postgreSQLContainer;

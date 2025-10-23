@@ -2,10 +2,14 @@ package com.codeit.deokhugam.service;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -101,6 +105,56 @@ public class CommentServiceTest {
 
     // NotificationService 1번 호출 확인
     verify(notificationService, times(1)).create(reviewOwner, review, comment);
+  }
+
+  @Test
+  @DisplayName("댓글 생성 성공 - 본인 리뷰에 댓글 시 알림이 생성되지 않는다.")
+  public void createCommentSuccessWithoutNotification() {
+    //  이 테스트 케이스만을 위한 객체를 생성한다.
+
+    Member selfCommentWriter = Member.builder().id(3L).nickname("리뷰 주인 이자 본인 리뷰에 댓글 쓴사람").build();
+    Review selfReview = Review.builder().id(33L).member(selfCommentWriter).build();
+    Comment selfComment = Comment.builder().id(44L).review(selfReview).member(selfCommentWriter).content("내 리뷰 댓글").build();
+
+    CommentCreateCommand selfCommand = new CommentCreateCommand(33L, 3L, "내 리뷰 댓글");
+    CommentCreateResult selfResult = new CommentCreateResult(44L, 33L, 3L, "리뷰 주인 이자 본인 리뷰에 댓글 쓴사람", "내 리뷰 댓글", null, null);
+
+
+    when(memberRepository.findById(selfCommentWriter.getId())).thenReturn(Optional.of(selfCommentWriter));
+    when(reviewRepository.findById(selfReview.getId())).thenReturn(Optional.of(selfReview));
+    when(commentMapper.toComment(selfCommand, selfReview, selfCommentWriter)).thenReturn(selfComment);
+    when(commentRepository.save(selfComment)).thenReturn(selfComment);
+
+    when(commentMapper.toCommentCreateResult(selfComment)).thenReturn(selfResult);
+
+    commentService.createComment(selfCommand);
+
+    //알림 서비스가 호출되지 않았는지 검증
+    verify(notificationService, never()).create(any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("댓글 생성 실패 - 리뷰를 찾을 수 없음 (404)")
+  void createCommentNotFoundReview() {
+    // Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
+    when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("Review");
+  }
+
+  @Test
+  @DisplayName("댓글 생성 실패 - 멤버(사용자)를 찾을 수 없음 (404)")
+  void createCommentNotFoundMember() {
+    // Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
+    when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.of(review));
+    // 그 다음 Member를 못 찾았다고 가정 when
+    when(memberRepository.findById(commentCreateCommand.memberId())).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("Member");
   }
 
 }

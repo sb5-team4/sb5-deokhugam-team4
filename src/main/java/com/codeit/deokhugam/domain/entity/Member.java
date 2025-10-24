@@ -10,13 +10,14 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
-@SuperBuilder
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Entity
+@Setter
+@ToString
+@SuperBuilder
+
 public class Member extends BaseUpdatableEntity {
 
   @Column(nullable = false, unique = true)

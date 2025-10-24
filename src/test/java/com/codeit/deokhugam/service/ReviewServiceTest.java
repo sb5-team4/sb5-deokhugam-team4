@@ -137,8 +137,8 @@ public class ReviewServiceTest {
   @DisplayName("리뷰 생성 테스트 -  올바른 입력값이 주어졌을 때")
   void createReviewWithRightInput() {
     // GIVEN
-    given(bookRepository.findById(any())).willReturn(Optional.of(book));
-    given(memberRepository.findById(any())).willReturn(Optional.of(member));
+    given(bookRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(book));
+    given(memberRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(member));
 
     given(reviewLikeRepository.findByMemberIdAndReviewId(any(), any()))
         .willReturn(Optional.empty());
@@ -172,7 +172,7 @@ public class ReviewServiceTest {
   @Test
   @DisplayName("리뷰 생성 테스트 -  존재하지않은 Book 입력")
   void createReviewWithNotFoundBookId() {
-    given(bookRepository.findById(any())).willReturn(Optional.empty());
+    given(bookRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> reviewService.createReview(createReviewCommand))
         .isInstanceOf(ResourceNotFoundException.class)
@@ -182,8 +182,8 @@ public class ReviewServiceTest {
   @Test
   @DisplayName("리뷰 생성 테스트 -  존재하지않은 Member 입력")
   void createReviewWithNotFoundMemberId() {
-    given(bookRepository.findById(any())).willReturn(Optional.of(book));
-    given(memberRepository.findById(any())).willReturn(Optional.empty());
+    given(bookRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(book));
+    given(memberRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> reviewService.createReview(createReviewCommand))
         .isInstanceOf(ResourceNotFoundException.class)
@@ -194,7 +194,7 @@ public class ReviewServiceTest {
   @DisplayName("리뷰 삭제 테스트 -  정상 동작")
   void softDeleteReview() {
     // Given
-    given(reviewRepository.findById(any())).willReturn(Optional.of(review));
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(review));
 
     // When
     boolean result = reviewService.softDelete(SoftDeleteReviewCommand.builder()
@@ -232,7 +232,8 @@ public class ReviewServiceTest {
         .updatedAt(Instant.now())
         .build();
 
-    given(reviewRepository.findById(any())).willReturn(Optional.of(NotAllowedReview));
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(
+        Optional.of(NotAllowedReview));
     SoftDeleteReviewCommand command = SoftDeleteReviewCommand.builder()
         .reviewId(NotAllowedReview.getId())
         .memberId(member.getId())
@@ -249,7 +250,7 @@ public class ReviewServiceTest {
   @DisplayName("리뷰 삭제 테스트 - 리뷰가 없을 때")
   void softDeleteReviewWithNotFoundReview() {
     // Given
-    given(reviewRepository.findById(any())).willReturn(Optional.empty());
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.empty());
     SoftDeleteReviewCommand command = SoftDeleteReviewCommand.builder()
         .reviewId(review.getId())
         .memberId(member.getId())

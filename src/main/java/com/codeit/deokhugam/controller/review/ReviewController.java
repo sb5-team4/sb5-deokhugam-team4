@@ -3,9 +3,14 @@ package com.codeit.deokhugam.controller.review;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
+import com.codeit.deokhugam.dto.response.LikeReviewResponse;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.LikeReviewCommand;
+import com.codeit.deokhugam.service.LikeReviewResult;
+import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +31,8 @@ public class ReviewController {
 
   private final ReviewService reviewService;
   private final ReviewMapper reviewMapper;
+  private final LikeReviewService likeReviewService;
+  private final LikeReviewMapper likeReviewMapper;
 
   @PostMapping
   public ResponseEntity<ReviewResponse> createReview(
@@ -63,6 +70,19 @@ public class ReviewController {
         .build());
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @PostMapping("/{reviewId}/like")
+  public ResponseEntity<LikeReviewResponse> likeReview(
+      @PathVariable Long reviewId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long memberId
+  ) {
+    LikeReviewResult result = likeReviewService.likeReview(LikeReviewCommand.builder()
+        .reviewId(reviewId)
+        .memberId(memberId)
+        .build());
+
+    return ResponseEntity.ok(likeReviewMapper.toResponse(result));
   }
 
 

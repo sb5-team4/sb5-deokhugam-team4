@@ -1,0 +1,66 @@
+#테스트 커버러지  ✅
+#테스트 코드 점검 ✅
+#PR 최신 develop 커밋을 pull 해왔는지 점검 ✅
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - release
+jobs:
+  check-branch-up-to-date:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 전체 히스토리를 가져와야 merge-base 체크 가능
+
+      - name: Checkout PR branch
+        run: |
+          # PR 브랜치로 체크아웃
+          git checkout $GITHUB_HEAD_REF
+          echo "✅ PR 브랜치로 체크아웃 완료: $GITHUB_HEAD_REF"
+
+      - name: Check if branch is up to date with develop
+        run: |
+          git fetch origin develop
+          BASE_COMMIT=$(git merge-base HEAD origin/develop)
+          LATEST_COMMIT=$(git rev-parse origin/develop)
+
+          echo "🔍 BASE_COMMIT: $BASE_COMMIT"
+          echo "🔍 LATEST_COMMIT: $LATEST_COMMIT"
+
+          if [ "$BASE_COMMIT" != "$LATEST_COMMIT" ]; then
+            echo "❌ PR이 최신 develop 브랜치를 포함하고 있지 않습니다."
+            echo "PR을 업데이트하세요: git merge origin/develop"
+            exit 1
+          fi
+
+          echo "✅ PR이 최신 develop 브랜치를 포함하고 있습니다."
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JDK 17 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: gradle
+
+      - name: 테스트 실행
+        run: ./gradlew test --stacktrace
+
+      - name: Codecov 테스트 커버리지 업로드
+        uses: codecov/codecov-action@v3
+        with:
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.CODECOV_TOKEN }} # 퍼블릭 저장소라면 생략 가능
+        continue-on-error: true

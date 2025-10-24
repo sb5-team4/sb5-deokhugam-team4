@@ -323,7 +323,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.clear();
 
     // When
-    long beforeCount = review.getLikeCount();
+    long beforeCount = reviewRepository.findById(review.getId()).get().getLikeCount();
     likeReviewService.likeReview(downCommand);
     em.flush();
     em.clear();

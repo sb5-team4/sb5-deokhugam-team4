@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 )
 public class ReviewLike extends BaseEntity {
 
-  @OneToOne(orphanRemoval = true)
+  @OneToOne
   @JoinColumn(name = "review_id", nullable = false)
   private Review review;
-  @OneToOne(orphanRemoval = true)
+  @OneToOne
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 }

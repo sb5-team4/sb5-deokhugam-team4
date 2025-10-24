@@ -9,7 +9,9 @@ import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
+import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
@@ -36,6 +38,10 @@ public class ReviewHardDeleteControllerTest {
   ReviewService reviewService;
   @MockitoBean
   ReviewMapper reviewMapper;
+  @MockitoBean
+  LikeReviewService likeReviewService;
+  @MockitoBean
+  LikeReviewMapper likeReviewMapper;
   @MockitoBean
   JpaMetamodelMappingContext jpaMetamodelMappingContext;
 

@@ -11,6 +11,7 @@ import com.codeit.deokhugam.repository.ReviewRepository;
 import com.codeit.deokhugam.service.LikeReviewCommand;
 import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,14 @@ public class LikeReviewServiceImpl implements LikeReviewService {
   private final MemberRepository memberRepository;
 
   @Override
+  @Transactional
   public LikeReviewResult likeReview(LikeReviewCommand command) {
     long memberId = command.getMemberId();
     long reviewId = command.getReviewId();
 
-    Review review = reviewRepository.findById(reviewId).orElseThrow(()
+    Review review = reviewRepository.findByIdAndDeletedIsFalse(reviewId).orElseThrow(()
         -> new ResourceNotFoundException("review with ID" + reviewId + " not found", reviewId));
-    Member member = memberRepository.findById(memberId).orElseThrow(()
+    Member member = memberRepository.findByIdAndDeletedIsFalse(memberId).orElseThrow(()
         -> new ResourceNotFoundException("member with ID" + memberId + " not found", memberId));
 
     if (review.getMember().getId() != memberId) {

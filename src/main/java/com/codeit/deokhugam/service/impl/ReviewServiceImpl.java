@@ -36,13 +36,13 @@ public class ReviewServiceImpl implements ReviewService {
       CreateReviewCommand command) {
 
     Long bookId = command.getBookId();
-    Book book = bookRepository.findById(bookId).orElseThrow(
+    Book book = bookRepository.findByIdAndDeletedIsFalse(bookId).orElseThrow(
         () -> new ResourceNotFoundException("bookId with" + bookId + " not found", bookId));
     // book의 review_count 증가
     book.setReviewCount(book.getReviewCount() + 1);
 
     Long memberId = command.getUserId();
-    Member member = memberRepository.findById(memberId)
+    Member member = memberRepository.findByIdAndDeletedIsFalse(memberId)
         .orElseThrow(
             () -> new ResourceNotFoundException("memberId with " + memberId + " not found",
                 bookId));
@@ -88,11 +88,11 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   @Transactional
-  public boolean softDelete(SoftDeleteReviewCommand command) {
+  public boolean softDelete(SoftDeleteReviewCommand command) { // todo softDelete cascade
     long memberId = command.getMemberId();
     long reviewId = command.getReviewId();
 
-    Review targetReview = reviewRepository.findById(reviewId).orElseThrow(
+    Review targetReview = reviewRepository.findByIdAndDeletedIsFalse(reviewId).orElseThrow(
         () -> new ResourceNotFoundException("reviewId with " + reviewId + " not found", reviewId));
 
     if (targetReview.getMember().getId() != memberId) {

@@ -61,8 +61,8 @@ public class LikeReviewServiceTest {
   @DisplayName("리뷰 좋아요 테스트 - 종아요")
   void LikeReviewWithLike() {
     // Given
-    given(reviewRepository.findById(any())).willReturn(Optional.of(review));
-    given(memberReviewRepository.findById(any())).willReturn(Optional.of(member));
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(review));
+    given(memberReviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(member));
     given(reviewLikeRepository.findByMemberIdAndReviewId(any(), any()))
         .willReturn(Optional.empty());
     given(reviewLikeRepository.save(any())).willReturn(reviewLike);
@@ -80,8 +80,8 @@ public class LikeReviewServiceTest {
   @DisplayName("리뷰 좋아요 테스트 - 종아요 취소")
   void LikeReviewWithUnlike() {
     // Given
-    given(reviewRepository.findById(any())).willReturn(Optional.of(review));
-    given(memberReviewRepository.findById(any())).willReturn(Optional.of(member));
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(review));
+    given(memberReviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(member));
     given(reviewLikeRepository.findByMemberIdAndReviewId(any(), any()))
         .willReturn(Optional.of(reviewLike));
     doNothing().when(reviewLikeRepository).deleteById(any());
@@ -100,11 +100,12 @@ public class LikeReviewServiceTest {
   @DisplayName("리뷰 좋아요 테스트 - 권한이 없을 때")
   void LikeReviewWithNotAllowed() {
     // Given
-    given(reviewRepository.findById(any())).willReturn(Optional.of(review));
-    given(memberReviewRepository.findById(any())).willReturn(Optional.of(member));
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(review));
+    given(memberReviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(member));
 
+    long wrongId = 999L;
     LikeReviewCommand notAllowedCommand = LikeReviewCommand.builder()
-        .memberId(member.getId())
+        .memberId(wrongId)
         .reviewId(review.getId())
         .build();
     // When Then
@@ -116,7 +117,7 @@ public class LikeReviewServiceTest {
   @DisplayName("리뷰 좋아요 테스트 - 리뷰를 찾을 수 없을 때")
   void LikeReviewWithNotFoundReview() {
     // Given
-    given(reviewRepository.findById(any())).willReturn(Optional.empty());
+    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.empty());
 
     // When Then
     assertThatThrownBy(() -> likeReviewService.likeReview(command))

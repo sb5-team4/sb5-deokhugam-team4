@@ -7,8 +7,10 @@ import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
+import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.ReviewLikeRepository;
@@ -130,4 +132,9 @@ public class ReviewServiceImpl implements ReviewService {
     return true;
   }
 
+
+  @Override
+  public PatchReviewResult patchReview(PatchReviewCommand command) {
+    return null;
+  }
 }

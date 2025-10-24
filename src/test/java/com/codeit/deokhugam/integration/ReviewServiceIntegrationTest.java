@@ -20,6 +20,8 @@ import com.codeit.deokhugam.repository.NotificationRepository;
 import com.codeit.deokhugam.repository.PopularReviewRepository;
 import com.codeit.deokhugam.repository.ReviewLikeRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
+import com.codeit.deokhugam.service.LikeReviewCommand;
+import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -51,6 +53,8 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
   PopularReviewRepository popularReviewRepository;
   @Autowired
   NotificationRepository notificationRepository;
+  @Autowired
+  LikeReviewService likeReviewService;
 
   Book book;
   Member member;
@@ -271,6 +275,62 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     assertThat(commentRepository.existsById(comment.getId())).isFalse();
     assertThat(popularReviewRepository.existsById(popularReview.getId())).isFalse();
     assertThat(notificationRepository.existsById(notification.getId())).isFalse();
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 시 리뷰 테이블 좋아요 수 필드 count up")
+  void LikeReviewThenReviewLikeCountUp() {
+    review.setLikeCount(1L);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    long beforeCount = review.getLikeCount();
+
+    LikeReviewCommand command = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    likeReviewService.likeReview(command);
+    em.flush();
+    em.clear();
+
+    long afterCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+
+    assertThat(afterCount).isEqualTo(beforeCount + 1);
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 취소시 리뷰 테이블 좋아요 수 필드 count down")
+  void UnlikeReviewThenReviewLikeCountDown() {
+    // Given
+    review.setLikeCount(1L);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    LikeReviewCommand upCommand = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    LikeReviewCommand downCommand = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+
+    likeReviewService.likeReview(upCommand);
+    em.flush();
+    em.clear();
+
+    // When
+    long beforeCount = review.getLikeCount();
+    likeReviewService.likeReview(downCommand);
+    em.flush();
+    em.clear();
+    long afterCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+
+    // Then
+    assertThat(afterCount).isEqualTo(beforeCount - 1);
   }
 
 }

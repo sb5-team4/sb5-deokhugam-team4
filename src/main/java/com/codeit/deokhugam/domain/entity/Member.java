@@ -28,5 +28,8 @@ public class Member extends BaseUpdatableEntity {
   private String password; // bcrypt
   @Column(nullable = false)
   private boolean deleted;
-
+  
+  public void encodePassword(String encodedPw) {
+    this.password = encodedPw;
+  }
 }

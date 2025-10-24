@@ -1,8 +1,8 @@
-package com.codeit.deokhugam.dto.response;
+package com.codeit.deokhugam.dto.response.member;
 
 import java.time.Instant;
 
-public record MemberLoginResponse(
+public record MemberCreatedResponse(
     Long id,
     String email,
     String nickname,

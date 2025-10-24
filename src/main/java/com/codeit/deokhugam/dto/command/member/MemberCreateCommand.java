@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.dto.command;
+package com.codeit.deokhugam.dto.command.member;
 
 public record MemberCreateCommand(
     String email,

@@ -7,14 +7,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.domain.entity.Member;
-import com.codeit.deokhugam.dto.command.MemberCreateCommand;
-import com.codeit.deokhugam.dto.command.MemberLoginCommand;
-import com.codeit.deokhugam.dto.request.MemberCreateRequest;
-import com.codeit.deokhugam.dto.request.MemberLoginRequest;
-import com.codeit.deokhugam.dto.response.MemberCreatedResponse;
-import com.codeit.deokhugam.dto.response.MemberLoginResponse;
-import com.codeit.deokhugam.dto.result.MemberCreatedResult;
-import com.codeit.deokhugam.dto.result.MemberLoginResult;
+import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
+import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
+import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
+import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
+import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
+import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
+import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
+import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -107,7 +107,7 @@ public class MemberControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidRequest)))
         .andExpect(status().isBadRequest())   // 400 Bad Request 기대
-        .andExpect(jsonPath("$.message").exists()); // GlobalExceptionHandler에서 메시지 반환 시
+        .andExpect(jsonPath("$.errorMessage").exists()); // GlobalExceptionHandler에서 메시지 반환 시
   }
 
   @Test

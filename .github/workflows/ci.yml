@@ -1,6 +1,6 @@
-#테스트 커버러지 - jacoco, codcov ✅
-#테스트 코드 점검 - sprint-mission  ✅
-#PR 최신 develop에 커밋을 pull 해왔는지 점검 ✅
+#테스트 커버러지  ✅
+#테스트 코드 점검 ✅
+#PR 최신 develop 커밋을 pull 해왔는지 점검 ✅
 
 name: CI
 

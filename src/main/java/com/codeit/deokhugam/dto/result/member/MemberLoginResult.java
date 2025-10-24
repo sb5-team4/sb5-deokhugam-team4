@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.dto.result;
+package com.codeit.deokhugam.dto.result.member;
 
 import java.time.Instant;
 

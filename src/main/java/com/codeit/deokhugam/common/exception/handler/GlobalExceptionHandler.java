@@ -3,6 +3,7 @@ package com.codeit.deokhugam.common.exception.handler;
 import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import java.util.NoSuchElementException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -18,23 +20,23 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleValidationExceptions(
       MethodArgumentNotValidException ex) {
     String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage);
+    ErrorResponse response = ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), errorMessage);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
   // 표준 예외 NoSuchElementException 처리 (404)
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
-    ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    ErrorResponse response = ErrorResponse.of(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
   }
-    
+
   @ExceptionHandler(MissingRequestHeaderException.class)
   public ResponseEntity<ErrorResponse> handleValidationExceptions(
       MissingRequestHeaderException ex) {
     String headerName = ex.getHeaderName();
     String message = headerName + " 헤더가 요청에 포함되어야 합니다.";
-    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+    ErrorResponse response = ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), message);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
@@ -42,7 +44,7 @@ public class GlobalExceptionHandler {
   // 커스텀예외 ResourceNotFoundException 처리 (404 Not Found)
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
-    ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    ErrorResponse response = ErrorResponse.of(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
   }
 
@@ -50,7 +52,7 @@ public class GlobalExceptionHandler {
   // 커스텀예외 AuthorizationException 처리 (403 Forbidden)
   @ExceptionHandler(AuthorizationException.class)
   public ResponseEntity<ErrorResponse> handlePermissionDenied(AuthorizationException ex) {
-    ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    ErrorResponse response = ErrorResponse.of(HttpStatus.FORBIDDEN.value(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
   }
 
@@ -58,14 +60,26 @@ public class GlobalExceptionHandler {
   //처리하지 못한 모든 예외 처리 (500 Internal Server Error)
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
-    ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+    ErrorResponse response = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(),
         "서버 내부 오류가 발생했습니다.");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
   }
 
+//
+//  // 공통 에러 응답 DTO (API 명세서의 에러 응답 형태)
+//  public record ErrorResponse(int code, String message) {
+//
+//  }
 
-  // 공통 에러 응답 DTO (API 명세서의 에러 응답 형태)
-  public record ErrorResponse(int code, String message) {
+  @ExceptionHandler(CustomException.class)
+  public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
+    // 예외 로깅 (ERROR 레벨)
+    log.error("CustomException occurred: ErrorCode = {}, Message = {}", ex.getErrorCode(),
+        ex.getErrorMessage(), ex);
 
+    ErrorResponse errorResponse = ErrorResponse.of(ex.getErrorCode(), ex.getErrorMessage());
+
+    return new ResponseEntity<>(errorResponse, ex.getHttpStatus());
   }
+
 }

@@ -24,8 +24,12 @@ public class CommentController {
   private final CommentService commentService;
   private final CommentMapper commentMapper;
 
-
-  // 댓글 생성
+  /**
+   * 댓글 생성 POST
+   * @param requestMemberId
+   * @param request
+   * @return
+   */
   @PostMapping
   public ResponseEntity<CommentResponse> createComment(
       // 요청자 멤버ID
@@ -33,7 +37,6 @@ public class CommentController {
       // Validation 검증
       @Valid @RequestBody CommentCreateRequest request
   ) {
-
 
     // Mapper를 통해 Request -> Command 변환
     CommentCreateCommand command = commentMapper.toCommentCreateCommand(request, requestMemberId);

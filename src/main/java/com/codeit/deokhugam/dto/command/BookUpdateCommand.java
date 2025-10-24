@@ -1,0 +1,34 @@
+package com.codeit.deokhugam.dto.command;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class BookUpdateCommand {
+
+  @NotBlank(message = "제목은 비워둘 수 없습니다.")
+  private String title;             // 제목
+
+  @NotBlank(message = "저자는 비워둘 수 없습니다.")
+  private String author;            // 저자
+
+  @NotBlank(message = "설명은 비워둘 수 없습니다.")
+  private String description;       // 설명
+
+  @NotBlank(message = "출판사는 비워둘 수 없습니다.")
+  private String publisher;         // 출판사
+
+  @NotNull(message = "출판일은 비워둘 수 없습니다.")
+  private LocalDate publishedDate;  // 출판일
+
+}

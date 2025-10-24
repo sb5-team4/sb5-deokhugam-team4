@@ -96,7 +96,7 @@ public class CommentServiceTest {
     when(commentMapper.toCommentCreateResult(comment)).thenReturn(commentCreateResult);
 
     // when 실행 : 서비스 로직 호출
-    CommentCreateResult result = commentService.createComment(commentCreateCommand);
+    CommentCreateResult result = commentService.createComment(commentCreateCommand, commentWriter.getId());
 
     // then 검증 : 결과 확인
     // result.id() (생성된 댓글 ID, 22L)는 기대했던 commentCreateResult.id() (댓글 ID, 22L)와 비교한다.
@@ -127,7 +127,7 @@ public class CommentServiceTest {
 
     when(commentMapper.toCommentCreateResult(selfComment)).thenReturn(selfResult);
 
-    commentService.createComment(selfCommand);
+    commentService.createComment(selfCommand, selfCommentWriter.getId());
 
     //알림 서비스가 호출되지 않았는지 검증
     verify(notificationService, never()).create(any(), any(), any());
@@ -139,7 +139,7 @@ public class CommentServiceTest {
     // Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
     when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand))
+    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand, commentWriter.getId()))
         .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Review");
   }
@@ -152,7 +152,7 @@ public class CommentServiceTest {
     // 그 다음 Member를 못 찾았다고 가정 when
     when(memberRepository.findById(commentCreateCommand.memberId())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand))
+    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand,  commentWriter.getId()))
         .isInstanceOf(ResourceNotFoundException.class)
         .hasMessageContaining("Member");
   }

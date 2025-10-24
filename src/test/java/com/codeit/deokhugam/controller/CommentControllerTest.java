@@ -65,7 +65,7 @@ public class CommentControllerTest {
     when(commentMapper.toCommentCreateCommand(any(), any())).thenReturn(null);
 
     // Service에서 Command를 받아서 코멘트 생성후 Result 반환 가정
-    when(commentService.createComment(any())).thenReturn(commentCreateResult);
+    when(commentService.createComment(any(), any())).thenReturn(commentCreateResult);
 
     // Mapper를 통해 Result -> Response 변환 가정
     when(commentMapper.toCommentResponse(any())).thenReturn(commentResponse);
@@ -120,7 +120,7 @@ public class CommentControllerTest {
     // Service가 404 예외를 던짐
     CommentCreateRequest request = new CommentCreateRequest(100L, 2L, "테스트 댓글");
 
-    when(commentService.createComment(any()))
+    when(commentService.createComment(any(), any()))
         .thenThrow(new ResourceNotFoundException("Review", 100L));
 
     mockMvc.perform(post("/api/comments")
@@ -137,7 +137,7 @@ public class CommentControllerTest {
     // Service가 404 예외를 던짐
     CommentCreateRequest request = new CommentCreateRequest(100L, 5L, "테스트 댓글");
 
-    when(commentService.createComment(any()))
+    when(commentService.createComment(any(), any()))
         .thenThrow(new ResourceNotFoundException("Member", 5L));
 
     mockMvc.perform(post("/api/comments")

@@ -1,5 +1,6 @@
 package com.codeit.deokhugam.service;
 
+import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
@@ -27,7 +28,12 @@ public class CommentService {
 
   // 댓글 생성 기능
   @Transactional
-  public CommentCreateResult createComment(CommentCreateCommand command) {
+  public CommentCreateResult createComment(CommentCreateCommand command, Long requestMemberId) {
+
+    // 인가(Authorization) 검증: 요청자(헤더)와 작성자(Command)가 일치하는지 확인
+    if (!requestMemberId.equals(command.memberId())) {
+      throw new AuthorizationException("댓글 작성 권한이 없습니다.");
+    }
 
     // 리뷰 조회 없으면 404 커스텀 예외
     Review review = reviewRepository.findById(command.reviewId())

@@ -1,3 +1,6 @@
+codecov:
+  branch: develop          # PR target branch
+  strict_yaml_branch: develop  # 항상 develop 브랜치 YAML 사용
 comment:
   layout: "reach, diff, flags"
   require_changes: false

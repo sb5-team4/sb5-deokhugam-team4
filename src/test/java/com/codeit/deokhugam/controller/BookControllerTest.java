@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.service.BookService;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,6 +28,8 @@ class BookControllerTest {
 
   @MockitoBean
   private BookService bookService;
+  @MockitoBean
+  private BookMapper bookMapper;
 
   @MockitoBean
   private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMetamodelMappingContext;

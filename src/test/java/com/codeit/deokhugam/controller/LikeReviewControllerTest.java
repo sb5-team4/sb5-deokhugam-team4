@@ -2,19 +2,21 @@ package com.codeit.deokhugam.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
+import com.codeit.deokhugam.dto.response.LikeReviewResponse;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ReviewController.class)
 @Import(GlobalExceptionHandler.class)
-public class ReviewHardDeleteControllerTest {
+public class LikeReviewControllerTest {
 
   @Autowired
   MockMvc mockMvc;
@@ -37,98 +39,80 @@ public class ReviewHardDeleteControllerTest {
   @MockitoBean
   ReviewService reviewService;
   @MockitoBean
-  ReviewMapper reviewMapper;
-  @MockitoBean
   LikeReviewService likeReviewService;
+  @MockitoBean
+  ReviewMapper reviewMapper;
   @MockitoBean
   LikeReviewMapper likeReviewMapper;
   @MockitoBean
   JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-  Long bookId;
-  Long userId;
-  String content;
-  short rating;
-
-  Long id;
-  String bookTitle;
-  String bookThumbnailUrl;
-  String userNickname;
-  Long likeCount;
-  Long commentCount;
-  boolean likedByMe;
-  OffsetDateTime createdAt;
-  OffsetDateTime updatedAt;
+  long reviewId;
+  long memberId;
+  boolean liked;
+  LikeReviewResult result;
+  LikeReviewResponse response;
 
   @BeforeEach
   void setUp() {
-    bookId = 1L;
-    userId = 1L;
-    content = "This is a test review";
-    rating = (short) 1;
-    id = 1L;
-    bookTitle = "This is a test book";
-    bookThumbnailUrl = "This is a test book thumbnail";
-    userNickname = "this is a test user";
-    likeCount = 0L;
-    commentCount = 0L;
-    likedByMe = false;
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    reviewId = 1L;
+    memberId = 1L;
+    liked = true;
+    result = LikeReviewResult.builder()
+        .reviewId(reviewId)
+        .memberId(memberId)
+        .liked(liked)
+        .build();
+
+    response = LikeReviewResponse.builder()
+        .reviewId(reviewId)
+        .memberId(memberId)
+        .liked(liked)
+        .build();
 
   }
 
   @Test
-  @DisplayName("delete - 리뷰 물리 삭제 테스트")
+  @DisplayName("post - 리뷰 좋아요 테스트")
   public void hardDeleteReview() throws Exception {
 
     Long reviewId = 1L;
-    Long MemberId = 1L;
+    Long memberId = 1L;
 
-    given(reviewService.hardDelete(any())).willReturn(true);
+    given(likeReviewService.likeReview(any())).willReturn(result);
+    given(likeReviewMapper.toResponse(any())).willReturn(response);
 
-    mockMvc.perform(delete("/api/reviews/" + reviewId + "/hard")
+    mockMvc.perform(post("/api/reviews/" + reviewId + "/like")
             .param("id", String.valueOf(reviewId))
-            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(memberId))
         )
-        .andExpect(status().isNoContent());
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.reviewId").value(reviewId)) // 숫자 비교
+        .andExpect(jsonPath("$.memberId").value(memberId)) // 숫자 비교
+        .andExpect(jsonPath("$.liked").value(liked)); // boolean 비교
   }
 
 
   @Test
-  @DisplayName("delete - 리뷰 물리 삭제 테스트 - 잘못된 요청 (400 에러)")
+  @DisplayName("post - 리뷰 좋아요 테스트 - 잘못된 요청 (400 에러)")
   public void hardDeleteReviewWithBadRequest() throws Exception {
 
     long reviewId = 1L;
-    mockMvc.perform(delete("/api/reviews/" + reviewId + "/hard")
+    mockMvc.perform(post("/api/reviews/" + reviewId + "/like")
         )
         .andExpect(status().isBadRequest());
 
   }
 
   @Test
-  @DisplayName("delete - 리뷰 물리 삭제 테스트 - 권한없음 (403 에러)")
-  public void hardDeleteReviewWithNotAllowed() throws Exception {
-
-    Long reviewId = 1L;
-    Long MemberId = 1L;
-    given(reviewService.hardDelete(any())).willThrow(AuthorizationException.class);
-
-    mockMvc.perform(delete("/api/reviews/" + reviewId + "/hard")
-            .param("id", String.valueOf(reviewId))
-            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
-        )
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
-  @DisplayName("delete - 리뷰 물리 삭제 테스트 - 리뷰 없음 (404 에러)")
+  @DisplayName("post - 리뷰 좋아요 테스트 - 리뷰 없음 (404 에러)")
   public void hardDeleteReviewWithNotFound() throws Exception {
     Long reviewId = 1L;
     Long MemberId = 1L;
-    given(reviewService.hardDelete(any())).willThrow(ResourceNotFoundException.class);
+    given(likeReviewService.likeReview(any())).willThrow(ResourceNotFoundException.class);
 
-    mockMvc.perform(delete("/api/reviews/" + reviewId + "/hard")
+    mockMvc.perform(post("/api/reviews/" + reviewId + "/like")
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
         )
@@ -136,19 +120,17 @@ public class ReviewHardDeleteControllerTest {
   }
 
   @Test
-  @DisplayName("delete - 리뷰 물리 삭제 테스트 - 예상치 못한 에러 (500 에러)")
+  @DisplayName("post - 리뷰 좋아요 테스트 - 예상치 못한 에러 (500 에러)")
   public void hardDeleteReviewWithInternalServerError() throws Exception {
 
     Long reviewId = 1L;
     Long MemberId = 1L;
-    given(reviewService.hardDelete(any())).willThrow(RuntimeException.class);
+    given(likeReviewService.likeReview(any())).willThrow(RuntimeException.class);
 
-    mockMvc.perform(delete("/api/reviews/" + reviewId + "/hard")
+    mockMvc.perform(post("/api/reviews/" + reviewId + "/like")
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
         )
         .andExpect(status().isInternalServerError());
   }
-
-
 }

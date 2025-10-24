@@ -1,6 +1,5 @@
 package com.codeit.deokhugam.service.impl;
 
-import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -33,10 +32,6 @@ public class LikeReviewServiceImpl implements LikeReviewService {
         -> new ResourceNotFoundException("review with ID" + reviewId + " not found", reviewId));
     Member member = memberRepository.findByIdAndDeletedIsFalse(memberId).orElseThrow(()
         -> new ResourceNotFoundException("member with ID" + memberId + " not found", memberId));
-
-    if (review.getMember().getId() != memberId) {
-      throw new AuthorizationException("허용되지 않은 연산입니다.");
-    }
 
     ReviewLike reviewLike = reviewLikeRepository
         .findByMemberIdAndReviewId(memberId, reviewId).orElse(null);

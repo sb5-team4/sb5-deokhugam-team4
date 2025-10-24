@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
@@ -104,21 +103,6 @@ public class LikeReviewControllerTest {
         )
         .andExpect(status().isBadRequest());
 
-  }
-
-  @Test
-  @DisplayName("post - 리뷰 좋아요 테스트 - 권한없음 (403 에러)")
-  public void hardDeleteReviewWithNotAllowed() throws Exception {
-
-    Long reviewId = 1L;
-    Long MemberId = 1L;
-    given(likeReviewService.likeReview(any())).willThrow(AuthorizationException.class);
-
-    mockMvc.perform(post("/api/reviews/" + reviewId + "/like")
-            .param("id", String.valueOf(reviewId))
-            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
-        )
-        .andExpect(status().isForbidden());
   }
 
   @Test

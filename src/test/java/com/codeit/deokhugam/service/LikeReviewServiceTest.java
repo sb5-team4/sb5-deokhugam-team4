@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 
-import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -94,23 +93,6 @@ public class LikeReviewServiceTest {
     assertThat(result.getMemberId()).isEqualTo(member.getId());
     assertThat(result.isLiked()).isFalse();
 
-  }
-
-  @Test
-  @DisplayName("리뷰 좋아요 테스트 - 권한이 없을 때")
-  void LikeReviewWithNotAllowed() {
-    // Given
-    given(reviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(review));
-    given(memberReviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(member));
-
-    long wrongId = 999L;
-    LikeReviewCommand notAllowedCommand = LikeReviewCommand.builder()
-        .memberId(wrongId)
-        .reviewId(review.getId())
-        .build();
-    // When Then
-    assertThatThrownBy(() -> likeReviewService.likeReview(notAllowedCommand))
-        .isInstanceOf(AuthorizationException.class);
   }
 
   @Test

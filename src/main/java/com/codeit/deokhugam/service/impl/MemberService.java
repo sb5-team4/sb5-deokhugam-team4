@@ -1,10 +1,13 @@
 package com.codeit.deokhugam.service.impl;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Member;
-import com.codeit.deokhugam.dto.command.MemberCreateCommand;
-import com.codeit.deokhugam.dto.command.MemberLoginCommand;
-import com.codeit.deokhugam.dto.result.MemberCreatedResult;
-import com.codeit.deokhugam.dto.result.MemberLoginResult;
+import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
+import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
+import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
+import com.codeit.deokhugam.dto.result.member.MemberFindResult;
+import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +35,7 @@ public class MemberService {
     Member createMember = memberMapper.toMember(memberCreateCommand);
     //record는 setter불가라 엔티티 변환후 패스워드 암호화
     String encodedPw = passwordEncoder.encode(createMember.getPassword());
-    createMember.setPassword(encodedPw);
+    createMember.encodePassword(encodedPw);
     Member returnMember = memberRepository.save(createMember);
     return memberMapper.toMemberCreatedResult(returnMember);
   }
@@ -51,5 +54,11 @@ public class MemberService {
       throw new RuntimeException("존재하지않는 이메일입니다.");
     }
     return memberMapper.toMemberLoginResult(member);
+  }
+
+  public MemberFindResult findById(Long id) {
+    Member member = memberRepository.findById(id)
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    return memberMapper.toMemberFindResult(member);
   }
 }

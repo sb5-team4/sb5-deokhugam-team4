@@ -3,6 +3,7 @@ package com.codeit.deokhugam.service;
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
@@ -20,6 +21,19 @@ public class BookService {
   private final BookRepository bookRepository;
   private final BookMapper bookMapper;
   private final S3Service s3Service;
+
+  public BookResponse createBook(BookCreateCommand command) {
+    if (command.getIsbn() != null && !command.getIsbn().isBlank()) {
+      bookRepository.findByIsbn(command.getIsbn())
+          .ifPresent(book -> {
+            throw new CustomException(ErrorCode.DUPLICATE_ISBN);
+          });
+    }
+    Book book = bookMapper.toEntity(command);
+    Book savedBook = bookRepository.save(book);
+
+    return BookResponse.from(savedBook);
+  }
 
   public BookResponse getBook(Long id) {
     Book book = bookRepository.findById(id)

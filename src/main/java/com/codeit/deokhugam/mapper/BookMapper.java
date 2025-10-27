@@ -1,7 +1,9 @@
 package com.codeit.deokhugam.mapper;
 
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.request.BookCreateRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
@@ -29,4 +31,14 @@ public interface BookMapper {
   BookResponse toBookResponse(BookUpdateResult result);
 
   BookResponse toBookResponse(Book book);
+
+  BookCreateCommand toBookCreateCommand(BookCreateRequest request);
+
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "reviewCount", constant = "0")
+  @Mapping(target = "rating", expression = "java(java.math.BigDecimal.ZERO)")
+  @Mapping(target = "deleted", constant = "false")
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  Book toEntity(BookCreateCommand command);
 }

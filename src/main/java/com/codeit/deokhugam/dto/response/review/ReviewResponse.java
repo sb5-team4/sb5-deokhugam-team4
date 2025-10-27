@@ -17,7 +17,7 @@ public class ReviewResponse {
   private final Long userId;
   private final String userNickname;
   private final String content;
-  private final int rating;
+  private final short rating;
   private final Long likeCount;
   private final Long commentCount;
   private final boolean likedByMe;

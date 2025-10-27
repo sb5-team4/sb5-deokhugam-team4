@@ -9,7 +9,9 @@ import lombok.Getter;
 @Builder
 public class PatchReviewCommand {
 
-  private String content;
-  private short rating;
+  private final Long memberId;
+  private final Long reviewId;
+  private final String newContent;
+  private final short newRating;
 
 }

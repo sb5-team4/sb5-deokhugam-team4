@@ -133,7 +133,7 @@ public class ReviewControllerTest {
 
     given(reviewService.createReview(any())).willReturn(result);
     given(reviewMapper.toCommand(any())).willReturn(command);
-    given(reviewMapper.toResponse(any())).willReturn(response);
+    given(reviewMapper.toResponse(any(CreateReviewResult.class))).willReturn(response);
 
     CreateReviewRequest request = CreateReviewRequest.builder()
         .bookId(bookId)

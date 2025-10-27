@@ -1,6 +1,6 @@
 package com.codeit.deokhugam.domain.entity;
 
-import com.codeit.deokhugam.domain.entity.base.BaseUpdatableEntity;
+import com.codeit.deokhugam.domain.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Entity
 @SuperBuilder
-public class PopularReview extends BaseUpdatableEntity {
+public class PopularReview extends BaseEntity {
 
   @Column(name = "rank", nullable = false)
   private Short rank;

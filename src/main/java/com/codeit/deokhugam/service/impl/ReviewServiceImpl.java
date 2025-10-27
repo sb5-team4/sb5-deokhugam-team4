@@ -49,6 +49,8 @@ public class ReviewServiceImpl implements ReviewService {
             () -> new ResourceNotFoundException("memberId with " + memberId + " not found",
                 bookId));
 
+    // 한사람은 한 책에 리뷰를 하나밖에 등록할 수 없습니다.
+
     int rate = command.getRating();
     String content = command.getContent();
 
@@ -134,7 +136,55 @@ public class ReviewServiceImpl implements ReviewService {
 
 
   @Override
+  @Transactional
   public PatchReviewResult patchReview(PatchReviewCommand command) {
-    return null;
+    long memberId = command.getMemberId();
+    long reviewId = command.getReviewId();
+    String newContent = command.getNewContent();
+    short newRating = command.getNewRating();
+
+    Member member = memberRepository.findByIdAndDeletedIsFalse(memberId).orElseThrow(()
+        -> new ResourceNotFoundException("memberId with " + memberId + " not found", memberId));
+
+    Review targetReview = reviewRepository.findByIdAndDeletedIsFalse(reviewId).orElseThrow(()
+        -> new ResourceNotFoundException("reviewId with " + reviewId + " not found", reviewId));
+
+    if (newRating < 1 || newRating > 5) {
+      throw new RuntimeException(); // todo 400 에러로 구현해야함 커스텀 예외 적용 후 수정 예정
+    }
+
+    if (targetReview.getMember() == null) {
+      throw new RuntimeException();
+    }
+
+    if (targetReview.getMember().getId() != memberId) {
+      throw new AuthorizationException("허용되지 않은 연산입니다.");
+    }
+
+    targetReview.updateReview(newContent, newRating);
+    Book book = targetReview.getBook();
+    boolean isLikedByMe = reviewLikeRepository
+        .findByMemberIdAndReviewId(memberId, targetReview.getId())
+        .isPresent();
+
+    return PatchReviewResult.builder()
+        .id(targetReview.getId())
+        .bookId(book.getId())
+        .bookTitle(book.getTitle())
+        .bookThumbnailUrl(book.getThumbnailUrl())
+        .userId(memberId)
+        .userNickname(member.getNickname())
+        .content(newContent)
+        .rating(newRating)
+        .likeCount(targetReview.getLikeCount())
+        .commentCount(targetReview.getCommentCount())
+        .likedByMe(isLikedByMe)
+        .createdAt(Optional.ofNullable(targetReview.getCreatedAt())
+            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
+            .orElse(null))
+        .updatedAt(Optional.ofNullable(targetReview.getUpdatedAt())
+            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
+            .orElse(null))
+        .build();
   }
 }

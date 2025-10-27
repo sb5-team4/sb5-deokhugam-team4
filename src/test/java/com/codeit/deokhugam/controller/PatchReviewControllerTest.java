@@ -3,14 +3,15 @@ package com.codeit.deokhugam.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.common.exception.AuthorizationException;
+import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
-import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
+import com.codeit.deokhugam.dto.request.PatchReviewRequest;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
@@ -107,6 +108,9 @@ public class PatchReviewControllerTest {
         .createdAt(createdAt)
         .updatedAt(updatedAt)
         .build();
+
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
+
     ReviewResponse response = ReviewResponse.builder()
         .id(id)
         .bookId(bookId)
@@ -127,20 +131,23 @@ public class PatchReviewControllerTest {
     Long MemberId = 1L;
 
     given(reviewService.patchReview(any())).willReturn(result);
-    given(reviewMapper.toResponse(any())).willReturn(response);
+    given(reviewMapper.toResponse(any(PatchReviewResult.class))).willReturn(response);
 
-    MvcResult requestResult = mockMvc.perform(delete("/api/reviews/" + reviewId)
+    MvcResult requestResult = mockMvc.perform(patch("/api/reviews/" + reviewId)
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
         )
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(id))
         .andExpect(jsonPath("$.bookId").value(bookId))
         .andExpect(jsonPath("$.bookTitle").value(bookTitle))
         .andExpect(jsonPath("$.bookThumbnailUrl").value(bookThumbnailUrl))
         .andExpect(jsonPath("$.userId").value(userId))
         .andExpect(jsonPath("$.userNickname").value(userNickname))
-        .andExpect(jsonPath("$.newContent").value(newContent))
-        .andExpect(jsonPath("$.newRating").value("" + newRating))
+        .andExpect(jsonPath("$.content").value(newContent))
+        .andExpect(jsonPath("$.rating").value("" + newRating))
         .andExpect(jsonPath("$.likeCount").value(likeCount))
         .andExpect(jsonPath("$.commentCount").value(commentCount))
         .andExpect(jsonPath("$.likedByMe").value(likedByMe)).andReturn();
@@ -159,6 +166,27 @@ public class PatchReviewControllerTest {
         actualUpdatedAt.truncatedTo(ChronoUnit.MILLIS));
   }
 
+  @Test
+  @DisplayName("patch - 리뷰 수정 테스트 - 403 응답 확인")
+  public void patchReviewWithNotAllowedException() throws Exception {
+
+    String newContent = "This is a test review";
+    short newRating = (short) 5;
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
+
+    Long reviewId = 1L;
+    Long MemberId = 1L;
+
+    given(reviewService.patchReview(any())).willThrow(AuthorizationException.class);
+
+    mockMvc.perform(patch("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+        )
+        .andExpect(status().isForbidden());
+  }
 
   @Test
   @DisplayName("patch - 리뷰 수정 테스트 - 404 응답 확인")
@@ -166,87 +194,39 @@ public class PatchReviewControllerTest {
 
     String newContent = "This is a test review";
     short newRating = (short) 5;
-
-    PatchReviewResult result = PatchReviewResult.builder()
-        .id(id)
-        .bookId(bookId)
-        .bookTitle(bookTitle)
-        .bookThumbnailUrl(bookThumbnailUrl)
-        .userId(userId)
-        .userNickname(userNickname)
-        .content(newContent) // 두 필드만 변화
-        .rating(newRating) // 두 필드만 변화
-        .likeCount(likeCount)
-        .commentCount(commentCount)
-        .likedByMe(likedByMe)
-        .createdAt(createdAt)
-        .updatedAt(updatedAt)
-        .build();
-    ReviewResponse response = ReviewResponse.builder()
-        .id(id)
-        .bookId(bookId)
-        .bookTitle(bookTitle)
-        .bookThumbnailUrl(bookThumbnailUrl)
-        .userId(userId)
-        .userNickname(userNickname)
-        .content(newContent)
-        .rating(newRating)
-        .likeCount(likeCount)
-        .commentCount(commentCount)
-        .likedByMe(likedByMe)
-        .createdAt(createdAt)
-        .updatedAt(updatedAt)
-        .build();
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
 
     Long reviewId = 1L;
     Long MemberId = 1L;
 
-    given(reviewService.patchReview(any())).willReturn(result);
-    given(reviewMapper.toResponse(any())).willReturn(response);
+    given(reviewService.patchReview(any())).willThrow(ResourceNotFoundException.class);
 
-    MvcResult requestResult = mockMvc.perform(delete("/api/reviews/" + reviewId)
+    mockMvc.perform(patch("/api/reviews/" + reviewId)
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
         )
-        .andExpect(jsonPath("$.id").value(id))
-        .andExpect(jsonPath("$.bookId").value(bookId))
-        .andExpect(jsonPath("$.bookTitle").value(bookTitle))
-        .andExpect(jsonPath("$.bookThumbnailUrl").value(bookThumbnailUrl))
-        .andExpect(jsonPath("$.userId").value(userId))
-        .andExpect(jsonPath("$.userNickname").value(userNickname))
-        .andExpect(jsonPath("$.newContent").value(newContent))
-        .andExpect(jsonPath("$.newRating").value("" + newRating))
-        .andExpect(jsonPath("$.likeCount").value(likeCount))
-        .andExpect(jsonPath("$.commentCount").value(commentCount))
-        .andExpect(jsonPath("$.likedByMe").value(likedByMe)).andReturn();
-
-    String responseBody = requestResult.getResponse().getContentAsString();
-
-// JSON 에서 createdAt, updatedAt 추출
-    OffsetDateTime actualCreatedAt = OffsetDateTime.parse(
-        JsonPath.read(responseBody, "$.createdAt"));
-    OffsetDateTime actualUpdatedAt = OffsetDateTime.parse(
-        JsonPath.read(responseBody, "$.updatedAt"));
-
-    assertEquals(createdAt.truncatedTo(ChronoUnit.MILLIS),
-        actualCreatedAt.truncatedTo(ChronoUnit.MILLIS));
-    assertEquals(updatedAt.truncatedTo(ChronoUnit.MILLIS),
-        actualUpdatedAt.truncatedTo(ChronoUnit.MILLIS));
-
+        .andExpect(status().isNotFound());
   }
+
 
   @Test
   @DisplayName("patch - 리뷰 수정 테스트 - 500 응답 확인")
   public void patchReviewWithInternalServerException() throws Exception {
 
-    given(reviewService.createReview(any())).willThrow(RuntimeException.class);
-    CreateReviewRequest request = CreateReviewRequest.builder()
-        .bookId(bookId)
-        .userId(userId)
-        .content(content)
-        .rating(rating)
-        .build();
-    mockMvc.perform(patch("/api/reviews")
+    String newContent = "This is a test review";
+    short newRating = (short) 5;
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
+
+    Long reviewId = 1L;
+    Long MemberId = 1L;
+
+    given(reviewService.patchReview(any())).willThrow(RuntimeException.class);
+
+    mockMvc.perform(patch("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
         )

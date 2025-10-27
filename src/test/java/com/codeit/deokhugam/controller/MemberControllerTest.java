@@ -2,6 +2,10 @@ package com.codeit.deokhugam.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -239,6 +243,44 @@ public class MemberControllerTest {
         .andExpect(jsonPath("$.id").value(memberId))
         .andExpect(jsonPath("$.email").value("test@test.com"))
         .andExpect(jsonPath("$.nickname").value(newNickname));
+  }
+
+  @Test
+  @DisplayName("사용자 논리삭제")
+  void softDelete() throws Exception {
+    // given
+    Long memberId = 1L;
+    Long headerId = 1L;
+
+    // service는 void 메서드라 그냥 doNothing
+    doNothing().when(memberService).softDelete(memberId, headerId);
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{memberId}", memberId)
+            .header("Deokhugam-Request-User-ID", headerId))
+        .andExpect(status().isNoContent());
+
+    // service 호출 여부 확인
+    verify(memberService).softDelete(memberId, headerId);
+
+    //연관데이터 논리삭제시 추가
+
+  }
+
+  @Test
+  @DisplayName("사용자 논리삭제 실패 - 멤버 없음")
+  void softDelete_memberNotFound() throws Exception {
+    Long memberId = 999L;
+    Long headerId = 1L;
+
+    doThrow(new CustomException(ErrorCode.USER_NOT_FOUND))
+        .when(memberService).softDelete(memberId, headerId);
+
+    mockMvc.perform(delete("/api/users/{memberId}", memberId)
+            .header("Deokhugam-Request-User-ID", headerId))
+        .andExpect(status().isNotFound());
+
+    verify(memberService).softDelete(memberId, headerId);
   }
 
 }

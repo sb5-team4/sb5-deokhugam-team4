@@ -64,7 +64,6 @@ public class BookServiceTest {
         .build();
 
     testBookUpdateResult = BookUpdateResult.builder()
-        .id(1L)
         .title("수정된 제목")
         .author("수정된 저자")
         .description("수정된 소개")
@@ -147,8 +146,7 @@ public class BookServiceTest {
   @DisplayName("도서 정보 수정 - 400 실패 (삭제된 도서)")
   void updateBook_DeletedBook() {
     // Given
-    Book deletedBook = BookFixture.createDeletedBook();
-    deletedBook.setId(1L);
+    Book deletedBook = BookFixture.createDeletedBookWithId(1L);
     when(bookRepository.findById(1L)).thenReturn(Optional.of(deletedBook));
 
     // When & Then
@@ -169,8 +167,7 @@ public class BookServiceTest {
   @DisplayName("도서 논리 삭제 - 성공")
   void softDeleteBook_Success() {
     // Given
-    Book book = BookFixture.createBook();
-    book.setId(1L);
+    Book book = BookFixture.createBookWithId(1L);
     when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
 
     // When
@@ -203,8 +200,7 @@ public class BookServiceTest {
   @DisplayName("도서 물리 삭제 - 성공")
   void hardDeleteBook_Success() {
     // Given
-    Book book = BookFixture.createBook();
-    book.setId(1L);
+    Book book = BookFixture.createBookWithId(1L);
     when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
 
     // When
@@ -219,8 +215,7 @@ public class BookServiceTest {
   @DisplayName("도서 물리 삭제 - 논리 삭제된 도서의 물리 삭제 성공")
   void hardDeleteBook_AfterSoftDelete() {
     // Given
-    Book book = BookFixture.createDeletedBook();
-    book.setId(1L);
+    Book book = BookFixture.createDeletedBookWithId(1L);
     when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
 
     // When

@@ -16,6 +16,7 @@ import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.GetReviewService;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +52,8 @@ public class PatchReviewControllerTest {
   LikeReviewService likeReviewService;
   @MockitoBean
   LikeReviewMapper likeReviewMapper;
+  @MockitoBean
+  GetReviewService getReviewService;
   @MockitoBean
   JpaMetamodelMappingContext jpaMetamodelMappingContext;
 

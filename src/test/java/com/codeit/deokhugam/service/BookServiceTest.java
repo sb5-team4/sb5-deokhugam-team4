@@ -3,10 +3,13 @@ package com.codeit.deokhugam.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
@@ -15,7 +18,6 @@ import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -131,8 +133,9 @@ public class BookServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> bookService.updateBook(99999L, testBookUpdateCommand, thumbnailImage))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessageContaining("해당하는 도서 ID가 존재하지 않습니다");
+        .isInstanceOf(CustomException.class)
+        .hasFieldOrPropertyWithValue("errorCode", ErrorCode.BOOK_NOT_FOUND.getCode())
+        .hasFieldOrPropertyWithValue("httpStatus", ErrorCode.BOOK_NOT_FOUND.getHttpStatus());
 
     verify(bookRepository).findById(99999L);
     verify(bookRepository, never()).save(any());
@@ -145,16 +148,103 @@ public class BookServiceTest {
   void updateBook_DeletedBook() {
     // Given
     Book deletedBook = BookFixture.createDeletedBook();
+    deletedBook.setId(1L);
     when(bookRepository.findById(1L)).thenReturn(Optional.of(deletedBook));
 
     // When & Then
     assertThatThrownBy(() -> bookService.updateBook(1L, testBookUpdateCommand, thumbnailImage))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("삭제된 도서는 수정할 수 없습니다");
+        .isInstanceOf(CustomException.class)
+        .hasFieldOrPropertyWithValue("errorCode",
+            ErrorCode.DELETED_BOOK_CANNOT_BE_MODIFIED.getCode())
+        .hasFieldOrPropertyWithValue("httpStatus",
+            ErrorCode.DELETED_BOOK_CANNOT_BE_MODIFIED.getHttpStatus());
 
     verify(bookRepository).findById(1L);
     verify(bookRepository, never()).save(any());
     verify(bookMapper, never()).updateBookFromCommand(any(), any());
     verify(s3Service, never()).uploadFile(any());
+  }
+
+  @Test
+  @DisplayName("도서 논리 삭제 - 성공")
+  void softDeleteBook_Success() {
+    // Given
+    Book book = BookFixture.createBook();
+    book.setId(1L);
+    when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+
+    // When
+    bookService.softDeleteBook(1L);
+
+    // Then
+    verify(bookRepository).findById(1L);
+    verify(bookRepository).save(argThat(Book::isDeleted));
+    assertThat(book.isDeleted()).isTrue();
+  }
+
+  @Test
+  @DisplayName("도서 논리 삭제 - 404 실패 (존재하지 않는 ID)")
+  void softDeleteBook_NotFound() {
+    // Given
+    Long bookId = 99999L;
+    when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> bookService.softDeleteBook(bookId))
+        .isInstanceOf(CustomException.class)
+        .hasFieldOrPropertyWithValue("errorCode", ErrorCode.BOOK_NOT_FOUND.getCode())
+        .hasFieldOrPropertyWithValue("httpStatus", ErrorCode.BOOK_NOT_FOUND.getHttpStatus());
+
+    verify(bookRepository).findById(bookId);
+    verify(bookRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("도서 물리 삭제 - 성공")
+  void hardDeleteBook_Success() {
+    // Given
+    Book book = BookFixture.createBook();
+    book.setId(1L);
+    when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+
+    // When
+    bookService.hardDeleteBook(1L);
+
+    // Then
+    verify(bookRepository).findById(1L);
+    verify(bookRepository).delete(book);
+  }
+
+  @Test
+  @DisplayName("도서 물리 삭제 - 논리 삭제된 도서의 물리 삭제 성공")
+  void hardDeleteBook_AfterSoftDelete() {
+    // Given
+    Book book = BookFixture.createDeletedBook();
+    book.setId(1L);
+    when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+
+    // When
+    bookService.hardDeleteBook(1L);
+
+    // Then
+    verify(bookRepository).findById(1L);
+    verify(bookRepository).delete(book);
+  }
+
+  @Test
+  @DisplayName("도서 물리 삭제 - 404 실패 (존재하지 않는 ID)")
+  void hardDeleteBook_NotFound() {
+    // Given
+    Long bookId = 99999L;
+    when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> bookService.hardDeleteBook(bookId))
+        .isInstanceOf(CustomException.class)
+        .hasFieldOrPropertyWithValue("errorCode", ErrorCode.BOOK_NOT_FOUND.getCode())
+        .hasFieldOrPropertyWithValue("httpStatus", ErrorCode.BOOK_NOT_FOUND.getHttpStatus());
+
+    verify(bookRepository).findById(bookId);
+    verify(bookRepository, never()).delete(any());
   }
 }

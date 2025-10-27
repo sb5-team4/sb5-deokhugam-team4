@@ -11,7 +11,9 @@ import static org.mockito.Mockito.when;
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.fixture.BookFixture;
 import com.codeit.deokhugam.mapper.BookMapper;
@@ -241,5 +243,124 @@ public class BookServiceTest {
 
     verify(bookRepository).findById(bookId);
     verify(bookRepository, never()).delete(any());
+  }
+
+  @Test
+  @DisplayName("도서 등록 (모든 필드) - 성공")
+  void createBookWithAllFields_Success() {
+    // Given
+    BookCreateCommand command = BookCreateCommand.builder()
+        .title("테스트 도서")
+        .author("테스트 저자")
+        .description("테스트 설명")
+        .publisher("테스트 출판사")
+        .publishedDate(LocalDate.of(2020, 10, 1))
+        .isbn("1234567890123")
+        .thumbnailUrl("example.url.jpg")
+        .build();
+
+    when(bookRepository.findByIsbn(command.getIsbn())).thenReturn(Optional.empty());
+
+    Book bookToSave = BookFixture.createBookWithAllFields();
+    when(bookMapper.toEntity(command)).thenReturn(bookToSave);
+
+    Book savedBook = BookFixture.createBookWithId(1L);
+    when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
+
+    BookResponse expectedResponse = BookResponse.builder()
+        .id(1L)
+        .title(command.getTitle())
+        .author(command.getAuthor())
+        .description(command.getDescription())
+        .publisher(command.getPublisher())
+        .publishedDate(command.getPublishedDate())
+        .isbn(command.getIsbn())
+        .thumbnailUrl(command.getThumbnailUrl())
+        .reviewCount(0)
+        .rating(BigDecimal.ZERO)
+        .build();
+    when(bookMapper.toBookResponse(any(Book.class))).thenReturn(expectedResponse);
+
+    // When
+    BookResponse response = bookService.createBook(command);
+
+    // Then
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isEqualTo(1L);
+    assertThat(response.getTitle()).isEqualTo(command.getTitle());
+    assertThat(response.getAuthor()).isEqualTo(command.getAuthor());
+    assertThat(response.getReviewCount()).isEqualTo(0);
+    assertThat(response.getRating()).isEqualByComparingTo(BigDecimal.ZERO);
+
+    verify(bookRepository).findByIsbn(command.getIsbn());
+    verify(bookMapper).toEntity(command);
+    verify(bookRepository).save(any(Book.class));
+    verify(bookMapper).toBookResponse(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("도서 등록 (필수 필드만) - 성공")
+  void createBookWithoutIsbn_Success() {
+    // Given
+    BookCreateCommand command = BookCreateCommand.builder()
+        .title("필수 필드 도서")
+        .author("필수 필드 저자")
+        .publisher("필수 필드 출판사")
+        .publishedDate(LocalDate.of(2024, 1, 1))
+        .build();
+
+    Book bookToSave = BookFixture.createBook();
+    when(bookMapper.toEntity(command)).thenReturn(bookToSave);
+
+    Book savedBook = BookFixture.createBookWithId(1L);
+    when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
+
+    BookResponse expectedResponse = BookResponse.builder()
+        .id(1L)
+        .title(command.getTitle())
+        .author(command.getAuthor())
+        .publisher(command.getPublisher())
+        .publishedDate(command.getPublishedDate())
+        .reviewCount(0)
+        .rating(BigDecimal.ZERO)
+        .build();
+    when(bookMapper.toBookResponse(any(Book.class))).thenReturn(expectedResponse);
+
+    // When
+    BookResponse response = bookService.createBook(command);
+
+    // Then
+    assertThat(response).isNotNull();
+    assertThat(response.getIsbn()).isNull();
+
+    verify(bookRepository, never()).findByIsbn(any());
+    verify(bookMapper).toEntity(command);
+    verify(bookRepository).save(any(Book.class));
+    verify(bookMapper).toBookResponse(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("도서 등록 - 실패 (중복된 ISBN)")
+  void createBook_DuplicateIsbn() {
+    // Given
+    BookCreateCommand command = BookCreateCommand.builder()
+        .title("중복 ISBN 도서")
+        .author("중복 ISBN 저자")
+        .publisher("중복 ISBN 출판사")
+        .publishedDate(LocalDate.of(2024, 1, 1))
+        .isbn("1234567890123")
+        .build();
+
+    Book existingBook = BookFixture.createBookWithIsbn("1234567890123");
+    when(bookRepository.findByIsbn(command.getIsbn())).thenReturn(Optional.of(existingBook));
+
+    // When & Then
+    assertThatThrownBy(() -> bookService.createBook(command))
+        .isInstanceOf(CustomException.class)
+        .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_ISBN.getCode());
+
+    verify(bookRepository).findByIsbn(command.getIsbn());
+    verify(bookMapper, never()).toEntity(any());
+    verify(bookRepository, never()).save(any());
   }
 }

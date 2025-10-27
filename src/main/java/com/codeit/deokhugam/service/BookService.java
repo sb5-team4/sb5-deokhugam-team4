@@ -32,7 +32,7 @@ public class BookService {
     Book book = bookMapper.toEntity(command);
     Book savedBook = bookRepository.save(book);
 
-    return BookResponse.from(savedBook);
+    return bookMapper.toBookResponse(savedBook);
   }
 
   public BookResponse getBook(Long id) {

@@ -35,9 +35,9 @@ public interface BookMapper {
   BookCreateCommand toBookCreateCommand(BookCreateRequest request);
 
   @Mapping(target = "id", ignore = true)
-  @Mapping(target = "reviewCount", constant = "0")
+  @Mapping(target = "reviewCount", expression = "java(0)")
   @Mapping(target = "rating", expression = "java(java.math.BigDecimal.ZERO)")
-  @Mapping(target = "deleted", constant = "false")
+  @Mapping(target = "deleted", expression = "java(false)")
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   Book toEntity(BookCreateCommand command);

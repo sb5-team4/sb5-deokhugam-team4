@@ -8,9 +8,11 @@ import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
 import com.codeit.deokhugam.dto.response.LikeReviewResponse;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.GetReviewOneResult;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.GetReviewService;
 import com.codeit.deokhugam.service.LikeReviewCommand;
 import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReviewController {
 
   private final ReviewService reviewService;
+  private final GetReviewService getReviewService;
   private final ReviewMapper reviewMapper;
   private final LikeReviewService likeReviewService;
   private final LikeReviewMapper likeReviewMapper;
@@ -105,5 +109,16 @@ public class ReviewController {
 
     return ResponseEntity.ok(reviewMapper.toResponse(result));
   }
+
+  @GetMapping("/{reviewId}")
+  public ResponseEntity<ReviewResponse> getReview(
+      @PathVariable Long reviewId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long memberId
+  ) {
+    GetReviewOneResult result = getReviewService.getReviewOne(reviewId, memberId);
+
+    return ResponseEntity.ok(reviewMapper.toResponse(result));
+  }
+
 
 }

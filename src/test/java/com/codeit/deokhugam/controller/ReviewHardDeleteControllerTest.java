@@ -11,6 +11,7 @@ import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.GetReviewService;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +41,8 @@ public class ReviewHardDeleteControllerTest {
   ReviewMapper reviewMapper;
   @MockitoBean
   LikeReviewService likeReviewService;
+  @MockitoBean
+  GetReviewService getReviewService;
   @MockitoBean
   LikeReviewMapper likeReviewMapper;
   @MockitoBean

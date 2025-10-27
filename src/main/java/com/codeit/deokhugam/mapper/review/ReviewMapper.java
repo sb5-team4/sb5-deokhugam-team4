@@ -4,6 +4,7 @@ import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.GetReviewOneResult;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import org.mapstruct.Mapper;
 
@@ -16,6 +17,8 @@ public interface ReviewMapper {
   ReviewResponse toResponse(CreateReviewResult result);
 
   ReviewResponse toResponse(PatchReviewResult result);
+
+  ReviewResponse toResponse(GetReviewOneResult result);
 
 
 }

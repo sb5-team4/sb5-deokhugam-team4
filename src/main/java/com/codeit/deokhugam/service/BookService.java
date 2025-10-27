@@ -1,12 +1,13 @@
 package com.codeit.deokhugam.service;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +23,10 @@ public class BookService {
 
   public BookResponse getBook(Long id) {
     Book book = bookRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("해당하는 도서 ID가 존재하지 않습니다: " + id));
+        .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND, id));
 
     if (book.isDeleted()) {
-      throw new NoSuchElementException("이미 삭제된 도서입니다: " + id);
+      throw new CustomException(ErrorCode.BOOK_ALREADY_DELETED, id);
     }
 
     return bookMapper.toBookResponse(book);
@@ -35,10 +36,10 @@ public class BookService {
   public BookUpdateResult updateBook(Long id, BookUpdateCommand command,
       MultipartFile thumbnailImage) {
     Book book = bookRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("해당하는 도서 ID가 존재하지 않습니다: " + id));
+        .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND, id));
 
     if (book.isDeleted()) {
-      throw new IllegalStateException("삭제된 도서는 수정할 수 없습니다.");
+      throw new CustomException(ErrorCode.BOOK_ALREADY_DELETED, id);
     }
 
     bookMapper.updateBookFromCommand(command, book);
@@ -56,7 +57,7 @@ public class BookService {
   @Transactional
   public void softDeleteBook(Long id) {
     Book book = bookRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("해당하는 도서 ID가 존재하지 않습니다: " + id));
+        .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND, id));
 
     if (!book.isDeleted()) {
       book.setDeleted(true);
@@ -67,7 +68,7 @@ public class BookService {
   @Transactional
   public void hardDeleteBook(Long id) {
     Book book = bookRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("해당하는 도서 ID가 존재하지 않습니다: " + id));
+        .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND, id));
 
     bookRepository.delete(book);
   }

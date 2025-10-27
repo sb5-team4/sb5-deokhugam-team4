@@ -8,12 +8,14 @@ import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
 
-
+  @Transactional
   public MemberCreatedResult create(MemberCreateCommand memberCreateCommand) {
     if (memberRepository.existsByEmail(memberCreateCommand.email())) {
       throw new RuntimeException("Email already exists");
@@ -40,12 +42,12 @@ public class MemberService {
     return memberMapper.toMemberCreatedResult(returnMember);
   }
 
+  @Transactional(readOnly = true)
   public MemberLoginResult login(MemberLoginCommand memberLoginCommand) {
     Member member;
     if (memberRepository.existsByEmail(memberLoginCommand.email())) {
       member = memberRepository.findByEmail(memberLoginCommand.email())
           .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
-      ;
 
       if (!passwordEncoder.matches(memberLoginCommand.password(), member.getPassword())) {
         throw new RuntimeException("Wrong password");
@@ -56,9 +58,22 @@ public class MemberService {
     return memberMapper.toMemberLoginResult(member);
   }
 
+  @Transactional(readOnly = true)
   public MemberFindResult findById(Long id) {
     Member member = memberRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     return memberMapper.toMemberFindResult(member);
   }
+
+  @Transactional
+  public MemberUpdateResult update(Long memberId, String nickname) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    member.updateNickname(nickname);
+    memberRepository.save(member);
+    return memberMapper.toMemberUpdateResult(member);
+
+  }
+
+
 }

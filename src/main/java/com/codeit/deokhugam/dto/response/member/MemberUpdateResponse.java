@@ -1,8 +1,8 @@
-package com.codeit.deokhugam.dto.result.member;
+package com.codeit.deokhugam.dto.response.member;
 
 import java.time.Instant;
 
-public record MemberFindResult(
+public record MemberUpdateResponse(
     Long id,
     String email,
     String nickname,

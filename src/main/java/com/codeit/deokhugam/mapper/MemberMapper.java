@@ -8,9 +8,11 @@ import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
+import com.codeit.deokhugam.dto.response.member.MemberUpdateResponse;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -46,5 +48,12 @@ public abstract class MemberMapper {
   public abstract MemberFindResult toMemberFindResult(Member member);
 
   public abstract MemberFindResponse toMemberFindResponse(MemberFindResult memberFindResult);
+
+  //Update
+  public abstract MemberUpdateResult toMemberUpdateResult(Member member);
+
+  public abstract MemberUpdateResponse toMemberUpdateResponse(
+      MemberUpdateResult memberUpdateResult);
+
 
 }

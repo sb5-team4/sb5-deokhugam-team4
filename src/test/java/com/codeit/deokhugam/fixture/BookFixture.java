@@ -88,4 +88,18 @@ public class BookFixture {
         .deleted(false)
         .build();
   }
+
+  // ID를 지정할 수 있는 테스트 도서
+  public static Book createBookWithId(Long id) {
+    Book book = createBook();
+    org.springframework.test.util.ReflectionTestUtils.setField(book, "id", id);
+    return book;
+  }
+
+  // ID를 지정할 수 있으며 논리 삭제된 테스트 도서
+  public static Book createDeletedBookWithId(Long id) {
+    Book book = createDeletedBook();
+    org.springframework.test.util.ReflectionTestUtils.setField(book, "id", id);
+    return book;
+  }
 }

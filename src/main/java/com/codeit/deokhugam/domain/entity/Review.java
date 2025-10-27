@@ -39,4 +39,9 @@ public class Review extends BaseUpdatableEntity {
   @ManyToOne
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
+
+  public void updateReview(String newContent, short newRating) {
+    content = newContent;
+    rating = newRating;
+  }
 }

@@ -11,6 +11,7 @@ import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.domain.entity.ReviewLike;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
+import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.CommentRepository;
@@ -331,6 +332,38 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
 
     // Then
     assertThat(afterCount).isEqualTo(beforeCount - 1);
+  }
+
+  @Test
+  @DisplayName("리뷰 수정 시 업데이트 여부 확인")
+  void patchReviewThenReviewFieldUpdate() {
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    String newContent = "newContent";
+    short newRating = 5;
+    PatchReviewCommand command = PatchReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .newContent(newContent)
+        .newRating(newRating)
+        .build();
+
+    String beforeContent = review.getContent();
+    Short beforeRating = review.getRating();
+
+    reviewService.patchReview(command);
+    em.flush();
+    em.clear();
+
+    Review afterReview = reviewRepository.findById(review.getId()).get();
+    assertThat(afterReview.getContent()).isEqualTo(newContent);
+    assertThat(afterReview.getContent()).isNotEqualTo(beforeContent);
+    assertThat(afterReview.getRating()).isEqualTo(newRating);
+    assertThat(afterReview.getRating()).isNotEqualTo(beforeRating);
+
+
   }
 
 }

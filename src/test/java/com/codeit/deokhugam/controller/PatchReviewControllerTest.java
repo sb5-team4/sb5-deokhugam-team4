@@ -3,8 +3,7 @@ package com.codeit.deokhugam.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -12,10 +11,9 @@ import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.controller.review.ReviewController;
-import com.codeit.deokhugam.dto.command.CreateReviewCommand;
-import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
+import com.codeit.deokhugam.dto.request.PatchReviewRequest;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
-import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
 import com.codeit.deokhugam.service.GetReviewService;
@@ -39,7 +37,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ReviewController.class)
 @Import(GlobalExceptionHandler.class)
-public class ReviewControllerTest {
+public class PatchReviewControllerTest {
 
   @Autowired
   MockMvc mockMvc;
@@ -53,9 +51,9 @@ public class ReviewControllerTest {
   @MockitoBean
   LikeReviewService likeReviewService;
   @MockitoBean
-  GetReviewService getReviewService;
-  @MockitoBean
   LikeReviewMapper likeReviewMapper;
+  @MockitoBean
+  GetReviewService getReviewService;
   @MockitoBean
   JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
@@ -93,31 +91,29 @@ public class ReviewControllerTest {
   }
 
   @Test
-  @DisplayName("post - 리뷰 생성 테스트")
-  public void postReview() throws Exception {
+  @DisplayName("patch - 리뷰 수정 테스트")
+  public void patchReview() throws Exception {
+    String newContent = "This is a test review";
+    short newRating = (short) 5;
 
-    CreateReviewCommand command = CreateReviewCommand.builder()
-        .bookId(bookId)
-        .userId(userId)
-        .content(content)
-        .rating(rating)
-        .build();
-
-    CreateReviewResult result = CreateReviewResult.builder()
+    PatchReviewResult result = PatchReviewResult.builder()
         .id(id)
         .bookId(bookId)
         .bookTitle(bookTitle)
         .bookThumbnailUrl(bookThumbnailUrl)
         .userId(userId)
         .userNickname(userNickname)
-        .content(content)
-        .rating(rating)
+        .content(newContent) // 두 필드만 변화
+        .rating(newRating) // 두 필드만 변화
         .likeCount(likeCount)
         .commentCount(commentCount)
         .likedByMe(likedByMe)
         .createdAt(createdAt)
         .updatedAt(updatedAt)
         .build();
+
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
+
     ReviewResponse response = ReviewResponse.builder()
         .id(id)
         .bookId(bookId)
@@ -125,8 +121,8 @@ public class ReviewControllerTest {
         .bookThumbnailUrl(bookThumbnailUrl)
         .userId(userId)
         .userNickname(userNickname)
-        .content(content)
-        .rating(rating)
+        .content(newContent)
+        .rating(newRating)
         .likeCount(likeCount)
         .commentCount(commentCount)
         .likedByMe(likedByMe)
@@ -134,36 +130,34 @@ public class ReviewControllerTest {
         .updatedAt(updatedAt)
         .build();
 
-    given(reviewService.createReview(any())).willReturn(result);
-    given(reviewMapper.toCommand(any())).willReturn(command);
-    given(reviewMapper.toResponse(any(CreateReviewResult.class))).willReturn(response);
+    Long reviewId = 1L;
+    Long MemberId = 1L;
 
-    CreateReviewRequest request = CreateReviewRequest.builder()
-        .bookId(bookId)
-        .userId(userId)
-        .content(content)
-        .rating(rating)
-        .build();
+    given(reviewService.patchReview(any())).willReturn(result);
+    given(reviewMapper.toResponse(any(PatchReviewResult.class))).willReturn(response);
 
-    MvcResult requestResult = mockMvc.perform(post("/api/reviews")
+    MvcResult requestResult = mockMvc.perform(patch("/api/reviews/" + reviewId)
+            .param("id", String.valueOf(reviewId))
+            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
         )
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(id))
         .andExpect(jsonPath("$.bookId").value(bookId))
         .andExpect(jsonPath("$.bookTitle").value(bookTitle))
         .andExpect(jsonPath("$.bookThumbnailUrl").value(bookThumbnailUrl))
         .andExpect(jsonPath("$.userId").value(userId))
         .andExpect(jsonPath("$.userNickname").value(userNickname))
-        .andExpect(jsonPath("$.content").value(content))
-        .andExpect(jsonPath("$.rating").value("" + rating))
+        .andExpect(jsonPath("$.content").value(newContent))
+        .andExpect(jsonPath("$.rating").value("" + newRating))
         .andExpect(jsonPath("$.likeCount").value(likeCount))
         .andExpect(jsonPath("$.commentCount").value(commentCount))
         .andExpect(jsonPath("$.likedByMe").value(likedByMe)).andReturn();
 
     String responseBody = requestResult.getResponse().getContentAsString();
 
-// JSON에서 createdAt, updatedAt 추출
+// JSON 에서 createdAt, updatedAt 추출
     OffsetDateTime actualCreatedAt = OffsetDateTime.parse(
         JsonPath.read(responseBody, "$.createdAt"));
     OffsetDateTime actualUpdatedAt = OffsetDateTime.parse(
@@ -175,114 +169,72 @@ public class ReviewControllerTest {
         actualUpdatedAt.truncatedTo(ChronoUnit.MILLIS));
   }
 
-
   @Test
-  @DisplayName("post - 리뷰 생성 테스트 - 404 응답 확인")
-  public void postReviewWithNotFoundException() throws Exception {
+  @DisplayName("patch - 리뷰 수정 테스트 - 403 응답 확인")
+  public void patchReviewWithNotAllowedException() throws Exception {
 
-    given(reviewService.createReview(any())).willThrow(ResourceNotFoundException.class);
-    CreateReviewRequest request = CreateReviewRequest.builder()
-        .bookId(bookId)
-        .userId(userId)
-        .content(content)
-        .rating(rating)
-        .build();
-    mockMvc.perform(post("/api/reviews")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-        )
-        .andExpect(status().isNotFound());
-
-  }
-
-  @Test
-  @DisplayName("post - 리뷰 생성 테스트 - 500 응답 확인")
-  public void postReviewWithInternalServerException() throws Exception {
-
-    given(reviewService.createReview(any())).willThrow(RuntimeException.class);
-    CreateReviewRequest request = CreateReviewRequest.builder()
-        .bookId(bookId)
-        .userId(userId)
-        .content(content)
-        .rating(rating)
-        .build();
-    mockMvc.perform(post("/api/reviews")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-        )
-        .andExpect(status().isInternalServerError());
-
-  }
-
-  @Test
-  @DisplayName("delete - 리뷰 논리 삭제 테스트")
-  public void softDeleteReview() throws Exception {
+    String newContent = "This is a test review";
+    short newRating = (short) 5;
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
 
     Long reviewId = 1L;
     Long MemberId = 1L;
 
-    given(reviewService.softDelete(any())).willReturn(true);
+    given(reviewService.patchReview(any())).willThrow(AuthorizationException.class);
 
-    mockMvc.perform(delete("/api/reviews/" + reviewId)
+    mockMvc.perform(patch("/api/reviews/" + reviewId)
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
-        )
-        .andExpect(status().isNoContent());
-  }
-
-
-  @Test
-  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 잘못된 요청 (400 에러)")
-  public void softDeleteReviewWithBadRequest() throws Exception {
-
-    long reviewId = 1L;
-    mockMvc.perform(delete("/api/reviews/" + reviewId)
-        )
-        .andExpect(status().isBadRequest());
-
-  }
-
-  @Test
-  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 권한없음 (403 에러)")
-  public void softDeleteReviewWithNotAllowed() throws Exception {
-
-    Long reviewId = 1L;
-    Long MemberId = 1L;
-    given(reviewService.softDelete(any())).willThrow(AuthorizationException.class);
-
-    mockMvc.perform(delete("/api/reviews/" + reviewId)
-            .param("id", String.valueOf(reviewId))
-            .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
         )
         .andExpect(status().isForbidden());
   }
 
   @Test
-  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 리뷰 없음 (404 에러)")
-  public void softDeleteReviewWithNotFound() throws Exception {
+  @DisplayName("patch - 리뷰 수정 테스트 - 404 응답 확인")
+  public void patchReviewWithNotFoundException() throws Exception {
+
+    String newContent = "This is a test review";
+    short newRating = (short) 5;
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
+
     Long reviewId = 1L;
     Long MemberId = 1L;
-    given(reviewService.softDelete(any())).willThrow(ResourceNotFoundException.class);
 
-    mockMvc.perform(delete("/api/reviews/" + reviewId)
+    given(reviewService.patchReview(any())).willThrow(ResourceNotFoundException.class);
+
+    mockMvc.perform(patch("/api/reviews/" + reviewId)
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
         )
         .andExpect(status().isNotFound());
   }
 
+
   @Test
-  @DisplayName("delete - 리뷰 논리 삭제 테스트 - 예상치 못한 에러 (500 에러)")
-  public void softDeleteReviewWithInternalServerError() throws Exception {
+  @DisplayName("patch - 리뷰 수정 테스트 - 500 응답 확인")
+  public void patchReviewWithInternalServerException() throws Exception {
+
+    String newContent = "This is a test review";
+    short newRating = (short) 5;
+    PatchReviewRequest request = new PatchReviewRequest(newContent, newRating);
 
     Long reviewId = 1L;
     Long MemberId = 1L;
-    given(reviewService.softDelete(any())).willThrow(RuntimeException.class);
 
-    mockMvc.perform(delete("/api/reviews/" + reviewId)
+    given(reviewService.patchReview(any())).willThrow(RuntimeException.class);
+
+    mockMvc.perform(patch("/api/reviews/" + reviewId)
             .param("id", String.valueOf(reviewId))
             .header("Deokhugam-Request-User-ID", String.valueOf(MemberId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
         )
         .andExpect(status().isInternalServerError());
+
   }
+
 }

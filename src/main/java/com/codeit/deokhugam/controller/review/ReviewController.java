@@ -1,11 +1,14 @@
 package com.codeit.deokhugam.controller.review;
 
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
+import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
+import com.codeit.deokhugam.dto.request.PatchReviewRequest;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
 import com.codeit.deokhugam.dto.response.LikeReviewResponse;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
 import com.codeit.deokhugam.service.LikeReviewCommand;
@@ -17,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/reviews")
+@RequestMapping("/api/reviews")
 public class ReviewController {
 
   private final ReviewService reviewService;
@@ -85,5 +89,21 @@ public class ReviewController {
     return ResponseEntity.ok(likeReviewMapper.toResponse(result));
   }
 
+  @PatchMapping("/{reviewId}")
+  public ResponseEntity<ReviewResponse> patchReview(
+      @PathVariable Long reviewId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long memberId,
+      @Valid @RequestBody PatchReviewRequest request
+  ) {
+
+    PatchReviewResult result = reviewService.patchReview(PatchReviewCommand.builder()
+        .memberId(memberId)
+        .reviewId(reviewId)
+        .newContent(request.getContent())
+        .newRating(request.getRating())
+        .build());
+
+    return ResponseEntity.ok(reviewMapper.toResponse(result));
+  }
 
 }

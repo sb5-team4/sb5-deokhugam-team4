@@ -3,8 +3,10 @@ package com.codeit.deokhugam.service;
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
@@ -20,6 +22,26 @@ public class BookService {
   private final BookRepository bookRepository;
   private final BookMapper bookMapper;
   private final S3Service s3Service;
+
+  @Transactional
+  public BookCreateResult createBook(BookCreateCommand command, MultipartFile thumbnailImage) {
+    if (command.getIsbn() != null && !command.getIsbn().isBlank()) {
+      bookRepository.findByIsbn(command.getIsbn())
+          .ifPresent(book -> {
+            throw new CustomException(ErrorCode.DUPLICATE_ISBN);
+          });
+    }
+    Book book = bookMapper.toEntity(command);
+
+    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
+      String url = s3Service.uploadFile(thumbnailImage);
+      book.setThumbnailUrl(url);
+    }
+
+    Book savedBook = bookRepository.save(book);
+
+    return bookMapper.toBookCreateResult(savedBook);
+  }
 
   public BookResponse getBook(Long id) {
     Book book = bookRepository.findById(id)

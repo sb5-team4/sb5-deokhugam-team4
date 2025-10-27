@@ -3,10 +3,8 @@ package com.codeit.deokhugam.mapper;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
-import com.codeit.deokhugam.dto.command.member.MemberUpdateCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
-import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
@@ -52,11 +50,6 @@ public abstract class MemberMapper {
   public abstract MemberFindResponse toMemberFindResponse(MemberFindResult memberFindResult);
 
   //Update
-  public abstract MemberUpdateCommand toMemberUpdateCommand(
-      MemberUpdateRequest memberUpdateRequest);
-
-  public abstract Member toMember(MemberUpdateCommand memberUpdateCommand);
-
   public abstract MemberUpdateResult toMemberUpdateResult(Member member);
 
   public abstract MemberUpdateResponse toMemberUpdateResponse(

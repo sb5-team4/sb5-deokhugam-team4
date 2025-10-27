@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Member;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
   EntityManager em;
 
   Member member;
+  Member updateMember;
   private BCryptPasswordEncoder passwordEncoder;
 
   @BeforeEach
@@ -36,6 +39,12 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
     member = Member.builder()
         .email("test@test.com")
         .nickname("user1")
+        .password(encodedPassword)
+        .deleted(false)
+        .build();
+    updateMember = Member.builder()
+        .email("test@test.com")
+        .nickname("user2")
         .password(encodedPassword)
         .deleted(false)
         .build();
@@ -74,6 +83,37 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
 
     // 평문 비밀번호와 DB 해시 비교
     assertTrue(passwordEncoder.matches("a1234567", found.getPassword()));
+  }
+
+  @Test
+  @DisplayName("조회(단건)")
+  public void findMemberById() {
+    memberRepository.save(member);
+    Member found = memberRepository.findById(member.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    assertNotNull(found);
+    em.flush();
+    em.clear();
+  }
+
+  @Test
+  @DisplayName("업데이트 닉네임")
+  public void updateMember() {
+    // given
+    memberRepository.save(member);
+    Long memberId = member.getId();
+    String newNickname = "user2";
+
+    // when
+    Member findMember = memberRepository.findById(memberId)
+        .orElseThrow(() -> new RuntimeException("Member not found"));
+    findMember.updateNickname(newNickname);
+    memberRepository.save(findMember);
+
+    // then
+    Member updated = memberRepository.findById(memberId)
+        .orElseThrow();
+    assertEquals(newNickname, updated.getNickname());
   }
 
 }

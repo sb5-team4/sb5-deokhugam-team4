@@ -9,11 +9,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
+import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.service.impl.MemberService;
@@ -147,5 +151,82 @@ public class MemberServiceTest {
     assertThat(exception.getMessage()).isEqualTo("Wrong password");
   }
 
+  @Test
+  @DisplayName("조회 단건")
+  void findMemberById_Success() {
+    // given
+    Long memberId = 1L;
+    MemberFindResult expectedResult = new MemberFindResult(memberId, "test@test.com", "nickname",
+        null);
+
+    given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
+    given(memberMapper.toMemberFindResult(member)).willReturn(expectedResult);
+
+    // when
+    MemberFindResult result = memberService.findById(memberId);
+
+    // then
+    assertThat(result).isNotNull();
+    assertThat(result.id()).isEqualTo(memberId);
+    assertThat(result.email()).isEqualTo("test@test.com");
+    assertThat(result.nickname()).isEqualTo("nickname");
+  }
+
+  @Test
+  @DisplayName("회원 단건 조회 실패 - 사용자 없음")
+  void findById_Fail_UserNotFound() {
+    // given
+    Long memberId = 999L;
+    given(memberRepository.findById(memberId)).willReturn(Optional.empty());
+
+    // when & then
+    CustomException exception = assertThrows(CustomException.class,
+        () -> memberService.findById(memberId));
+
+    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND.getCode());
+  }
+
+  @Test
+  @DisplayName("닉네임 업데이트 성공")
+  void updateNickname_Success() {
+    // given
+    Long memberId = 1L;
+    String newNickname = "newNickname";
+
+    MemberUpdateResult updateResult = new MemberUpdateResult(memberId, "test@test.com", newNickname,
+        null);
+
+    given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
+    given(memberMapper.toMemberUpdateResult(member)).willReturn(updateResult);
+
+    // when
+    MemberUpdateResult result = memberService.update(memberId, newNickname);
+
+    // then
+    assertThat(result).isNotNull();
+    assertThat(result.nickname()).isEqualTo(newNickname);
+
+    // member.updateNickname가 호출됐는지 확인
+    assertThat(member.getNickname()).isEqualTo(newNickname);
+
+    // memberRepository.save 호출 검증
+    verify(memberRepository).save(member);
+  }
+
+  @Test
+  @DisplayName("닉네임 업데이트 실패 - 사용자 없음")
+  void updateNickname_Fail_UserNotFound() {
+    // given
+    Long memberId = 999L;
+    String newNickname = "newNickname";
+
+    given(memberRepository.findById(memberId)).willReturn(Optional.empty());
+
+    // when & then
+    CustomException exception = assertThrows(CustomException.class,
+        () -> memberService.update(memberId, newNickname));
+
+    assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND.getCode());
+  }
 
 }

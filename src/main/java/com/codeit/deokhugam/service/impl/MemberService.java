@@ -5,7 +5,6 @@ import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
-import com.codeit.deokhugam.dto.command.member.MemberUpdateCommand;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
@@ -47,7 +46,6 @@ public class MemberService {
     if (memberRepository.existsByEmail(memberLoginCommand.email())) {
       member = memberRepository.findByEmail(memberLoginCommand.email())
           .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
-      ;
 
       if (!passwordEncoder.matches(memberLoginCommand.password(), member.getPassword())) {
         throw new RuntimeException("Wrong password");
@@ -64,10 +62,11 @@ public class MemberService {
     return memberMapper.toMemberFindResult(member);
   }
 
-  public MemberUpdateResult update(Long memberId, MemberUpdateCommand command) {
+  public MemberUpdateResult update(Long memberId, String nickname) {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    member.updateNickname(command.nickname());
+    member.updateNickname(nickname);
+    memberRepository.save(member);
     return memberMapper.toMemberUpdateResult(member);
 
   }

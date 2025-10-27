@@ -4,7 +4,6 @@ import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
-import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
@@ -16,6 +15,8 @@ import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -50,9 +51,15 @@ public class MemberController {
 
   @PostMapping(path = "/login")
   public ResponseEntity<MemberLoginResponse> login(
-      @RequestBody @Valid MemberLoginRequest request) {
+      @RequestBody @Valid MemberLoginRequest request
+      /*HttpServletRequest servletReqest*/) {
     MemberLoginCommand memberLoginCommand = memberMapper.toMemberLoginCommand(request);
     MemberLoginResult memberLoginResult = memberService.login(memberLoginCommand);
+
+//    servletReqest.getSession().invalidate(); // 이전 세션 무효화
+//    HttpSession session = servletReqest.getSession(true); // 새 세션 생성
+//    session.setAttribute("memberId", memberLoginResult.id());
+
     MemberLoginResponse memberLoginResponse = memberMapper.toMemberLoginResponse(memberLoginResult);
     return ResponseEntity.status(HttpStatus.OK).body(memberLoginResponse);
   }
@@ -63,9 +70,9 @@ public class MemberController {
   @PatchMapping(path = "/{memberId}")
   public ResponseEntity<MemberUpdateResponse> update(
       @PathVariable("memberId") Long memberId,
-      @RequestBody @Valid MemberUpdateRequest request) {
+      @NotBlank(message = "닉네임을 입력해주세요") @Size(min = 2, max = 50) @RequestBody String nickname) {
     MemberUpdateResult result = memberService.update(memberId,
-        memberMapper.toMemberUpdateCommand(request));
+        nickname);
     return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberUpdateResponse(result));
 
   }

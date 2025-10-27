@@ -13,6 +13,7 @@ import com.codeit.deokhugam.controller.review.ReviewController;
 import com.codeit.deokhugam.dto.response.LikeReviewResponse;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.GetReviewService;
 import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
@@ -44,6 +45,8 @@ public class LikeReviewControllerTest {
   ReviewMapper reviewMapper;
   @MockitoBean
   LikeReviewMapper likeReviewMapper;
+  @MockitoBean
+  GetReviewService getReviewService;
   @MockitoBean
   JpaMetamodelMappingContext jpaMetamodelMappingContext;
 

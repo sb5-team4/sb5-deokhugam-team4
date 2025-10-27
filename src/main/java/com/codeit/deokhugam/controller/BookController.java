@@ -26,12 +26,26 @@ public class BookController {
   private final BookService bookService;
   private final BookMapper bookMapper;
 
+  /**
+   * 도서 ID로 도서 정보 조회
+   *
+   * @param bookId
+   * @return ResponseEntity<BookResponse>
+   */
   @GetMapping("/{bookId}")
   public ResponseEntity<BookResponse> getBook(@PathVariable Long bookId) {
     BookResponse response = bookService.getBook(bookId);
     return ResponseEntity.ok(response);
   }
 
+  /**
+   * 도서 ID로 도서 정보 수정
+   *
+   * @param bookId
+   * @param request
+   * @param thumbnailImage
+   * @return ResponseEntity<BookResponse>
+   */
   @PatchMapping("/{bookId}")
   public ResponseEntity<BookResponse> updateBook(
       @PathVariable Long bookId,
@@ -45,12 +59,24 @@ public class BookController {
     return ResponseEntity.ok(response);
   }
 
+  /**
+   * 도서 논리 삭제
+   *
+   * @param bookId
+   * @return ResponseEntity<Void>
+   */
   @DeleteMapping("/{bookId}")
   public ResponseEntity<Void> softDeleteBook(@PathVariable Long bookId) {
     bookService.softDeleteBook(bookId);
     return ResponseEntity.noContent().build();
   }
 
+  /**
+   * 도서 물리 삭제
+   *
+   * @param bookId
+   * @return ResponseEntity<Void>
+   */
   @DeleteMapping("/{bookId}/hard")
   public ResponseEntity<Void> hardDeleteBook(@PathVariable Long bookId) {
     bookService.hardDeleteBook(bookId);

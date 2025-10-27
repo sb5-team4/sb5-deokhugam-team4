@@ -17,4 +17,11 @@ public class CustomException extends RuntimeException {
     this.errorCode = errorCode.getCode();
     this.errorMessage = errorCode.getMessage();
   }
+
+  // 동적 메시지를 보내기 위한 생성자
+  public CustomException(ErrorCode errorCode, Object... args) {
+    this.httpStatus = errorCode.getHttpStatus();
+    this.errorCode = errorCode.getCode();
+    this.errorMessage = String.format(errorCode.getMessage(), args);
+  }
 }

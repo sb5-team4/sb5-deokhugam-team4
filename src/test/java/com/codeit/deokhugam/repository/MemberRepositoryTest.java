@@ -1,14 +1,14 @@
 package com.codeit.deokhugam.repository;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.codeit.deokhugam.common.exception.handler.CustomException;
-import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Member;
 import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,34 +86,37 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
   }
 
   @Test
-  @DisplayName("조회(단건)")
-  public void findMemberById() {
-    memberRepository.save(member);
-    Member found = memberRepository.findById(member.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    assertNotNull(found);
-    em.flush();
-    em.clear();
+  @DisplayName("회원 단건 조회가 정상적으로 수행된다")
+  void findById_Success() {
+    // given
+    Member saved = memberRepository.save(member);
+
+    // when
+    Optional<Member> found = memberRepository.findById(saved.getId());
+
+    // then
+    assertThat(found).isPresent();
+    assertThat(found.get().getEmail()).isEqualTo("test@test.com");
   }
 
   @Test
-  @DisplayName("업데이트 닉네임")
-  public void updateMember() {
+  @DisplayName("회원 닉네임 수정이 DB에 반영된다")
+  void updateNickname_Success() {
     // given
     memberRepository.save(member);
-    Long memberId = member.getId();
-    String newNickname = "user2";
+    em.flush();
+    em.clear();
 
     // when
-    Member findMember = memberRepository.findById(memberId)
-        .orElseThrow(() -> new RuntimeException("Member not found"));
-    findMember.updateNickname(newNickname);
+    Member findMember = memberRepository.findById(member.getId()).get();
+    findMember.updateNickname("newNick");
     memberRepository.save(findMember);
+    em.flush();
+    em.clear();
 
     // then
-    Member updated = memberRepository.findById(memberId)
-        .orElseThrow();
-    assertEquals(newNickname, updated.getNickname());
+    Member updated = memberRepository.findById(member.getId()).get();
+    assertThat(updated.getNickname()).isEqualTo("newNick");
   }
 
 }

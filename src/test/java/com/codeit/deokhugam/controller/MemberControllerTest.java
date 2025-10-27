@@ -152,7 +152,7 @@ public class MemberControllerTest {
   }
 
   @Test
-    // 테스트실패
+  @DisplayName("멤버로그인 실패 이메일or비번 틀림")
   void loginMemberFail() throws Exception { //이메일 or 비번 안맞음
     // given
     MemberLoginRequest request = new MemberLoginRequest("wrong@email.com", "password");

@@ -18,7 +18,7 @@ public class BookResponse {
   private Long id;                  // 도서 id
   private String title;             // 제목
   private String author;            // 저자
-  private String description;       // 소개
+  private String description;       // 설명
   private String publisher;         // 출판사
   private LocalDate publishedDate;  // 출판일
   private String isbn;              // ISBN

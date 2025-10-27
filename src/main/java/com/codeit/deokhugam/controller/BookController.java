@@ -5,6 +5,7 @@ import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.request.BookCreateRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
 import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.service.BookService;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,15 +34,18 @@ public class BookController {
   /**
    * 도서 등록
    *
-   * @param request DTO
+   * @param bookData
+   * @param thumbnailImage
    * @return ResponseEntity<BookResponse>
    */
   @PostMapping
   public ResponseEntity<BookResponse> createBook(
-      @Valid @RequestBody BookCreateRequest request
+      @RequestPart("BookData") @Valid BookCreateRequest bookData,
+      @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage
   ) {
-    BookCreateCommand command = bookMapper.toBookCreateCommand(request);
-    BookResponse response = bookService.createBook(command);
+    BookCreateCommand command = bookMapper.toBookCreateCommand(bookData);
+    BookCreateResult result = bookService.createBook(command, thumbnailImage);
+    BookResponse response = bookMapper.toBookResponse(result);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 

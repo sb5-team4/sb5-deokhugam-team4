@@ -6,6 +6,7 @@ import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.request.BookCreateRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
 import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,8 +14,6 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface BookMapper {
-
-  BookUpdateCommand toBookUpdateCommand(BookUpdateRequest request);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "isbn", ignore = true)
@@ -28,11 +27,17 @@ public interface BookMapper {
 
   BookUpdateResult toBookUpdateResult(Book book);
 
+  BookUpdateCommand toBookUpdateCommand(BookUpdateRequest request);
+
+  BookCreateCommand toBookCreateCommand(BookCreateRequest request);
+
+  BookCreateResult toBookCreateResult(Book book);
+
   BookResponse toBookResponse(BookUpdateResult result);
 
   BookResponse toBookResponse(Book book);
 
-  BookCreateCommand toBookCreateCommand(BookCreateRequest request);
+  BookResponse toBookResponse(BookCreateResult result);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "reviewCount", expression = "java(0)")

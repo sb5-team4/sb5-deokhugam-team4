@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +14,7 @@ import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
-import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.fixture.BookFixture;
 import com.codeit.deokhugam.mapper.BookMapper;
@@ -259,43 +260,42 @@ public class BookServiceTest {
         .thumbnailUrl("example.url.jpg")
         .build();
 
+    MultipartFile thumbnailImage = mock(MultipartFile.class);
+    when(thumbnailImage.isEmpty()).thenReturn(false);
+
     when(bookRepository.findByIsbn(command.getIsbn())).thenReturn(Optional.empty());
 
     Book bookToSave = BookFixture.createBookWithAllFields();
     when(bookMapper.toEntity(command)).thenReturn(bookToSave);
 
+    String uploadedUrl = "https://s3.amazonaws.com/bucket/uploaded-image.jpg";
+    when(s3Service.uploadFile(thumbnailImage)).thenReturn(uploadedUrl);
+
     Book savedBook = BookFixture.createBookWithId(1L);
     when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
 
-    BookResponse expectedResponse = BookResponse.builder()
-        .id(1L)
-        .title(command.getTitle())
-        .author(command.getAuthor())
-        .description(command.getDescription())
-        .publisher(command.getPublisher())
-        .publishedDate(command.getPublishedDate())
-        .isbn(command.getIsbn())
-        .thumbnailUrl(command.getThumbnailUrl())
-        .reviewCount(0)
-        .rating(BigDecimal.ZERO)
-        .build();
-    when(bookMapper.toBookResponse(any(Book.class))).thenReturn(expectedResponse);
+    BookCreateResult expectResult = BookFixture.createBookCreateResultWithThumbnail(1L,
+        uploadedUrl);
+    when(bookMapper.toBookCreateResult(any(Book.class))).thenReturn(expectResult);
 
-    // When
-    BookResponse response = bookService.createBook(command);
+    BookCreateResult result = bookService.createBook(command, thumbnailImage);
 
-    // Then
-    assertThat(response).isNotNull();
-    assertThat(response.getId()).isEqualTo(1L);
-    assertThat(response.getTitle()).isEqualTo(command.getTitle());
-    assertThat(response.getAuthor()).isEqualTo(command.getAuthor());
-    assertThat(response.getReviewCount()).isEqualTo(0);
-    assertThat(response.getRating()).isEqualByComparingTo(BigDecimal.ZERO);
+    // Then: 응답 검증
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(1L);
+    assertThat(result.getTitle()).isEqualTo("테스트 도서");
+    assertThat(result.getAuthor()).isEqualTo("테스트 저자");
+    assertThat(result.getDescription()).isEqualTo("테스트 설명");
+    assertThat(result.getThumbnailUrl()).isEqualTo(uploadedUrl); // S3 업로드된 URL
+    assertThat(result.getReviewCount()).isEqualTo(0);
+    assertThat(result.getRating()).isEqualByComparingTo(BigDecimal.ZERO);
 
+    // 메서드 호출 검증
     verify(bookRepository).findByIsbn(command.getIsbn());
     verify(bookMapper).toEntity(command);
+    verify(s3Service).uploadFile(thumbnailImage);
     verify(bookRepository).save(any(Book.class));
-    verify(bookMapper).toBookResponse(any(Book.class));
+    verify(bookMapper).toBookCreateResult(any(Book.class));
   }
 
   @Test
@@ -309,34 +309,33 @@ public class BookServiceTest {
         .publishedDate(LocalDate.of(2024, 1, 1))
         .build();
 
+    MultipartFile thumbnailImage = null;
+
     Book bookToSave = BookFixture.createBook();
     when(bookMapper.toEntity(command)).thenReturn(bookToSave);
 
     Book savedBook = BookFixture.createBookWithId(1L);
     when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
 
-    BookResponse expectedResponse = BookResponse.builder()
-        .id(1L)
-        .title(command.getTitle())
-        .author(command.getAuthor())
-        .publisher(command.getPublisher())
-        .publishedDate(command.getPublishedDate())
-        .reviewCount(0)
-        .rating(BigDecimal.ZERO)
-        .build();
-    when(bookMapper.toBookResponse(any(Book.class))).thenReturn(expectedResponse);
+    BookCreateResult expectResult = BookFixture.createBookCreateResultWithRequiredFields(1L);
+    when(bookMapper.toBookCreateResult(any(Book.class))).thenReturn(expectResult);
 
     // When
-    BookResponse response = bookService.createBook(command);
+    BookCreateResult result = bookService.createBook(command, null);
 
     // Then
-    assertThat(response).isNotNull();
-    assertThat(response.getIsbn()).isNull();
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(1L);
+    assertThat(result.getIsbn()).isNull();
+    assertThat(result.getThumbnailUrl()).isNull();
+    assertThat(result.getReviewCount()).isEqualTo(0);
+    assertThat(result.getRating()).isEqualByComparingTo(BigDecimal.ZERO);
 
     verify(bookRepository, never()).findByIsbn(any());
+    verify(s3Service, never()).uploadFile(any());
     verify(bookMapper).toEntity(command);
     verify(bookRepository).save(any(Book.class));
-    verify(bookMapper).toBookResponse(any(Book.class));
+    verify(bookMapper).toBookCreateResult(any(Book.class));
   }
 
   @Test
@@ -355,7 +354,7 @@ public class BookServiceTest {
     when(bookRepository.findByIsbn(command.getIsbn())).thenReturn(Optional.of(existingBook));
 
     // When & Then
-    assertThatThrownBy(() -> bookService.createBook(command))
+    assertThatThrownBy(() -> bookService.createBook(command, thumbnailImage))
         .isInstanceOf(CustomException.class)
         .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_ISBN.getCode());
 

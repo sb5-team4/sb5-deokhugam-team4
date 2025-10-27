@@ -36,4 +36,9 @@ public class Member extends BaseUpdatableEntity {
   public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
+
+  public void isSoftDeleted() {
+    this.deleted = !deleted;
+  }
+
 }

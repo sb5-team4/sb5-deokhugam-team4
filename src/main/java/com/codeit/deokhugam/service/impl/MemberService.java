@@ -5,9 +5,11 @@ import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
+import com.codeit.deokhugam.dto.command.member.MemberUpdateCommand;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,4 +63,14 @@ public class MemberService {
         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     return memberMapper.toMemberFindResult(member);
   }
+
+  public MemberUpdateResult update(Long memberId, MemberUpdateCommand command) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    member.updateNickname(command.nickname());
+    return memberMapper.toMemberUpdateResult(member);
+
+  }
+
+
 }

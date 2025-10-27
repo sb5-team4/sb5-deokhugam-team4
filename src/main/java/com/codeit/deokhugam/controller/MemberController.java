@@ -4,12 +4,15 @@ import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
+import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
+import com.codeit.deokhugam.dto.response.member.MemberUpdateResponse;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
 import jakarta.validation.Valid;
@@ -22,7 +25,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,14 +57,17 @@ public class MemberController {
     return ResponseEntity.status(HttpStatus.OK).body(memberLoginResponse);
   }
 
-  //미구현, 로그인시 접근가능한지, 로그인후 요청헤더에 id값이 들어오는지 테스트용
-  @PatchMapping(path = "/{userId}")
-  public ResponseEntity<Void> update(
-      @PathVariable("userId") long userId,
-      @RequestHeader("Deokhugam-Request-User-ID") long id) {
-    log.info("id  {}", userId);
-    log.info("Update member with header_id  {}", id);
-    return ResponseEntity.noContent().build();
+  //사용자 닉네임 업데이트 (닉네임만가능)
+  //사용자 아이디값 받음
+  // id, email, 수정된 nickname, 생성날짜 반환
+  @PatchMapping(path = "/{memberId}")
+  public ResponseEntity<MemberUpdateResponse> update(
+      @PathVariable("memberId") Long memberId,
+      @RequestBody @Valid MemberUpdateRequest request) {
+    MemberUpdateResult result = memberService.update(memberId,
+        memberMapper.toMemberUpdateCommand(request));
+    return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberUpdateResponse(result));
+
   }
 
   //사용자 정보조회(단일)

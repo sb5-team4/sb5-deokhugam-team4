@@ -88,9 +88,9 @@ public class MemberController {
   }
 
   //멤버 논리삭제
-  // 사용자 id값을 경로로 받고, 상태코드 반환
+  // 사용자 id값을 경로로 받고, 204 no content 상태코드 반환
   @DeleteMapping(path = "/{memberId}")
-  public ResponseEntity<Void> deleteMember(@PathVariable Long memberId,
+  public ResponseEntity<Void> softDeleteMember(@PathVariable Long memberId,
       @RequestHeader("Deokhugam-Request-User-ID") Long headerId
   ) {
     memberService.softDelete(memberId, headerId);

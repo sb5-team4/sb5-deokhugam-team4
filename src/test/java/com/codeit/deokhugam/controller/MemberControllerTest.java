@@ -263,8 +263,6 @@ public class MemberControllerTest {
     // service 호출 여부 확인
     verify(memberService).softDelete(memberId, headerId);
 
-    //연관데이터 논리삭제시 추가
-
   }
 
   @Test

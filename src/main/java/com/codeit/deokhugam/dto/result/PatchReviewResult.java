@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.dto.response.review;
+package com.codeit.deokhugam.dto.result;
 
 import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 @Builder
-public class ReviewResponse {
+public class PatchReviewResult {
 
   private final Long id;
   private final Long bookId;

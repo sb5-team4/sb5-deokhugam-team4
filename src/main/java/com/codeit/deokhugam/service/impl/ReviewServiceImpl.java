@@ -7,8 +7,10 @@ import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
+import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.ReviewLikeRepository;
@@ -46,6 +48,8 @@ public class ReviewServiceImpl implements ReviewService {
         .orElseThrow(
             () -> new ResourceNotFoundException("memberId with " + memberId + " not found",
                 bookId));
+
+    // 한사람은 한 책에 리뷰를 하나밖에 등록할 수 없습니다.
 
     int rate = command.getRating();
     String content = command.getContent();
@@ -130,4 +134,57 @@ public class ReviewServiceImpl implements ReviewService {
     return true;
   }
 
+
+  @Override
+  @Transactional
+  public PatchReviewResult patchReview(PatchReviewCommand command) {
+    long memberId = command.getMemberId();
+    long reviewId = command.getReviewId();
+    String newContent = command.getNewContent();
+    short newRating = command.getNewRating();
+
+    Member member = memberRepository.findByIdAndDeletedIsFalse(memberId).orElseThrow(()
+        -> new ResourceNotFoundException("memberId with " + memberId + " not found", memberId));
+
+    Review targetReview = reviewRepository.findByIdAndDeletedIsFalse(reviewId).orElseThrow(()
+        -> new ResourceNotFoundException("reviewId with " + reviewId + " not found", reviewId));
+
+    if (newRating < 1 || newRating > 5) {
+      throw new RuntimeException(); // todo 400 에러로 구현해야함 커스텀 예외 적용 후 수정 예정
+    }
+
+    if (targetReview.getMember() == null) {
+      throw new RuntimeException();
+    }
+
+    if (targetReview.getMember().getId() != memberId) {
+      throw new AuthorizationException("허용되지 않은 연산입니다.");
+    }
+
+    targetReview.updateReview(newContent, newRating);
+    Book book = targetReview.getBook();
+    boolean isLikedByMe = reviewLikeRepository
+        .findByMemberIdAndReviewId(memberId, targetReview.getId())
+        .isPresent();
+
+    return PatchReviewResult.builder()
+        .id(targetReview.getId())
+        .bookId(book.getId())
+        .bookTitle(book.getTitle())
+        .bookThumbnailUrl(book.getThumbnailUrl())
+        .userId(memberId)
+        .userNickname(member.getNickname())
+        .content(newContent)
+        .rating(newRating)
+        .likeCount(targetReview.getLikeCount())
+        .commentCount(targetReview.getCommentCount())
+        .likedByMe(isLikedByMe)
+        .createdAt(Optional.ofNullable(targetReview.getCreatedAt())
+            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
+            .orElse(null))
+        .updatedAt(Optional.ofNullable(targetReview.getUpdatedAt())
+            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
+            .orElse(null))
+        .build();
+  }
 }

@@ -1,10 +1,15 @@
 package com.codeit.deokhugam.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.common.exception.handler.GlobalExceptionHandler;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
@@ -12,9 +17,13 @@ import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
+import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
+import com.codeit.deokhugam.dto.response.member.MemberUpdateResponse;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
+import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -142,20 +151,94 @@ public class MemberControllerTest {
         .andExpect(jsonPath("$.nickname").value("nickname"));
   }
 
-//  @Test
-//    // 테스트실패
-//  void loginMemberFail() throws Exception { //이메일 or 비번 안맞음 todo 찬규님이 수정해주셔야함
-//    // given
-//    MemberLoginRequest request = new MemberLoginRequest("wrong@email.com", "password");
-//
-//    given(memberService.login(any()))
-//        .willThrow(new RuntimeException("로그인 실패")); // ❌ 401로 안 잡히지만 예외는 던짐 나중에 예외만들면 수정
-//
-//    // when & then
-//    mockMvc.perform(post("/api/members/login")
-//            .contentType(MediaType.APPLICATION_JSON)
-//            .content(objectMapper.writeValueAsString(request)))
-//        .andExpect(status().isUnauthorized()); // ✅ 401 기대
-//  }
+  @Test
+  @DisplayName("멤버로그인 실패 이메일or비번 틀림")
+  void loginMemberFail() throws Exception { //이메일 or 비번 안맞음
+    // given
+    MemberLoginRequest request = new MemberLoginRequest("wrong@email.com", "password");
+
+    given(memberService.login(any()))
+        .willThrow(new CustomException(ErrorCode.INVALID_USER_CREDENTIALS));
+
+    // when & then
+    mockMvc.perform(post("/api/users/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isUnauthorized()); // ✅ 401 기대
+  }
+
+  @Test
+  @DisplayName("사용자 단일 조회")
+  void findMemberById() throws Exception {
+    Long memberId = 1L;
+    Member member = new Member("test@test.com", "nickname", "a1234567", false);
+    MemberFindResult result = new MemberFindResult(1L, "test@test.com", "nickname", null);
+    MemberFindResponse response = new MemberFindResponse(1L, "test@test.com", "nickname", null);
+
+    given(memberService.findById(memberId)).willReturn(result);
+    given(memberMapper.toMemberFindResult(member)).willReturn(result);
+    given(memberMapper.toMemberFindResponse(result)).willReturn(response);
+
+    // when & then
+    mockMvc.perform(get("/api/users/{memberId}", memberId)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1L))
+        .andExpect(jsonPath("$.email").value("test@test.com"))
+        .andExpect(jsonPath("$.nickname").value("nickname"));
+  }
+
+
+  @Test
+  @DisplayName("사용자 단일 조회 실패 404")
+  void getMemberNotFound() throws Exception {
+    // given
+    Long memberId = 999L;
+    given(memberService.findById(memberId))
+        .willThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+
+    // when & then
+    mockMvc.perform(get("/api/users/{memberId}", memberId)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("사용자 닉네임 업데이트 성공")
+  void updateNicknameSuccess() throws Exception {
+    // given
+    Long memberId = 1L;
+    String newNickname = "newNickname";
+
+    Member member = new Member("test@test.com", "newNickname", "a1234567", false);
+
+    MemberUpdateResult updateResult = new MemberUpdateResult(
+        1L,
+        "test@test.com",
+        "newNickname",
+        null
+    );
+
+    MemberUpdateResponse response = new MemberUpdateResponse(
+        1L,
+        "test@test.com",
+        "newNickname",
+        null
+    );
+
+    // 서비스 & 매퍼 모킹
+    given(memberService.update(memberId, newNickname)).willReturn(updateResult);
+//    given(memberMapper.toMemberUpdateResult(member)).willReturn(updateResult);
+    given(memberMapper.toMemberUpdateResponse(updateResult)).willReturn(response);
+
+    // when & then
+    mockMvc.perform(patch("/api/users/{memberId}", memberId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(newNickname)) // 단일 문자열이므로 쌍따옴표 포함
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(memberId))
+        .andExpect(jsonPath("$.email").value("test@test.com"))
+        .andExpect(jsonPath("$.nickname").value(newNickname));
+  }
 
 }

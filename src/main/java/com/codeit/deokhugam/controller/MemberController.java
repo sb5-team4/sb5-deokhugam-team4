@@ -7,12 +7,16 @@ import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
+import com.codeit.deokhugam.dto.response.member.MemberUpdateResponse;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
+import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +26,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,21 +51,30 @@ public class MemberController {
 
   @PostMapping(path = "/login")
   public ResponseEntity<MemberLoginResponse> login(
-      @RequestBody @Valid MemberLoginRequest request) {
+      @RequestBody @Valid MemberLoginRequest request
+      /*HttpServletRequest servletReqest*/) {
     MemberLoginCommand memberLoginCommand = memberMapper.toMemberLoginCommand(request);
     MemberLoginResult memberLoginResult = memberService.login(memberLoginCommand);
+
+//    servletReqest.getSession().invalidate(); // 이전 세션 무효화
+//    HttpSession session = servletReqest.getSession(true); // 새 세션 생성
+//    session.setAttribute("memberId", memberLoginResult.id());
+
     MemberLoginResponse memberLoginResponse = memberMapper.toMemberLoginResponse(memberLoginResult);
     return ResponseEntity.status(HttpStatus.OK).body(memberLoginResponse);
   }
 
-  //미구현, 로그인시 접근가능한지, 로그인후 요청헤더에 id값이 들어오는지 테스트용
-  @PatchMapping(path = "/{userId}")
-  public ResponseEntity<Void> update(
-      @PathVariable("userId") long userId,
-      @RequestHeader("Deokhugam-Request-User-ID") long id) {
-    log.info("id  {}", userId);
-    log.info("Update member with header_id  {}", id);
-    return ResponseEntity.noContent().build();
+  //사용자 닉네임 업데이트 (닉네임만가능)
+  //사용자 아이디값 받음
+  // id, email, 수정된 nickname, 생성날짜 반환
+  @PatchMapping(path = "/{memberId}")
+  public ResponseEntity<MemberUpdateResponse> update(
+      @PathVariable("memberId") Long memberId,
+      @NotBlank(message = "닉네임을 입력해주세요") @Size(min = 2, max = 50) @RequestBody String nickname) {
+    MemberUpdateResult result = memberService.update(memberId,
+        nickname);
+    return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberUpdateResponse(result));
+
   }
 
   //사용자 정보조회(단일)

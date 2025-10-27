@@ -1,5 +1,6 @@
 package com.codeit.deokhugam.repository;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -7,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.codeit.deokhugam.domain.entity.Member;
 import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
   EntityManager em;
 
   Member member;
+  Member updateMember;
   private BCryptPasswordEncoder passwordEncoder;
 
   @BeforeEach
@@ -36,6 +39,12 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
     member = Member.builder()
         .email("test@test.com")
         .nickname("user1")
+        .password(encodedPassword)
+        .deleted(false)
+        .build();
+    updateMember = Member.builder()
+        .email("test@test.com")
+        .nickname("user2")
         .password(encodedPassword)
         .deleted(false)
         .build();
@@ -74,6 +83,40 @@ public class MemberRepositoryTest extends DataBaseConnectionSupport {
 
     // 평문 비밀번호와 DB 해시 비교
     assertTrue(passwordEncoder.matches("a1234567", found.getPassword()));
+  }
+
+  @Test
+  @DisplayName("회원 단건 조회가 정상적으로 수행된다")
+  void findById_Success() {
+    // given
+    Member saved = memberRepository.save(member);
+
+    // when
+    Optional<Member> found = memberRepository.findById(saved.getId());
+
+    // then
+    assertThat(found).isPresent();
+    assertThat(found.get().getEmail()).isEqualTo("test@test.com");
+  }
+
+  @Test
+  @DisplayName("회원 닉네임 수정이 DB에 반영된다")
+  void updateNickname_Success() {
+    // given
+    memberRepository.save(member);
+    em.flush();
+    em.clear();
+
+    // when
+    Member findMember = memberRepository.findById(member.getId()).get();
+    findMember.updateNickname("newNick");
+    memberRepository.save(findMember);
+    em.flush();
+    em.clear();
+
+    // then
+    Member updated = memberRepository.findById(member.getId()).get();
+    assertThat(updated.getNickname()).isEqualTo("newNick");
   }
 
 }

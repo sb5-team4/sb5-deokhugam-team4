@@ -1,24 +1,32 @@
 package com.codeit.deokhugam.controller.review;
 
+import com.codeit.deokhugam.domain.enums.Period;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.request.PatchReviewRequest;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
+import com.codeit.deokhugam.dto.response.CursorPageResponse;
 import com.codeit.deokhugam.dto.response.LikeReviewResponse;
+import com.codeit.deokhugam.dto.response.PopularReviewResponse;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.GetPopularReviewsResult;
 import com.codeit.deokhugam.dto.result.GetReviewOneResult;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.GetPopularReviewsCommand;
 import com.codeit.deokhugam.service.GetReviewService;
 import com.codeit.deokhugam.service.LikeReviewCommand;
 import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -118,6 +127,40 @@ public class ReviewController {
     GetReviewOneResult result = getReviewService.getReviewOne(reviewId, memberId);
 
     return ResponseEntity.ok(reviewMapper.toResponse(result));
+  }
+
+  @GetMapping("/popular")
+  public ResponseEntity<CursorPageResponse<PopularReviewResponse, BigDecimal>> getPopularReviews(
+      @RequestParam(defaultValue = "DAILY") Period period,
+      @RequestParam(defaultValue = "ASC") Direction direction,
+      @RequestParam(required = false) BigDecimal cursor,
+      @RequestParam(required = false) Instant after,
+      @RequestParam(defaultValue = "50") Integer limit
+
+  ) {
+
+    GetPopularReviewsResult result = getReviewService.getPopularReviews(GetPopularReviewsCommand
+        .builder()
+        .period(period)
+        .direction(direction)
+        .cursor(cursor)
+        .after(after)
+        .limit(limit)
+        .build());
+
+    CursorPageResponse<PopularReviewResponse, BigDecimal> response = CursorPageResponse
+        .<PopularReviewResponse, BigDecimal>builder()
+        .content(result.getPopularReviews()
+            .stream().map(reviewMapper::toResponse)
+            .toList())
+        .nextCursor(result.getNextCursor())
+        .nextAfter(result.getNextAfter())
+        .size((result.getSize()))
+        .totalElements(result.getTotalElements())
+        .hasNext(result.getHasNext())
+        .build();
+
+    return ResponseEntity.ok(response);
   }
 
 

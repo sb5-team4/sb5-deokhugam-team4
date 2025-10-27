@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,7 +12,9 @@ import static org.mockito.Mockito.when;
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.fixture.BookFixture;
 import com.codeit.deokhugam.mapper.BookMapper;
@@ -241,5 +244,122 @@ public class BookServiceTest {
 
     verify(bookRepository).findById(bookId);
     verify(bookRepository, never()).delete(any());
+  }
+
+  @Test
+  @DisplayName("도서 등록 (모든 필드) - 성공")
+  void createBookWithAllFields_Success() {
+    // Given
+    BookCreateCommand command = BookCreateCommand.builder()
+        .title("테스트 도서")
+        .author("테스트 저자")
+        .description("테스트 설명")
+        .publisher("테스트 출판사")
+        .publishedDate(LocalDate.of(2020, 10, 1))
+        .isbn("1234567890123")
+        .thumbnailUrl("example.url.jpg")
+        .build();
+
+    MultipartFile thumbnailImage = mock(MultipartFile.class);
+    when(thumbnailImage.isEmpty()).thenReturn(false);
+
+    when(bookRepository.findByIsbn(command.getIsbn())).thenReturn(Optional.empty());
+
+    Book bookToSave = BookFixture.createBookWithAllFields();
+    when(bookMapper.toEntity(command)).thenReturn(bookToSave);
+
+    String uploadedUrl = "https://s3.amazonaws.com/bucket/uploaded-image.jpg";
+    when(s3Service.uploadFile(thumbnailImage)).thenReturn(uploadedUrl);
+
+    Book savedBook = BookFixture.createBookWithId(1L);
+    when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
+
+    BookCreateResult expectResult = BookFixture.createBookCreateResultWithThumbnail(1L,
+        uploadedUrl);
+    when(bookMapper.toBookCreateResult(any(Book.class))).thenReturn(expectResult);
+
+    BookCreateResult result = bookService.createBook(command, thumbnailImage);
+
+    // Then: 응답 검증
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(1L);
+    assertThat(result.getTitle()).isEqualTo("테스트 도서");
+    assertThat(result.getAuthor()).isEqualTo("테스트 저자");
+    assertThat(result.getDescription()).isEqualTo("테스트 설명");
+    assertThat(result.getThumbnailUrl()).isEqualTo(uploadedUrl); // S3 업로드된 URL
+    assertThat(result.getReviewCount()).isEqualTo(0);
+    assertThat(result.getRating()).isEqualByComparingTo(BigDecimal.ZERO);
+
+    // 메서드 호출 검증
+    verify(bookRepository).findByIsbn(command.getIsbn());
+    verify(bookMapper).toEntity(command);
+    verify(s3Service).uploadFile(thumbnailImage);
+    verify(bookRepository).save(any(Book.class));
+    verify(bookMapper).toBookCreateResult(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("도서 등록 (필수 필드만) - 성공")
+  void createBookWithoutIsbn_Success() {
+    // Given
+    BookCreateCommand command = BookCreateCommand.builder()
+        .title("필수 필드 도서")
+        .author("필수 필드 저자")
+        .publisher("필수 필드 출판사")
+        .publishedDate(LocalDate.of(2024, 1, 1))
+        .build();
+
+    MultipartFile thumbnailImage = null;
+
+    Book bookToSave = BookFixture.createBook();
+    when(bookMapper.toEntity(command)).thenReturn(bookToSave);
+
+    Book savedBook = BookFixture.createBookWithId(1L);
+    when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
+
+    BookCreateResult expectResult = BookFixture.createBookCreateResultWithRequiredFields(1L);
+    when(bookMapper.toBookCreateResult(any(Book.class))).thenReturn(expectResult);
+
+    // When
+    BookCreateResult result = bookService.createBook(command, null);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(1L);
+    assertThat(result.getIsbn()).isNull();
+    assertThat(result.getThumbnailUrl()).isNull();
+    assertThat(result.getReviewCount()).isEqualTo(0);
+    assertThat(result.getRating()).isEqualByComparingTo(BigDecimal.ZERO);
+
+    verify(bookRepository, never()).findByIsbn(any());
+    verify(s3Service, never()).uploadFile(any());
+    verify(bookMapper).toEntity(command);
+    verify(bookRepository).save(any(Book.class));
+    verify(bookMapper).toBookCreateResult(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("도서 등록 - 실패 (중복된 ISBN)")
+  void createBook_DuplicateIsbn() {
+    // Given
+    BookCreateCommand command = BookCreateCommand.builder()
+        .title("중복 ISBN 도서")
+        .author("중복 ISBN 저자")
+        .publisher("중복 ISBN 출판사")
+        .publishedDate(LocalDate.of(2024, 1, 1))
+        .isbn("1234567890123")
+        .build();
+
+    Book existingBook = BookFixture.createBookWithIsbn("1234567890123");
+    when(bookRepository.findByIsbn(command.getIsbn())).thenReturn(Optional.of(existingBook));
+
+    // When & Then
+    assertThatThrownBy(() -> bookService.createBook(command, thumbnailImage))
+        .isInstanceOf(CustomException.class)
+        .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_ISBN.getCode());
+
+    verify(bookRepository).findByIsbn(command.getIsbn());
+    verify(bookMapper, never()).toEntity(any());
+    verify(bookRepository, never()).save(any());
   }
 }

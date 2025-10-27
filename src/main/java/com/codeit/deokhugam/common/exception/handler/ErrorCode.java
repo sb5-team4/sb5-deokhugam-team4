@@ -16,7 +16,8 @@ public enum ErrorCode {
   // Book 관련 에러 코드
   BOOK_NOT_FOUND(404, "해당하는 도서 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
   BOOK_ALREADY_DELETED(400, "이미 삭제된 도서입니다.", HttpStatus.BAD_REQUEST),
-  DELETED_BOOK_CANNOT_BE_MODIFIED(400, "삭제된 도서는 수정할 수 없습니다.", HttpStatus.BAD_REQUEST);
+  DELETED_BOOK_CANNOT_BE_MODIFIED(400, "삭제된 도서는 수정할 수 없습니다.", HttpStatus.BAD_REQUEST),
+  DUPLICATE_ISBN(409, "이미 존재하는 ISBN입니다.", HttpStatus.CONFLICT);
 
   private final int code;         // 에러 코드
   private final String message;      // 에러 메시지

@@ -1,18 +1,23 @@
 package com.codeit.deokhugam.controller;
 
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.request.BookCreateRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
 import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +30,24 @@ public class BookController {
 
   private final BookService bookService;
   private final BookMapper bookMapper;
+
+  /**
+   * 도서 등록
+   *
+   * @param bookData
+   * @param thumbnailImage
+   * @return ResponseEntity<BookResponse>
+   */
+  @PostMapping
+  public ResponseEntity<BookResponse> createBook(
+      @RequestPart("BookData") @Valid BookCreateRequest bookData,
+      @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage
+  ) {
+    BookCreateCommand command = bookMapper.toBookCreateCommand(bookData);
+    BookCreateResult result = bookService.createBook(command, thumbnailImage);
+    BookResponse response = bookMapper.toBookResponse(result);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
 
   /**
    * 도서 ID로 도서 정보 조회

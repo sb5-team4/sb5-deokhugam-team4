@@ -62,7 +62,7 @@ jobs:
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker stop my-app || true
             docker rm my-app || true
-            docker run -d --name my-app -p 8080:8080 \
+            docker run -d --name my-app -p 8080:8081 \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e DATABASE_URL=$DB_URL \
               -e DATABASE_USERNAME=$DB_USERNAME \

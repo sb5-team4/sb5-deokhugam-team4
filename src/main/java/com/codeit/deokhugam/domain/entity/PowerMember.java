@@ -14,7 +14,7 @@ public class PowerMember extends BaseEntity {
   @Column(name = "period", nullable = false)
   private String period; // enum
   @Column(name = "rank", nullable = false)
-  private Short rank;
+  private Long rank;
   @Column(name = "score", nullable = false)
   private BigDecimal score;
   @Column(name = "review_score_sum", nullable = false)

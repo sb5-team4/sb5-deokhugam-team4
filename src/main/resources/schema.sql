@@ -13,10 +13,11 @@ CREATE TABLE popular_review
 (
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     review_id  BIGINT                                          NOT NULL,
-    rank       SMALLINT                                        NOT NULL,
+    rank       BIGINT                                          NOT NULL,
     score      DECIMAL(10, 2)                                  NOT NULL,
     period     VARCHAR(10)                                     NOT NULL, -- 'DAILY, MONTLY, YEARLY, ALL'
-    created_at timestamp with time zone                        NOT NULL
+    created_at timestamp with time zone                        NOT NULL,
+    CONSTRAINT uq_popular_review UNIQUE (period, rank)                   -- 기간별 공동 순위를 제거
 );
 
 DROP TABLE IF EXISTS comment CASCADE;

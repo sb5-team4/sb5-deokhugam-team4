@@ -13,7 +13,6 @@ public class PaginatedResult<T, S> {
 
   private final List<T> content;
   private final S nextCursor;
-  private final Long nextIdAfter;
   private final Instant nextAfter;
   private final int size;
   private final Long totalElements;

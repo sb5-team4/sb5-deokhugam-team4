@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 public class PopularReview extends BaseEntity {
 
   @Column(name = "rank", nullable = false)

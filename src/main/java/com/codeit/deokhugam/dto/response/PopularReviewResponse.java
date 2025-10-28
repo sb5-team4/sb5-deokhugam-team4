@@ -2,7 +2,7 @@ package com.codeit.deokhugam.dto.response;
 
 import com.codeit.deokhugam.domain.enums.Period;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class PopularReviewResponse {
   private final String reviewContent;
   private final Short reviewRating;
   private final Period period;
-  private final OffsetDateTime createdAt;
+  private final Instant createdAt;
   private final Long rank;
   private final BigDecimal score;
   private final Long likeCount;

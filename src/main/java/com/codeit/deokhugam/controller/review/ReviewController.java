@@ -23,7 +23,6 @@ import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort.Direction;
@@ -130,10 +129,10 @@ public class ReviewController {
   }
 
   @GetMapping("/popular")
-  public ResponseEntity<CursorPageResponse<PopularReviewResponse, BigDecimal>> getPopularReviews(
+  public ResponseEntity<CursorPageResponse<PopularReviewResponse, Long>> getPopularReviews(
       @RequestParam(defaultValue = "DAILY") Period period,
       @RequestParam(defaultValue = "ASC") Direction direction,
-      @RequestParam(required = false) BigDecimal cursor,
+      @RequestParam(required = false) Long cursor,
       @RequestParam(required = false) Instant after,
       @RequestParam(defaultValue = "50") Integer limit
 
@@ -148,8 +147,8 @@ public class ReviewController {
         .limit(limit)
         .build());
 
-    CursorPageResponse<PopularReviewResponse, BigDecimal> response = CursorPageResponse
-        .<PopularReviewResponse, BigDecimal>builder()
+    CursorPageResponse<PopularReviewResponse, Long> response = CursorPageResponse
+        .<PopularReviewResponse, Long>builder()
         .content(result.getPopularReviews()
             .stream().map(reviewMapper::toResponse)
             .toList())
@@ -159,7 +158,6 @@ public class ReviewController {
         .totalElements(result.getTotalElements())
         .hasNext(result.getHasNext())
         .build();
-
     return ResponseEntity.ok(response);
   }
 

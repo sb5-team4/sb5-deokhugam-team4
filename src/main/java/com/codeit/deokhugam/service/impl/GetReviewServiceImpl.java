@@ -18,7 +18,6 @@ import com.codeit.deokhugam.repository.ReviewLikeRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
 import com.codeit.deokhugam.service.GetPopularReviewsCommand;
 import com.codeit.deokhugam.service.GetReviewService;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -81,11 +80,11 @@ public class GetReviewServiceImpl implements GetReviewService {
     Period period = command.getPeriod();
     Direction direction = command.getDirection();
     int limit = command.getLimit();
-    BigDecimal cursor = command.getCursor(); // Nullable
+    Long cursor = command.getCursor(); // Nullable
     Instant after = command.getAfter(); // Nullable
 
     // 1. QueryDSL 결과
-    PaginatedResult<PopularReview, BigDecimal> entitiesResult = popularReviewRepository
+    PaginatedResult<PopularReview, Long> entitiesResult = popularReviewRepository
         .searchWithCursor(period, direction, limit, cursor, after);
 
     // 2. 필요한 Result 파싱
@@ -107,9 +106,7 @@ public class GetReviewServiceImpl implements GetReviewService {
                   .reviewContent(review.getContent())
                   .reviewRating(review.getRating())
                   .period(Period.from(pr.getPeriod()))
-                  .createdAt(Optional.ofNullable(pr.getCreatedAt())
-                      .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-                      .orElse(null))
+                  .createdAt(pr.getCreatedAt())
                   .rank(pr.getRank())
                   .score(pr.getScore())
                   .likeCount(review.getLikeCount())

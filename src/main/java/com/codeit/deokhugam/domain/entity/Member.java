@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Setter
 @ToString
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 
 public class Member extends BaseUpdatableEntity {
 

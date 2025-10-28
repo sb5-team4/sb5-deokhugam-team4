@@ -1,6 +1,5 @@
 package com.codeit.deokhugam.dto.result;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,7 @@ import lombok.Getter;
 public class GetPopularReviewsResult {
 
   private final List<PopularReviewResult> popularReviews;
-  private final BigDecimal nextCursor;
+  private final Long nextCursor;
   private final Instant nextAfter;
   private final Integer size;
   private final Long totalElements;

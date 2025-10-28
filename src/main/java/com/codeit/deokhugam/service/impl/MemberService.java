@@ -75,5 +75,19 @@ public class MemberService {
 
   }
 
+  @Transactional
+  public void softDelete(Long memberId, Long headerId
+  ) {
+    if (!memberId.equals(headerId)) {  //로그인후 요청에 넣는 로그인유저id값과 요청 유저id값이 같은지
+      throw new CustomException(ErrorCode.USER_NOT_AUTHORIZED);
+    }
+    Member deleteMember = memberRepository.findById(memberId)
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    deleteMember.isSoftDeleted();
+
+    //소프트딜리트시 연관데이터 소프트딜리트?
+
+  }
+
 
 }

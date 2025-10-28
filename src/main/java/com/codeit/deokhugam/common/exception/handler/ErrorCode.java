@@ -12,6 +12,7 @@ public enum ErrorCode {
   REVIEW_NOT_FOUND(404, "리뷰 정보 없음", HttpStatus.NOT_FOUND),
   DUPLICATE_USER(409, "이미 존재하는 사용자입니다.", HttpStatus.CONFLICT),
   INVALID_USER_CREDENTIALS(401, "잘못된 사용자 인증 정보입니다.", HttpStatus.UNAUTHORIZED),
+  USER_NOT_AUTHORIZED(403, "사용자 삭제 권한 없음", HttpStatus.FORBIDDEN),
 
   // Book 관련 에러 코드
   BOOK_NOT_FOUND(404, "해당하는 도서 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND),

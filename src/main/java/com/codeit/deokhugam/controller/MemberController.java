@@ -21,11 +21,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -83,6 +85,16 @@ public class MemberController {
   public ResponseEntity<MemberFindResponse> getMember(@PathVariable Long memberId) {
     MemberFindResult result = memberService.findById(memberId);
     return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberFindResponse(result));
+  }
+
+  //멤버 논리삭제
+  // 사용자 id값을 경로로 받고, 204 no content 상태코드 반환
+  @DeleteMapping(path = "/{memberId}")
+  public ResponseEntity<Void> softDeleteMember(@PathVariable Long memberId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long headerId
+  ) {
+    memberService.softDelete(memberId, headerId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
 

@@ -1,6 +1,7 @@
 package com.codeit.deokhugam.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -227,6 +229,33 @@ public class MemberServiceTest {
         () -> memberService.update(memberId, newNickname));
 
     assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND.getCode());
+  }
+
+  @Test
+  @DisplayName("소프트 딜리트 성공")
+  void softDelete_success() {
+    Long memberId = 1L;
+    Long headerId = 1L;
+
+    Member member = Mockito.mock(Member.class); // 엔티티 mock
+    given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
+
+    memberService.softDelete(memberId, headerId);
+
+    verify(memberRepository).findById(memberId);
+    verify(member).isSoftDeleted(); // soft delete 호출 확인
+  }
+
+  @Test
+  @DisplayName("소프트 딜리트 실패 - 권한 없음 403")
+  void softDelete_forbidden() {
+    Long memberId = 1L;
+    Long headerId = 2L;
+
+    CustomException exception = assertThrows(CustomException.class,
+        () -> memberService.softDelete(memberId, headerId));
+
+    assertEquals(ErrorCode.USER_NOT_AUTHORIZED.getCode(), exception.getErrorCode());
   }
 
 }

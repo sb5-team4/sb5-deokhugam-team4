@@ -20,8 +20,6 @@ import com.codeit.deokhugam.service.impl.ReviewServiceImpl;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -173,10 +171,10 @@ public class PatchReviewServiceTest {
     assertThat(result.getCommentCount()).isEqualTo(review.getCommentCount());
     assertThat(result.isLikedByMe()).isTrue();
     assertThat(result.getCreatedAt())
-        .isEqualTo(OffsetDateTime.ofInstant(review.getCreatedAt(), ZoneOffset.ofHours(9)));
+        .isEqualTo(review.getCreatedAt());
 
     assertThat(result.getUpdatedAt())
-        .isEqualTo(OffsetDateTime.ofInstant(review.getUpdatedAt(), ZoneOffset.ofHours(9)));
+        .isEqualTo(review.getUpdatedAt());
   }
 
   @Test

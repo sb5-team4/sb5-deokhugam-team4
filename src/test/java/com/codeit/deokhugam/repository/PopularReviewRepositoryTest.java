@@ -92,19 +92,19 @@ public class PopularReviewRepositoryTest extends DataBaseConnectionSupport {
     Instant now = Instant.now();
     popularReview1 = PopularReviewFixture.createReview(review1, 1, DAILY)
         .toBuilder()
-        .createdAt(now.minusSeconds(1))
+        .createdAt(now.minusSeconds(3))
         .score(score1)
         .build();
 
     popularReview2 = PopularReviewFixture.createReview(review2, 2, DAILY)
         .toBuilder()
-        .createdAt(now.minusSeconds(2))
+        .createdAt(now.minusSeconds(13))
         .score(score2)
         .build();
 
     popularReview3 = PopularReviewFixture.createReview(review3, 3, DAILY)
         .toBuilder()
-        .createdAt(now.minusSeconds(3))
+        .createdAt(now.minusSeconds(23))
         .score(score3)
         .build();
 

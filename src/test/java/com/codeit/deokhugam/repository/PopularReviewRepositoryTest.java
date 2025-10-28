@@ -2,6 +2,7 @@ package com.codeit.deokhugam.repository;
 
 import static com.codeit.deokhugam.domain.enums.Period.DAILY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Member;
@@ -14,6 +15,8 @@ import com.codeit.deokhugam.fixture.PopularReviewFixture;
 import com.codeit.deokhugam.fixture.ReviewFixture;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -86,18 +89,22 @@ public class PopularReviewRepositoryTest extends DataBaseConnectionSupport {
         review3
     ));
 
+    Instant now = Instant.now();
     popularReview1 = PopularReviewFixture.createReview(review1, 1, DAILY)
         .toBuilder()
+        .createdAt(now.minusSeconds(1))
         .score(score1)
         .build();
 
     popularReview2 = PopularReviewFixture.createReview(review2, 2, DAILY)
         .toBuilder()
+        .createdAt(now.minusSeconds(2))
         .score(score2)
         .build();
 
     popularReview3 = PopularReviewFixture.createReview(review3, 3, DAILY)
         .toBuilder()
+        .createdAt(now.minusSeconds(3))
         .score(score3)
         .build();
 
@@ -135,7 +142,8 @@ public class PopularReviewRepositoryTest extends DataBaseConnectionSupport {
 
     // 페이징 데이터 검사
     assertThat(result.getNextCursor()).isEqualTo(popularReview3.getRank());
-    assertThat(result.getNextAfter()).isEqualTo(popularReview3.getCreatedAt());
+    assertThat(result.getNextAfter())
+        .isCloseTo(popularReview3.getCreatedAt(), within(1, ChronoUnit.MILLIS));
     assertThat(result.getSize()).isEqualTo(3);
     assertThat(result.getTotalElements()).isEqualTo(3);
     assertThat(result.getHasNext()).isFalse();
@@ -160,7 +168,8 @@ public class PopularReviewRepositoryTest extends DataBaseConnectionSupport {
 
     // 페이징 데이터 검사
     assertThat(result.getNextCursor()).isEqualTo(popularReview2.getRank());
-    assertThat(result.getNextAfter()).isEqualTo(popularReview2.getCreatedAt());
+    assertThat(result.getNextAfter())
+        .isCloseTo(popularReview2.getCreatedAt(), within(1, ChronoUnit.MILLIS));
     assertThat(result.getSize()).isEqualTo(1);
     assertThat(result.getTotalElements()).isEqualTo(3);
     assertThat(result.getHasNext()).isTrue();

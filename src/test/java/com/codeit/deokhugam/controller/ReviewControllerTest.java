@@ -23,6 +23,7 @@ import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,8 +72,8 @@ public class ReviewControllerTest {
   Long likeCount;
   Long commentCount;
   boolean likedByMe;
-  OffsetDateTime createdAt;
-  OffsetDateTime updatedAt;
+  Instant createdAt;
+  Instant updatedAt;
 
   @BeforeEach
   void setUp() {
@@ -87,8 +88,8 @@ public class ReviewControllerTest {
     likeCount = 0L;
     commentCount = 0L;
     likedByMe = false;
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
 
   }
 

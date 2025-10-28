@@ -1,6 +1,10 @@
 package com.codeit.deokhugam.controller.review;
 
+import static com.codeit.deokhugam.domain.enums.ReviewOrderBy.createdAt;
+
 import com.codeit.deokhugam.domain.enums.Period;
+import com.codeit.deokhugam.domain.enums.ReviewOrderBy;
+import com.codeit.deokhugam.dto.command.GetReviewsCommand;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
@@ -13,6 +17,7 @@ import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
 import com.codeit.deokhugam.dto.result.GetPopularReviewsResult;
 import com.codeit.deokhugam.dto.result.GetReviewOneResult;
+import com.codeit.deokhugam.dto.result.GetReviewsResult;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
@@ -159,6 +164,44 @@ public class ReviewController {
         .hasNext(result.getHasNext())
         .build();
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping
+  public ResponseEntity<CursorPageResponse<ReviewResponse, String>> getPopularReviews(
+      @RequestParam(name = "userId", required = false) Long authorId,
+      @RequestParam(required = false) Long bookId,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(defaultValue = "createdAt") ReviewOrderBy orderBy,
+      @RequestParam(defaultValue = "DESC") Direction direction,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) Instant after,
+      @RequestParam(defaultValue = "50") Integer limit,
+      @RequestParam Long requestUserId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long loginUserId
+
+  ) {
+
+    if (cursor != null) {
+      cursor = orderBy == createdAt ?
+          cursor :
+          Short.toString(Short.parseShort(cursor));
+    }
+
+    GetReviewsResult result = getReviewService.getReviews(GetReviewsCommand.from(
+        authorId, bookId, keyword, orderBy, direction, cursor, after, limit, requestUserId,
+        loginUserId)
+    );
+
+    CursorPageResponse<ReviewResponse, String> body = CursorPageResponse.<ReviewResponse, String>from(
+        result.getReviews().stream().map(reviewMapper::toResponse).toList(),
+        result.getNextCursor(),
+        result.getNextAfter(),
+        result.getSize(),
+        result.getTotalElements(),
+        result.getHasNext()
+    );
+
+    return ResponseEntity.ok(body);
   }
 
 

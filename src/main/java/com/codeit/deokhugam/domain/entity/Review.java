@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @ToString
 @Entity
 public class Review extends BaseUpdatableEntity {

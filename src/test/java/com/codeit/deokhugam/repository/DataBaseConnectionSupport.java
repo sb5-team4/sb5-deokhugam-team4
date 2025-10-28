@@ -1,6 +1,8 @@
 package com.codeit.deokhugam.repository;
 
+import com.codeit.deokhugam.config.QuerydslConfig;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -8,6 +10,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
+@Import(QuerydslConfig.class)
 @ActiveProfiles("test")
 //Spring Boot가 자동으로 테스트용 DB(H2 등)로 교체하지 않도록 함.
 //실제 Testcontainers PostgreSQL 컨테이너를 그대로 사용하려고 설정.

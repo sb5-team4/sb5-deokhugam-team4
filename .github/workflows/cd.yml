@@ -52,20 +52,22 @@ jobs:
           DB_URL: ${{ secrets.DATABASE_URL }}
           DB_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DB_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,ECR_REPOSITORY,DB_URL,DB_USERNAME,DB_PASSWORD
+          envs: ECR_REGISTRY,ECR_REPOSITORY,DB_URL,DB_USERNAME,DB_PASSWORD,AWS_REGION
           script: |
-            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY
+            export AWS_DEFAULT_REGION=$AWS_REGION
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-            docker stop my-app || true
-            docker rm my-app || true
+            docker stop my-app 2>/dev/null || true
+            docker rm my-app 2>/dev/null || true
             docker run -d --name my-app -p 8080:8081 \
               -e SPRING_PROFILES_ACTIVE=prod \
-              -e DATABASE_URL=$DB_URL \
-              -e DATABASE_USERNAME=$DB_USERNAME \
-              -e DATABASE_PASSWORD=$DB_PASSWORD \
+              -e DATABASE_URL="$DB_URL" \
+              -e DATABASE_USERNAME="$DB_USERNAME" \
+              -e DATABASE_PASSWORD="$DB_PASSWORD" \
               $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker image prune -af

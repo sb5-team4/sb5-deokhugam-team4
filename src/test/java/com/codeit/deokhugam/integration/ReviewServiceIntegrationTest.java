@@ -67,8 +67,8 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
 
   ReviewLike reviewLike;
 
-  Short rank;
-  Short score;
+  Long rank;
+  BigDecimal score;
   String period;
   PopularReview popularReview;
 
@@ -117,8 +117,8 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
         .content(content)
         .build();
 
-    rank = (short) 1;
-    score = (short) 1;
+    rank = 1L;
+    score = BigDecimal.valueOf(1.1);
     period = "period";
     confirmed = false;
 

@@ -4,9 +4,11 @@ import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.dto.command.BookCreateCommand;
+import com.codeit.deokhugam.dto.command.BookInfoByIsbnCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookCreateResult;
+import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
@@ -22,6 +24,7 @@ public class BookService {
   private final BookRepository bookRepository;
   private final BookMapper bookMapper;
   private final S3Service s3Service;
+  private final NaverApiService naverApiService;
 
   @Transactional
   public BookCreateResult createBook(BookCreateCommand command, MultipartFile thumbnailImage) {
@@ -94,4 +97,15 @@ public class BookService {
 
     bookRepository.delete(book);
   }
+
+  public BookInfoByIsbnResult getBookInfoByIsbn(BookInfoByIsbnCommand command) {
+    String isbn = command.getIsbn();
+
+    if (isbn == null || !isbn.matches("\\d{13}")) {
+      throw new CustomException(ErrorCode.ISBN_NOT_COLLECT);
+    }
+
+    return naverApiService.getBookByIsbn(isbn);
+  }
+
 }

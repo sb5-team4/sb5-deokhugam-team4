@@ -17,7 +17,9 @@ public enum ErrorCode {
   BOOK_NOT_FOUND(404, "해당하는 도서 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
   BOOK_ALREADY_DELETED(400, "이미 삭제된 도서입니다.", HttpStatus.BAD_REQUEST),
   DELETED_BOOK_CANNOT_BE_MODIFIED(400, "삭제된 도서는 수정할 수 없습니다.", HttpStatus.BAD_REQUEST),
-  DUPLICATE_ISBN(409, "이미 존재하는 ISBN입니다.", HttpStatus.CONFLICT);
+  DUPLICATE_ISBN(409, "이미 존재하는 ISBN입니다.", HttpStatus.CONFLICT),
+  BOOK_ISBN_NOT_FOUND(404, "해당 ISBN의 도서 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  ISBN_NOT_COLLECT(400, "ISBN은 13자리 숫자여야 합니다.", HttpStatus.BAD_REQUEST);
 
   private final int code;         // 에러 코드
   private final String message;      // 에러 메시지

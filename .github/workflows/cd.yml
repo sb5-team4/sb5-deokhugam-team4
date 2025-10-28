@@ -2,7 +2,7 @@ name: CD
 
 on:
   push:
-    branches: [ main ]  # main 브랜치에 push될 때만 배포
+    branches: [ release ]  # release 브랜치에 push될 때만 배포
 
 jobs:
   deploy:

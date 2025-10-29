@@ -123,4 +123,12 @@ public class MemberController {
 
   }
 
+  @DeleteMapping(path = "/{memberId}/hard")
+  public ResponseEntity<Void> softDeleteMemberHard(
+      @PathVariable Long memberId
+  ) {
+    memberService.hardDelete(memberId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
 }

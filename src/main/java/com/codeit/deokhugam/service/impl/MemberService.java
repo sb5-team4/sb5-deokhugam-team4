@@ -111,5 +111,10 @@ public class MemberService {
     return result;
   }
 
+  @Transactional
+  public void hardDelete(Long id) {
+
+  }
+
 
 }

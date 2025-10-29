@@ -21,6 +21,10 @@ public enum ErrorCode {
   BOOK_ISBN_NOT_FOUND(404, "해당 ISBN의 도서 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   ISBN_NOT_COLLECT(400, "ISBN은 13자리 숫자여야 합니다.", HttpStatus.BAD_REQUEST),
 
+  // File 관련 에러 코드
+  INVALID_FILE(400, "유효하지 않은 파일입니다.", HttpStatus.BAD_REQUEST),
+  FILE_UPLOAD_FAILED(500, "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
   // Review 관련 에러 코드
   REVIEW_NOT_FOUND(404, "해당하는 리뷰 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
 

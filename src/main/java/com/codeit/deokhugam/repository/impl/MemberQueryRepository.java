@@ -28,8 +28,7 @@ public class MemberQueryRepository {
 
   public Slice<PowerMemberDto> findPowerMembers(PowerMemberFindCommand command) {
     //페이징 처리 기본 코드
-    long rank =
-        (command.cursor() != null && command.cursor() > 0L) ? command.cursor() : 0L; //null, 음수방지
+    Long rank = command.cursor(); //null, 음수방지
     int size = command.limit();
     //after period direction
     // where 절
@@ -42,18 +41,21 @@ public class MemberQueryRepository {
 //    if (command.after() != null) {  //**after는 보험용 필터인데 랭킹테이블은 생성시간이 같을 확률이 높아 안쓰는게 나을듯?
 //      builder.and(p.createdAt.after(command.after()));
 //    }
-    if (command.direction() == Order.ASC) {
-      builder.and(p.rank.gt(rank));
-    } else { // DESC
-      builder.and(p.rank.lt(rank));
+    if (rank != null && rank > 0) {
+      if (command.direction() == Order.ASC) {
+        builder.and(p.rank.gt(rank));
+      } else { // DESC
+        builder.and(p.rank.lt(rank));
+      }
     }
+
     // period 조건 추가
     builder.and(p.period.eq(command.period().name()));
 
     //정렬 방향 설정
     Order order = command.direction(); // 기본값 ASC
     //정렬 기준
-    OrderSpecifier<?> orderById = new OrderSpecifier<>(order, p.id);
+    OrderSpecifier<?> orderById = new OrderSpecifier<>(order, p.rank);
 
     //컨텐츠 조회
     // slice 컨텐츠 조회시 limit+1 -> hasNext를 표현하기 위해

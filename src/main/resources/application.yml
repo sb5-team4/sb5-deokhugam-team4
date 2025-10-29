@@ -15,8 +15,8 @@ naver:
 # AWS S3 설정, 환경변수에서 주입받음
 aws:
   s3:
-    access-key: ${AWS_ACCESS_KEY_ID}
-    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    access-key: ${AWS_ACCESS_KEY_ID:mock-key}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:mock-key}
     region: ${AWS_S3_REGION:ap-northeast-2}
     bucket: ${S3_BUCKET_NAME:deokhugam-thumbnails}
     base-url: https://${S3_BUCKET_NAME:deokhugam-thumbnails}.s3.ap-northeast-2.amazonaws.com

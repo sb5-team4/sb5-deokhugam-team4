@@ -15,6 +15,6 @@ public interface CommentRepositoryCustom {
    * @param limit     페이지 크기
    * @return 댓글 목록 Slice (또는 직접 만든 CursorPageResponse)
    */
-  List<Comment> findByCommentReviewIdWithCursor(Long reviewId, String direction, Instant after, int limit);
+  List<Comment> findByCommentReviewIdWithCursor(Long reviewId, String direction, Instant after, Long cursorId, int limit);
 
   }

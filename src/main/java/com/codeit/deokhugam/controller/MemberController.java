@@ -114,7 +114,6 @@ public class MemberController {
       @RequestParam(required = false) Instant after,
       @RequestParam(defaultValue = "50") int limit
   ) {
-    System.out.println("Period: " + period);
     PowerMemberFindResult result = memberService.findPowerMember(
         memberMapper.toPowerMemberFindCommand(period, direction, cursor, after, limit));
     return ResponseEntity.status(HttpStatus.OK)

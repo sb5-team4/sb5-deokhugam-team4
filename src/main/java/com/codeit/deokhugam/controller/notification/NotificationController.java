@@ -38,5 +38,13 @@ public class NotificationController {
     return ResponseEntity.ok(notificationMapper.toResponse(result));
   }
 
+  @PatchMapping("/read-all")
+  public ResponseEntity<Void> updateAll(@RequestHeader("Deokhugam-Request-User-ID") Long memberId) {
+
+    notificationService.readAll(memberId);
+
+    return ResponseEntity.noContent().build();
+  }
+
 
 }

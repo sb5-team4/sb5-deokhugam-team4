@@ -2,6 +2,7 @@ package com.codeit.deokhugam.service;
 
 import static com.codeit.deokhugam.common.exception.handler.ErrorCode.NOTIFICATION_NOT_AUTHORIZED;
 import static com.codeit.deokhugam.common.exception.handler.ErrorCode.NOTIFICATION_NOT_FOUND;
+import static com.codeit.deokhugam.common.exception.handler.ErrorCode.USER_NOT_FOUND;
 
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.domain.entity.Comment;
@@ -10,7 +11,9 @@ import com.codeit.deokhugam.domain.entity.Notification;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.ReadNotificationCommand;
 import com.codeit.deokhugam.dto.result.ReadNotificationResult;
+import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.NotificationRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
+  private final MemberRepository memberRepository;
 
   //알림 생성 메서드
   @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -68,6 +72,23 @@ public class NotificationService {
         .createdAt(notification.getCreatedAt())
         .updatedAt(notification.getUpdatedAt())
         .build();
+
+  }
+
+
+  @Transactional
+  public void readAll(Long memberId) {
+    // todo 알림이 매우 많을 때도 풀스캔을 할 것인가??
+    // todo 업데이트 할때 bulkUpdate 로 최적화 가능
+
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+    List<Notification> notifications = notificationRepository.findByMemberId(memberId);
+    boolean confirmed = true;
+    notifications.forEach(notification -> {
+      notification.read(confirmed);
+    });
 
   }
 }

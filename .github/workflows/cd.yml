@@ -53,11 +53,16 @@ jobs:
           DB_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DB_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,ECR_REPOSITORY,DB_URL,DB_USERNAME,DB_PASSWORD,AWS_REGION
+          envs: ECR_REGISTRY,ECR_REPOSITORY,DB_URL,DB_USERNAME,DB_PASSWORD,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,S3_BUCKET_NAME,NAVER_CLIENT_ID,NAVER_CLIENT_SECRET
           script: |
             export AWS_DEFAULT_REGION=$AWS_REGION
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
@@ -69,5 +74,10 @@ jobs:
               -e DATABASE_URL="$DB_URL" \
               -e DATABASE_USERNAME="$DB_USERNAME" \
               -e DATABASE_PASSWORD="$DB_PASSWORD" \
+              -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
+              -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+              -e S3_BUCKET_NAME="$S3_BUCKET_NAME" \
+              -e NAVER_CLIENT_ID="$NAVER_CLIENT_ID" \
+              -e NAVER_CLIENT_SECRET="$NAVER_CLIENT_SECRET" \
               $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker image prune -af

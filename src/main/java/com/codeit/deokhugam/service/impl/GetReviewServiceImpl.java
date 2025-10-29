@@ -7,8 +7,11 @@ import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.PopularReview;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.domain.enums.Period;
+import com.codeit.deokhugam.domain.enums.ReviewOrderBy;
+import com.codeit.deokhugam.dto.command.GetReviewsCommand;
 import com.codeit.deokhugam.dto.result.GetPopularReviewsResult;
 import com.codeit.deokhugam.dto.result.GetReviewOneResult;
+import com.codeit.deokhugam.dto.result.GetReviewsResult;
 import com.codeit.deokhugam.dto.result.PaginatedResult;
 import com.codeit.deokhugam.dto.result.PopularReviewResult;
 import com.codeit.deokhugam.repository.BookRepository;
@@ -19,10 +22,9 @@ import com.codeit.deokhugam.repository.ReviewRepository;
 import com.codeit.deokhugam.service.GetPopularReviewsCommand;
 import com.codeit.deokhugam.service.GetReviewService;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -65,12 +67,8 @@ public class GetReviewServiceImpl implements GetReviewService {
         .likeCount(review.getLikeCount())
         .commentCount(review.getCommentCount())
         .likedByMe(likedByMe)
-        .createdAt(Optional.ofNullable(review.getCreatedAt())
-            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-            .orElse(null))
-        .updatedAt(Optional.ofNullable(review.getUpdatedAt())
-            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-            .orElse(null))
+        .createdAt(review.getCreatedAt())
+        .updatedAt(review.getUpdatedAt())
         .build();
   }
 
@@ -124,5 +122,59 @@ public class GetReviewServiceImpl implements GetReviewService {
         .totalElements(entitiesResult.getTotalElements())
         .hasNext(entitiesResult.getHasNext())
         .build();
+  }
+
+  @Override
+  public GetReviewsResult getReviews(GetReviewsCommand command) {
+    Long authorId = command.getAuthorId();
+    Long bookId = command.getBookId();
+    String keyword = command.getKeyword();
+    ReviewOrderBy orderBy = command.getOrderBy();
+    Direction direction = command.getDirection();
+    String cursor = command.getCursor();
+    Instant after = command.getAfter();
+    Integer limit = command.getLimit();
+    Long requestUserId = command.getRequestUserId();
+    Long loginUserId = command.getLoginUserId();
+
+    // 1. QueryDSL 결과
+    PaginatedResult<Review, String> entitiesResult = reviewRepository.searchWithCursor(
+        authorId,
+        bookId,
+        keyword,
+        direction,
+        orderBy,
+        cursor,
+        after,
+        limit,
+        requestUserId,
+        loginUserId);
+
+    // 2. like 정보 불러오기
+    Set<Long> loginUserLikedReviewIDs = reviewLikeRepository.findAllWithReviewByMemberId(
+        loginUserId).stream().map(
+        reviewLike -> reviewLike.getReview().getId()).collect(Collectors.toSet());
+
+    // 2. 응답 형식에 맞게 파싱
+    List<GetReviewOneResult> reviewDetailResults = entitiesResult.getContent().stream().map(
+        rv -> {
+          Book book = rv.getBook();
+          Member member = rv.getMember();
+          boolean likedByMe = loginUserLikedReviewIDs.contains(rv.getId());
+
+          return GetReviewOneResult.from(rv, book, member, likedByMe);
+        }
+    ).toList();
+
+    return GetReviewsResult.from(
+        reviewDetailResults,
+        entitiesResult.getNextCursor(),
+        entitiesResult.getNextAfter(),
+        entitiesResult.getSize(),
+        entitiesResult.getTotalElements(),
+        entitiesResult.getHasNext()
+    );
+
+
   }
 }

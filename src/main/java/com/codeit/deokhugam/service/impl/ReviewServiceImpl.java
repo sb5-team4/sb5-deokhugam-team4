@@ -17,9 +17,6 @@ import com.codeit.deokhugam.repository.ReviewLikeRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.transaction.Transactional;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -81,12 +78,8 @@ public class ReviewServiceImpl implements ReviewService {
         .likeCount(savedReview.getLikeCount())
         .commentCount(savedReview.getCommentCount())
         .likedByMe(isLikedByMe)
-        .createdAt(Optional.ofNullable(savedReview.getCreatedAt())
-            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-            .orElse(null))
-        .updatedAt(Optional.ofNullable(savedReview.getUpdatedAt())
-            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-            .orElse(null))
+        .createdAt(savedReview.getCreatedAt())
+        .updatedAt(savedReview.getUpdatedAt())
         .build();
   }
 
@@ -179,12 +172,8 @@ public class ReviewServiceImpl implements ReviewService {
         .likeCount(targetReview.getLikeCount())
         .commentCount(targetReview.getCommentCount())
         .likedByMe(isLikedByMe)
-        .createdAt(Optional.ofNullable(targetReview.getCreatedAt())
-            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-            .orElse(null))
-        .updatedAt(Optional.ofNullable(targetReview.getUpdatedAt())
-            .map(i -> OffsetDateTime.ofInstant(i, ZoneId.of("Asia/Seoul")))
-            .orElse(null))
+        .createdAt(targetReview.getCreatedAt())
+        .updatedAt(targetReview.getUpdatedAt())
         .build();
   }
 }

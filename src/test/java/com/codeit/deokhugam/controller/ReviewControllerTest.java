@@ -23,7 +23,7 @@ import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,8 +71,8 @@ public class ReviewControllerTest {
   Long likeCount;
   Long commentCount;
   boolean likedByMe;
-  OffsetDateTime createdAt;
-  OffsetDateTime updatedAt;
+  Instant createdAt;
+  Instant updatedAt;
 
   @BeforeEach
   void setUp() {
@@ -87,8 +87,8 @@ public class ReviewControllerTest {
     likeCount = 0L;
     commentCount = 0L;
     likedByMe = false;
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    createdAt = Instant.now();
+    updatedAt = Instant.now();
 
   }
 
@@ -164,9 +164,9 @@ public class ReviewControllerTest {
     String responseBody = requestResult.getResponse().getContentAsString();
 
 // JSON에서 createdAt, updatedAt 추출
-    OffsetDateTime actualCreatedAt = OffsetDateTime.parse(
+    Instant actualCreatedAt = Instant.parse(
         JsonPath.read(responseBody, "$.createdAt"));
-    OffsetDateTime actualUpdatedAt = OffsetDateTime.parse(
+    Instant actualUpdatedAt = Instant.parse(
         JsonPath.read(responseBody, "$.updatedAt"));
 
     assertEquals(createdAt.truncatedTo(ChronoUnit.MILLIS),

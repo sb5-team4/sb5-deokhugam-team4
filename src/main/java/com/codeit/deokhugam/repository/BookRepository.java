@@ -10,4 +10,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
   Optional<Book> findByIdAndDeletedIsFalse(Long id);
 
   Optional<Book> findByIsbn(String Isbn);
+
+  boolean existsByIsbn(String Isbn);
 }

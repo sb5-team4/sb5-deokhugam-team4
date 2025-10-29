@@ -19,10 +19,10 @@ public class RealS3Service implements S3Service {
 
   private final S3Client s3Client;
 
-  @Value("${AWS_S3_BUCKET}")
+  @Value("${aws.s3.bucket}")
   private String bucketName;
 
-  @Value("${AWS_S3_BASE_URL}")
+  @Value("${aws.s3.base-url}")
   private String baseUrl;
 
   @Override

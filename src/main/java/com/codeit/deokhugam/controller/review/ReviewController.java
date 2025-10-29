@@ -167,7 +167,7 @@ public class ReviewController {
   }
 
   @GetMapping
-  public ResponseEntity<CursorPageResponse<ReviewResponse, String>> getPopularReviews(
+  public ResponseEntity<CursorPageResponse<ReviewResponse, String>> getReviews(
       @RequestParam(name = "userId", required = false) Long authorId,
       @RequestParam(required = false) Long bookId,
       @RequestParam(required = false) String keyword,

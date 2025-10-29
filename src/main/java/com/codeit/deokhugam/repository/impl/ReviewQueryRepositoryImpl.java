@@ -46,7 +46,11 @@ public class ReviewQueryRepositoryImpl implements ReviewQueryRepository {
       where.and(rv.book.id.eq(bookId));
     }
     if (keyword != null) {
-      where.and(rv.member.nickname.contains(keyword));
+      where.and(
+          rv.member.nickname.contains(keyword)
+              .or(rv.content.contains(keyword))
+              .or(rv.book.title.contains(keyword))
+      );
     }
 
     // 2. 정렬 조건
@@ -95,6 +99,7 @@ public class ReviewQueryRepositoryImpl implements ReviewQueryRepository {
 
     List<Review> contents = queryFactory.selectFrom(rv)
         .where(where)
+        .where(rv.deleted.isFalse()) // review 가 삭제되지 않은 것만
         .distinct()
         .join(rv.member).fetchJoin()
         .join(rv.book).fetchJoin()

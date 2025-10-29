@@ -23,6 +23,8 @@ import com.codeit.deokhugam.service.GetPopularReviewsCommand;
 import com.codeit.deokhugam.service.GetReviewService;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -148,14 +150,19 @@ public class GetReviewServiceImpl implements GetReviewService {
         requestUserId,
         loginUserId);
 
+    // 2. like 정보 불러오기
+    Set<Long> loginUserLikedReviewIDs = reviewLikeRepository.findAllWithReviewByMemberId(
+        loginUserId).stream().map(
+        reviewLike -> reviewLike.getReview().getId()).collect(Collectors.toSet());
+
     // 2. 응답 형식에 맞게 파싱
     List<GetReviewOneResult> reviewDetailResults = entitiesResult.getContent().stream().map(
         rv -> {
           Book book = rv.getBook();
           Member member = rv.getMember();
-          boolean likedByMe = member.getId().equals(loginUserId);
+          boolean likedByMe = loginUserLikedReviewIDs.contains(rv.getId());
 
-          return GetReviewOneResult.from(rv, book, member, false);
+          return GetReviewOneResult.from(rv, book, member, likedByMe);
         }
     ).toList();
 

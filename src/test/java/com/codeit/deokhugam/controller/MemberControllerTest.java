@@ -20,6 +20,7 @@ import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
+import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
@@ -229,6 +230,7 @@ public class MemberControllerTest {
         "newNickname",
         null
     );
+    MemberUpdateRequest request = new MemberUpdateRequest("newNickname");
 
     // 서비스 & 매퍼 모킹
     given(memberService.update(memberId, newNickname)).willReturn(updateResult);
@@ -238,11 +240,12 @@ public class MemberControllerTest {
     // when & then
     mockMvc.perform(patch("/api/users/{memberId}", memberId)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(newNickname)) // 단일 문자열이므로 쌍따옴표 포함
-        .andExpect(status().isOk())
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk()) // 혹은 noContent() 확인
         .andExpect(jsonPath("$.id").value(memberId))
         .andExpect(jsonPath("$.email").value("test@test.com"))
         .andExpect(jsonPath("$.nickname").value(newNickname));
+
   }
 
   @Test

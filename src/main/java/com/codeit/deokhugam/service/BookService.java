@@ -69,13 +69,20 @@ public class BookService {
 
     bookMapper.updateBookFromCommand(command, book);
 
-    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
-      String uploadedUrl = s3Service.uploadFile(thumbnailImage);
-      book.setThumbnailUrl(uploadedUrl);
+    // S3 이미지 업데이트 로직 추가 (Early return으로)
+    if (thumbnailImage == null || thumbnailImage.isEmpty()) {
+      Book updatedBook = bookRepository.save(book);
+      return bookMapper.toBookUpdateResult(updatedBook);
     }
 
-    Book updatedBook = bookRepository.save(book);
+    if (book.getThumbnailUrl() != null && !book.getThumbnailUrl().isEmpty()) {
+      s3Service.deleteFile(book.getThumbnailUrl());
+    }
 
+    String uploadedUrl = s3Service.uploadFile(thumbnailImage);
+    book.setThumbnailUrl(uploadedUrl);
+
+    Book updatedBook = bookRepository.save(book);
     return bookMapper.toBookUpdateResult(updatedBook);
   }
 
@@ -94,6 +101,10 @@ public class BookService {
   public void hardDeleteBook(Long id) {
     Book book = bookRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND, id));
+
+    if (book.getThumbnailUrl() != null && !book.getThumbnailUrl().isEmpty()) {
+      s3Service.deleteFile(book.getThumbnailUrl());
+    }
 
     bookRepository.delete(book);
   }

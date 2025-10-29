@@ -10,10 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
-import com.codeit.deokhugam.dto.command.CommentCreateCommand;
-import com.codeit.deokhugam.dto.request.CommentCreateRequest;
-import com.codeit.deokhugam.dto.response.CommentResponse;
-import com.codeit.deokhugam.dto.result.CommentCreateResult;
+import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.request.comment.CommentCreateRequest;
+import com.codeit.deokhugam.dto.response.comment.CommentResponse;
+import com.codeit.deokhugam.dto.result.comment.CommentCreateResult;
 import com.codeit.deokhugam.mapper.CommentMapper;
 import com.codeit.deokhugam.service.CommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.dto.response;
+package com.codeit.deokhugam.dto.result;
 
 import java.time.Instant;
 import java.util.List;
@@ -9,26 +9,25 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 @Builder
-public class CursorPageResponse<T, S> {
+public class GetReviewsResult {
 
-  private final List<T> content;
-  private final S nextCursor;
+  private final List<GetReviewOneResult> reviews;
+  private final String nextCursor;
   private final Instant nextAfter;
   private final Integer size;
   private final Long totalElements;
   private final Boolean hasNext;
 
-  public static <T, S> CursorPageResponse<T, S> from(
-      List<T> content,
-      S nextCursor,
+  public static GetReviewsResult from(
+      List<GetReviewOneResult> reviews,
+      String nextCursor,
       Instant nextAfter,
       Integer size,
       Long totalElements,
-      Boolean hasNext
+      Boolean hasNext) {
 
-  ) {
-    return CursorPageResponse.<T, S>builder()
-        .content(content)
+    return GetReviewsResult.builder()
+        .reviews(reviews)
         .nextCursor(nextCursor)
         .nextAfter(nextAfter)
         .size(size)
@@ -36,5 +35,4 @@ public class CursorPageResponse<T, S> {
         .hasNext(hasNext)
         .build();
   }
-
 }

@@ -45,7 +45,8 @@ public class BookController {
    */
   @PostMapping
   public ResponseEntity<BookResponse> createBook(
-      @RequestPart("BookData") @Valid BookCreateRequest bookData,
+      @RequestPart(value = "bookData", required = true) BookCreateRequest bookData,
+      @RequestPart(value = "BookData", required = false) BookCreateRequest bookDataAlt,  // 대문자도 허용
       @RequestPart(value = "thumbnailImage", required = false) MultipartFile thumbnailImage
   ) {
     BookCreateCommand command = bookMapper.toBookCreateCommand(bookData);

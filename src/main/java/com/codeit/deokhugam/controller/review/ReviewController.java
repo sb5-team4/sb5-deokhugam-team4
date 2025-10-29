@@ -1,31 +1,47 @@
 package com.codeit.deokhugam.controller.review;
 
+import static com.codeit.deokhugam.domain.enums.ReviewOrderBy.createdAt;
+
+import com.codeit.deokhugam.domain.enums.Period;
+import com.codeit.deokhugam.domain.enums.ReviewOrderBy;
+import com.codeit.deokhugam.dto.command.GetReviewsCommand;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.request.PatchReviewRequest;
 import com.codeit.deokhugam.dto.request.review.CreateReviewRequest;
+import com.codeit.deokhugam.dto.response.CursorPageResponse;
 import com.codeit.deokhugam.dto.response.LikeReviewResponse;
+import com.codeit.deokhugam.dto.response.PopularReviewResponse;
 import com.codeit.deokhugam.dto.response.review.ReviewResponse;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
+import com.codeit.deokhugam.dto.result.GetPopularReviewsResult;
+import com.codeit.deokhugam.dto.result.GetReviewOneResult;
+import com.codeit.deokhugam.dto.result.GetReviewsResult;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
 import com.codeit.deokhugam.mapper.likeReview.LikeReviewMapper;
 import com.codeit.deokhugam.mapper.review.ReviewMapper;
+import com.codeit.deokhugam.service.GetPopularReviewsCommand;
+import com.codeit.deokhugam.service.GetReviewService;
 import com.codeit.deokhugam.service.LikeReviewCommand;
 import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -34,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReviewController {
 
   private final ReviewService reviewService;
+  private final GetReviewService getReviewService;
   private final ReviewMapper reviewMapper;
   private final LikeReviewService likeReviewService;
   private final LikeReviewMapper likeReviewMapper;
@@ -105,5 +122,87 @@ public class ReviewController {
 
     return ResponseEntity.ok(reviewMapper.toResponse(result));
   }
+
+  @GetMapping("/{reviewId}")
+  public ResponseEntity<ReviewResponse> getReview(
+      @PathVariable Long reviewId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long memberId
+  ) {
+    GetReviewOneResult result = getReviewService.getReviewOne(reviewId, memberId);
+
+    return ResponseEntity.ok(reviewMapper.toResponse(result));
+  }
+
+  @GetMapping("/popular")
+  public ResponseEntity<CursorPageResponse<PopularReviewResponse, Long>> getPopularReviews(
+      @RequestParam(defaultValue = "DAILY") Period period,
+      @RequestParam(defaultValue = "ASC") Direction direction,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(required = false) Instant after,
+      @RequestParam(defaultValue = "50") Integer limit
+
+  ) {
+
+    GetPopularReviewsResult result = getReviewService.getPopularReviews(GetPopularReviewsCommand
+        .builder()
+        .period(period)
+        .direction(direction)
+        .cursor(cursor)
+        .after(after)
+        .limit(limit)
+        .build());
+
+    CursorPageResponse<PopularReviewResponse, Long> response = CursorPageResponse
+        .<PopularReviewResponse, Long>builder()
+        .content(result.getPopularReviews()
+            .stream().map(reviewMapper::toResponse)
+            .toList())
+        .nextCursor(result.getNextCursor())
+        .nextAfter(result.getNextAfter())
+        .size((result.getSize()))
+        .totalElements(result.getTotalElements())
+        .hasNext(result.getHasNext())
+        .build();
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping
+  public ResponseEntity<CursorPageResponse<ReviewResponse, String>> getReviews(
+      @RequestParam(name = "userId", required = false) Long authorId,
+      @RequestParam(required = false) Long bookId,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(defaultValue = "createdAt") ReviewOrderBy orderBy,
+      @RequestParam(defaultValue = "DESC") Direction direction,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) Instant after,
+      @RequestParam(defaultValue = "50") Integer limit,
+      @RequestParam Long requestUserId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long loginUserId
+
+  ) {
+
+    if (cursor != null) {
+      cursor = orderBy == createdAt ?
+          cursor :
+          Short.toString(Short.parseShort(cursor));
+    }
+
+    GetReviewsResult result = getReviewService.getReviews(GetReviewsCommand.from(
+        authorId, bookId, keyword, orderBy, direction, cursor, after, limit, requestUserId,
+        loginUserId)
+    );
+
+    CursorPageResponse<ReviewResponse, String> body = CursorPageResponse.<ReviewResponse, String>from(
+        result.getReviews().stream().map(reviewMapper::toResponse).toList(),
+        result.getNextCursor(),
+        result.getNextAfter(),
+        result.getSize(),
+        result.getTotalElements(),
+        result.getHasNext()
+    );
+
+    return ResponseEntity.ok(body);
+  }
+
 
 }

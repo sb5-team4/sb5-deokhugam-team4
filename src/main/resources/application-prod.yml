@@ -5,18 +5,13 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    # for Local
-    #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    #    username: ${DB_USERNAME}
-    #    password: ${DB_PASSWORD}
-    # for RDS
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5555/deokhugam}
-    username: ${SPRING_DATASOURCE_USERNAME:deokhugam_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:deokhugam1234}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -25,3 +20,6 @@ spring:
 logging:
   level:
     root: info
+
+server:
+  port: 8081

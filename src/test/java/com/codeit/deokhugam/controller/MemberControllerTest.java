@@ -2,6 +2,10 @@ package com.codeit.deokhugam.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +20,7 @@ import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
+import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
@@ -225,6 +230,7 @@ public class MemberControllerTest {
         "newNickname",
         null
     );
+    MemberUpdateRequest request = new MemberUpdateRequest("newNickname");
 
     // 서비스 & 매퍼 모킹
     given(memberService.update(memberId, newNickname)).willReturn(updateResult);
@@ -234,11 +240,48 @@ public class MemberControllerTest {
     // when & then
     mockMvc.perform(patch("/api/users/{memberId}", memberId)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(newNickname)) // 단일 문자열이므로 쌍따옴표 포함
-        .andExpect(status().isOk())
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk()) // 혹은 noContent() 확인
         .andExpect(jsonPath("$.id").value(memberId))
         .andExpect(jsonPath("$.email").value("test@test.com"))
         .andExpect(jsonPath("$.nickname").value(newNickname));
+
+  }
+
+  @Test
+  @DisplayName("사용자 논리삭제")
+  void softDelete() throws Exception {
+    // given
+    Long memberId = 1L;
+    Long headerId = 1L;
+
+    // service는 void 메서드라 그냥 doNothing
+    doNothing().when(memberService).softDelete(memberId, headerId);
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{memberId}", memberId)
+            .header("Deokhugam-Request-User-ID", headerId))
+        .andExpect(status().isNoContent());
+
+    // service 호출 여부 확인
+    verify(memberService).softDelete(memberId, headerId);
+
+  }
+
+  @Test
+  @DisplayName("사용자 논리삭제 실패 - 멤버 없음")
+  void softDelete_memberNotFound() throws Exception {
+    Long memberId = 999L;
+    Long headerId = 1L;
+
+    doThrow(new CustomException(ErrorCode.USER_NOT_FOUND))
+        .when(memberService).softDelete(memberId, headerId);
+
+    mockMvc.perform(delete("/api/users/{memberId}", memberId)
+            .header("Deokhugam-Request-User-ID", headerId))
+        .andExpect(status().isNotFound());
+
+    verify(memberService).softDelete(memberId, headerId);
   }
 
 }

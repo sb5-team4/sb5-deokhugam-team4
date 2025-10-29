@@ -25,7 +25,7 @@ public class Book extends BaseUpdatableEntity {
   private String title;
   @Column(name = "author", nullable = false, length = 255)
   private String author;
-  @Column(name = "description", columnDefinition = "TEXT")
+  @Column(name = "description", nullable = false, columnDefinition = "TEXT", length = 1000)
   private String description;
   @Column(name = "publisher", nullable = false, length = 255)
   private String publisher;

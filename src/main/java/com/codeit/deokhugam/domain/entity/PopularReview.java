@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,13 +18,13 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 public class PopularReview extends BaseEntity {
 
   @Column(name = "rank", nullable = false)
-  private Short rank;
+  private Long rank;
   @Column(name = "score", nullable = false)
-  private Short score;
+  private BigDecimal score;
   @Column(name = "period", nullable = false)
   private String period; // enum 필드
 

@@ -1,6 +1,5 @@
 package com.codeit.deokhugam.config;
 
-
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,5 +22,4 @@ public class QuerydslConfig {
     // 이것을 CommentRepositoryCustomImpl에서 사용한다.
     return new JPAQueryFactory(entityManager);
   }
-
 }

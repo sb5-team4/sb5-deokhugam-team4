@@ -3,8 +3,12 @@ package com.codeit.deokhugam.service;
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.command.BookCreateCommand;
+import com.codeit.deokhugam.dto.command.BookInfoByIsbnCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
+import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
@@ -20,6 +24,27 @@ public class BookService {
   private final BookRepository bookRepository;
   private final BookMapper bookMapper;
   private final S3Service s3Service;
+  private final NaverApiService naverApiService;
+
+  @Transactional
+  public BookCreateResult createBook(BookCreateCommand command, MultipartFile thumbnailImage) {
+    if (command.getIsbn() != null && !command.getIsbn().isBlank()) {
+      bookRepository.findByIsbn(command.getIsbn())
+          .ifPresent(book -> {
+            throw new CustomException(ErrorCode.DUPLICATE_ISBN);
+          });
+    }
+    Book book = bookMapper.toEntity(command);
+
+    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
+      String url = s3Service.uploadFile(thumbnailImage);
+      book.setThumbnailUrl(url);
+    }
+
+    Book savedBook = bookRepository.save(book);
+
+    return bookMapper.toBookCreateResult(savedBook);
+  }
 
   public BookResponse getBook(Long id) {
     Book book = bookRepository.findById(id)
@@ -44,13 +69,20 @@ public class BookService {
 
     bookMapper.updateBookFromCommand(command, book);
 
-    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
-      String uploadedUrl = s3Service.uploadFile(thumbnailImage);
-      book.setThumbnailUrl(uploadedUrl);
+    // S3 이미지 업데이트 로직 추가 (Early return으로)
+    if (thumbnailImage == null || thumbnailImage.isEmpty()) {
+      Book updatedBook = bookRepository.save(book);
+      return bookMapper.toBookUpdateResult(updatedBook);
     }
 
-    Book updatedBook = bookRepository.save(book);
+    if (book.getThumbnailUrl() != null && !book.getThumbnailUrl().isEmpty()) {
+      s3Service.deleteFile(book.getThumbnailUrl());
+    }
 
+    String uploadedUrl = s3Service.uploadFile(thumbnailImage);
+    book.setThumbnailUrl(uploadedUrl);
+
+    Book updatedBook = bookRepository.save(book);
     return bookMapper.toBookUpdateResult(updatedBook);
   }
 
@@ -70,6 +102,21 @@ public class BookService {
     Book book = bookRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND, id));
 
+    if (book.getThumbnailUrl() != null && !book.getThumbnailUrl().isEmpty()) {
+      s3Service.deleteFile(book.getThumbnailUrl());
+    }
+
     bookRepository.delete(book);
   }
+
+  public BookInfoByIsbnResult getBookInfoByIsbn(BookInfoByIsbnCommand command) {
+    String isbn = command.getIsbn();
+
+    if (isbn == null || !isbn.matches("\\d{13}")) {
+      throw new CustomException(ErrorCode.ISBN_NOT_COLLECT);
+    }
+
+    return naverApiService.getBookByIsbn(isbn);
+  }
+
 }

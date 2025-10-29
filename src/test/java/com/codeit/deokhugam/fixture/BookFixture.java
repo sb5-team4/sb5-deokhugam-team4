@@ -1,7 +1,9 @@
 package com.codeit.deokhugam.fixture;
 
 import com.codeit.deokhugam.domain.entity.Book;
+import com.codeit.deokhugam.dto.result.BookCreateResult;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 
 public class BookFixture {
@@ -101,5 +103,66 @@ public class BookFixture {
     Book book = createDeletedBook();
     org.springframework.test.util.ReflectionTestUtils.setField(book, "id", id);
     return book;
+  }
+
+  // ID를 지정할 수 있고 모든 필드를 가지는 테스트 도서
+  public static Book createBookWithAllFieldsAndId(Long id) {
+    Book book = createBookWithAllFields();
+    org.springframework.test.util.ReflectionTestUtils.setField(book, "id", id);
+    return book;
+  }
+
+
+  // 모든 필드를 가지는 result
+  public static BookCreateResult createBookCreateResult(Long id) {
+    return BookCreateResult.builder()
+        .id(id)
+        .title("테스트 도서")
+        .author("테스트 저자")
+        .description("테스트 설명")
+        .publisher("테스트 출판사")
+        .publishedDate(LocalDate.of(1990, 12, 30))
+        .isbn("1234567890123")
+        .thumbnailUrl("testThumbnailUrl.png")
+        .reviewCount(0)
+        .rating(BigDecimal.ZERO)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .build();
+  }
+
+
+  // 필수 필드만 가지는 result
+  public static BookCreateResult createBookCreateResultWithRequiredFields(Long id) {
+    return BookCreateResult.builder()
+        .id(id)
+        .title("테스트 도서")
+        .author("테스트 저자")
+        .publisher("테스트 출판사")
+        .publishedDate(LocalDate.of(2020, 1, 1))
+        .reviewCount(0)
+        .rating(BigDecimal.ZERO)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .build();
+  }
+
+
+  // thumbnailUrl을 가지는 result
+  public static BookCreateResult createBookCreateResultWithThumbnail(Long id, String thumbnailUrl) {
+    return BookCreateResult.builder()
+        .id(id)
+        .title("테스트 도서")
+        .author("테스트 저자")
+        .description("테스트 설명")
+        .publisher("테스트 출판사")
+        .publishedDate(LocalDate.of(1990, 12, 30))
+        .isbn("1234567890123")
+        .thumbnailUrl(thumbnailUrl)
+        .reviewCount(0)
+        .rating(BigDecimal.ZERO)
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .build();
   }
 }

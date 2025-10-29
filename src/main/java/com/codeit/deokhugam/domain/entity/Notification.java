@@ -10,12 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Getter
+@Setter
 @Entity
 public class Notification extends BaseUpdatableEntity {
 
@@ -33,4 +35,8 @@ public class Notification extends BaseUpdatableEntity {
   @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "review_id", nullable = false)
   private Review review;
+
+  public void read(boolean confirmed) {
+    this.confirmed = confirmed;
+  }
 }

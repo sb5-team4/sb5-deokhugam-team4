@@ -1,12 +1,14 @@
 spring:
-  config:
+  main:
+    allow-bean-definition-overriding: true
+
     activate:
       on-profile: test
   sql:
     init:
       mode: always  # 테스트일 때도 항상 실행
       schema-locations: classpath:schema.sql
-  #      data-locations: classpath:data.sql
+  #      data-locations: classpath:popular_review_dummy.sql
 
   jpa:
     show-sql: true

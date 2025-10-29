@@ -1,32 +1,40 @@
 package com.codeit.deokhugam.controller;
 
+import com.codeit.deokhugam.domain.enums.Period;
 import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
+import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
 import com.codeit.deokhugam.dto.response.member.MemberUpdateResponse;
+import com.codeit.deokhugam.dto.response.member.PowerMemberFindResponse;
 import com.codeit.deokhugam.dto.result.member.MemberCreatedResult;
 import com.codeit.deokhugam.dto.result.member.MemberFindResult;
 import com.codeit.deokhugam.dto.result.member.MemberLoginResult;
 import com.codeit.deokhugam.dto.result.member.MemberUpdateResult;
+import com.codeit.deokhugam.dto.result.member.PowerMemberFindResult;
 import com.codeit.deokhugam.mapper.MemberMapper;
 import com.codeit.deokhugam.service.impl.MemberService;
+import com.querydsl.core.types.Order;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -70,7 +78,8 @@ public class MemberController {
   @PatchMapping(path = "/{memberId}")
   public ResponseEntity<MemberUpdateResponse> update(
       @PathVariable("memberId") Long memberId,
-      @NotBlank(message = "닉네임을 입력해주세요") @Size(min = 2, max = 50) @RequestBody String nickname) {
+      @RequestBody @Valid MemberUpdateRequest request) {
+    String nickname = request.nickname();
     MemberUpdateResult result = memberService.update(memberId,
         nickname);
     return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberUpdateResponse(result));
@@ -85,5 +94,40 @@ public class MemberController {
     return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberFindResponse(result));
   }
 
+  //멤버 논리삭제
+  // 사용자 id값을 경로로 받고, 204 no content 상태코드 반환
+  @DeleteMapping(path = "/{memberId}")
+  public ResponseEntity<Void> softDeleteMember(@PathVariable Long memberId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long headerId
+  ) {
+    memberService.softDelete(memberId, headerId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  //파워유저 목록조회
+  // 커서기반 페이지응답
+  @GetMapping(path = "/power")
+  public ResponseEntity<PowerMemberFindResponse> findPowerMember(
+      @RequestParam(defaultValue = "DAILY") Period period,
+      @RequestParam(defaultValue = "ASC") Order direction,
+      @RequestParam(required = false) @Min(0) Long cursor,  //만약값이있다면 양수 / null허용이라 Long타입
+      @RequestParam(required = false) Instant after,
+      @RequestParam(defaultValue = "50") int limit
+  ) {
+    PowerMemberFindResult result = memberService.findPowerMember(
+        memberMapper.toPowerMemberFindCommand(period, direction, cursor, after, limit));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(memberMapper.toPowerMemberFindResponse(result));
+
+
+  }
+
+  @DeleteMapping(path = "/{memberId}/hard")
+  public ResponseEntity<Void> softDeleteMemberHard(
+      @PathVariable Long memberId
+  ) {
+    memberService.hardDelete(memberId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
 
 }

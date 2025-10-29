@@ -1,11 +1,17 @@
 package com.codeit.deokhugam.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.service.BookService;
@@ -85,6 +91,64 @@ class BookControllerTest {
 
     // when & then
     mockMvc.perform(get("/api/books/{bookId}", nonExistentBookId))
+        .andDo(print())
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("도서 논리 삭제 - 성공")
+  void softDeleteBook_Success() throws Exception {
+    // Given
+    Long bookId = 1L;
+
+    // When & Then
+    mockMvc.perform(delete("/api/books/{bookId}", bookId))
+        .andDo(print())
+        .andExpect(status().isNoContent()); // 204 No Content 리턴
+
+    verify(bookService).softDeleteBook(bookId);
+  }
+
+  @Test
+  @DisplayName("도서 논리 삭제 - 존재하지 않는 ID로 실패")
+  void softDeleteBook_NotFound() throws Exception {
+    // Given
+    Long bookId = 99999L;
+
+    willThrow(new CustomException(ErrorCode.BOOK_NOT_FOUND, bookId))
+        .given(bookService).softDeleteBook(bookId);
+
+    // When & Then
+    mockMvc.perform(delete("/api/books/{bookId}", bookId))
+        .andDo(print())
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("도서 물리 삭제 - 성공")
+  void hardDeleteBook_Success() throws Exception {
+    // Given
+    Long bookId = 1L;
+
+    // When & Then
+    mockMvc.perform(delete("/api/books/{bookId}/hard", bookId))
+        .andDo(print())
+        .andExpect(status().isNoContent());
+
+    verify(bookService).hardDeleteBook(bookId);
+  }
+
+  @Test
+  @DisplayName("도서 물리 삭제 - 존재하지 않는 ID로 실패")
+  void hardDeleteBook_NotFound() throws Exception {
+    // Given
+    Long bookId = 99999L;
+
+    doThrow(new CustomException(ErrorCode.BOOK_NOT_FOUND, bookId))
+        .when(bookService).hardDeleteBook(bookId);
+
+    // When & Then
+    mockMvc.perform(delete("/api/books/{bookId}/hard", bookId))
         .andDo(print())
         .andExpect(status().isNotFound());
   }

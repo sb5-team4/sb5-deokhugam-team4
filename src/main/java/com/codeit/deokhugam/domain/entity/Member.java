@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Setter
 @ToString
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 
 public class Member extends BaseUpdatableEntity {
 
@@ -36,4 +36,9 @@ public class Member extends BaseUpdatableEntity {
   public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
+
+  public void isSoftDeleted() {
+    this.deleted = !deleted;
+  }
+
 }

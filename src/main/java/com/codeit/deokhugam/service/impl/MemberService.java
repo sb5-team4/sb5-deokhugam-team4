@@ -111,5 +111,14 @@ public class MemberService {
     return result;
   }
 
+  @Transactional
+  public void hardDelete(Long id) {
+    if (!memberRepository.existsById(id)) {
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    memberRepository.deleteById(id);
+  }
+
 
 }

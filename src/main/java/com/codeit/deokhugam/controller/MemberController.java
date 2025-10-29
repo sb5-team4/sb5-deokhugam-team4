@@ -5,6 +5,7 @@ import com.codeit.deokhugam.dto.command.member.MemberCreateCommand;
 import com.codeit.deokhugam.dto.command.member.MemberLoginCommand;
 import com.codeit.deokhugam.dto.request.member.MemberCreateRequest;
 import com.codeit.deokhugam.dto.request.member.MemberLoginRequest;
+import com.codeit.deokhugam.dto.request.member.MemberUpdateRequest;
 import com.codeit.deokhugam.dto.response.member.MemberCreatedResponse;
 import com.codeit.deokhugam.dto.response.member.MemberFindResponse;
 import com.codeit.deokhugam.dto.response.member.MemberLoginResponse;
@@ -20,8 +21,6 @@ import com.codeit.deokhugam.service.impl.MemberService;
 import com.querydsl.core.types.Order;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +78,8 @@ public class MemberController {
   @PatchMapping(path = "/{memberId}")
   public ResponseEntity<MemberUpdateResponse> update(
       @PathVariable("memberId") Long memberId,
-      @NotBlank(message = "닉네임을 입력해주세요") @Size(min = 2, max = 50) @RequestBody String nickname) {
+      @RequestBody @Valid MemberUpdateRequest request) {
+    String nickname = request.nickname();
     MemberUpdateResult result = memberService.update(memberId,
         nickname);
     return ResponseEntity.status(HttpStatus.OK).body(memberMapper.toMemberUpdateResponse(result));

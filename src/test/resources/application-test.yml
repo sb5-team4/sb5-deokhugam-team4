@@ -3,6 +3,7 @@ spring:
     allow-bean-definition-overriding: true
 
   config:
+    import: optional:file:.env[.properties]
     activate:
       on-profile: test
   sql:

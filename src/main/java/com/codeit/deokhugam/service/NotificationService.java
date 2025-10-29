@@ -11,7 +11,9 @@ import com.codeit.deokhugam.domain.entity.Notification;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.GetNotificationCommand;
 import com.codeit.deokhugam.dto.command.ReadNotificationCommand;
+import com.codeit.deokhugam.dto.result.GetNotificationOneResult;
 import com.codeit.deokhugam.dto.result.GetNotificationResult;
+import com.codeit.deokhugam.dto.result.PaginatedResult;
 import com.codeit.deokhugam.dto.result.ReadNotificationResult;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.NotificationRepository;
@@ -97,14 +99,21 @@ public class NotificationService {
   }
 
   public GetNotificationResult getAll(GetNotificationCommand command) {
-    Long authorId = command.getAuthorId();
+    Long userId = command.getUserId();
     Direction direction = command.getDirection();
     Instant cursor = command.getCursor();
     Instant after = command.getAfter();
     Integer limit = command.getLimit();
 
-//    PaginatedResult<Notification, > entitiesResult =
+    PaginatedResult<Notification, Instant> entitiesResult = notificationRepository.searchWithCursor(
+        userId, direction, cursor, after, limit
+    );
 
-    return null;
+    List<GetNotificationOneResult> notificationDetailResult = entitiesResult.getContent()
+        .stream().map(notification
+            -> GetNotificationOneResult.from(userId, notification.getReview(), notification))
+        .toList();
+
+    return GetNotificationResult.from(entitiesResult, notificationDetailResult);
   }
 }

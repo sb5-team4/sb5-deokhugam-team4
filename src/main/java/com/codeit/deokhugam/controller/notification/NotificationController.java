@@ -55,16 +55,17 @@ public class NotificationController {
 
   @GetMapping
   public ResponseEntity<CursorPageResponse<NotificationResponse, Instant>> readAll(
-      @RequestParam(name = "userId", required = false) Long authorId,
+      @RequestParam(name = "userId") Long userId,
       @RequestParam(defaultValue = "DESC") Direction direction,
       @RequestParam(required = false) Instant cursor,
       @RequestParam(required = false) Instant after,
-      @RequestParam(defaultValue = "50") Integer limit
+      @RequestParam(defaultValue = "20") Integer limit
   ) {
     // todo 좋아요를 계속 눌렀다가 취소하면 알람이 계속 생성됨
+    // todo 인기 순위 Top 10 은 알림이 등록되어야함
 
     GetNotificationResult result = notificationService.getAll(GetNotificationCommand.from(
-        authorId,
+        userId,
         direction,
         cursor,
         after,
@@ -72,7 +73,7 @@ public class NotificationController {
     ));
 
     CursorPageResponse<NotificationResponse, Instant> cursorPageResponse = CursorPageResponse.<NotificationResponse, Instant>from(
-        result.getReviews().stream().map(notificationMapper::toResponse).toList(),
+        result.getNotifications().stream().map(notificationMapper::toResponse).toList(),
         result.getNextCursor(),
         result.getNextAfter(),
         result.getSize(),

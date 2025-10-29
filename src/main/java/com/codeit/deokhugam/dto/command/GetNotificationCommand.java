@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 @Builder
 public class GetNotificationCommand {
 
-  private final Long authorId;
+  private final Long userId;
   private final Direction direction;
   private final Instant cursor;
   private final Instant after;
@@ -27,7 +27,7 @@ public class GetNotificationCommand {
   ) {
 
     return GetNotificationCommand.builder()
-        .authorId(authorId)
+        .userId(authorId)
         .direction(direction)
         .cursor(cursor)
         .after(after)

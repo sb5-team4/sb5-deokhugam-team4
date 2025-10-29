@@ -1,6 +1,6 @@
 package com.codeit.deokhugam.dto.result;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +21,6 @@ public class PatchReviewResult {
   private final Long likeCount;
   private final Long commentCount;
   private final boolean likedByMe;
-  private final OffsetDateTime createdAt;
-  private final OffsetDateTime updatedAt;
+  private final Instant createdAt;
+  private final Instant updatedAt;
 }

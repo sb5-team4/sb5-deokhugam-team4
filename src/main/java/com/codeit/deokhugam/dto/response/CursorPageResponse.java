@@ -18,4 +18,23 @@ public class CursorPageResponse<T, S> {
   private final Long totalElements;
   private final Boolean hasNext;
 
+  public static <T, S> CursorPageResponse<T, S> from(
+      List<T> content,
+      S nextCursor,
+      Instant nextAfter,
+      Integer size,
+      Long totalElements,
+      Boolean hasNext
+
+  ) {
+    return CursorPageResponse.<T, S>builder()
+        .content(content)
+        .nextCursor(nextCursor)
+        .nextAfter(nextAfter)
+        .size(size)
+        .totalElements(totalElements)
+        .hasNext(hasNext)
+        .build();
+  }
+
 }

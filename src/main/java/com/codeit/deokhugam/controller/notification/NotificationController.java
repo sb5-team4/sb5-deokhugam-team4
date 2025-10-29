@@ -24,7 +24,7 @@ public class NotificationController {
   private final NotificationMapper notificationMapper;
 
   @PatchMapping("/{id}")
-  public ResponseEntity<NotificationResponse> read(
+  public ResponseEntity<NotificationResponse> update(
       @PathVariable Long id,
       @RequestHeader("Deokhugam-Request-User-ID") Long memberId,
       @RequestBody NotificationRequest request

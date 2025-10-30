@@ -2,17 +2,23 @@ package com.codeit.deokhugam.mapper;
 
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.dto.command.BookCreateCommand;
+import com.codeit.deokhugam.dto.command.BookListCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.request.BookCreateRequest;
+import com.codeit.deokhugam.dto.request.BookListRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
+import com.codeit.deokhugam.dto.response.BookListResponse;
+import com.codeit.deokhugam.dto.response.BookListResponse.BookItem;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.response.NaverBookResponse;
 import com.codeit.deokhugam.dto.response.NaverBookSearchResponse;
 import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
+import com.codeit.deokhugam.dto.result.BookListResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -43,6 +49,8 @@ public interface BookMapper {
 
   BookCreateCommand toBookCreateCommand(BookCreateRequest request);
 
+  BookListCommand toBookListCommand(BookListRequest request);
+
   BookResponse toBookResponse(BookUpdateResult result);
 
   BookResponse toBookResponse(Book book);
@@ -50,6 +58,11 @@ public interface BookMapper {
   BookResponse toBookResponse(BookCreateResult result);
 
   NaverBookResponse toNaverBookResponse(BookInfoByIsbnResult result);
+
+  @Mapping(target = "content", source = "content")
+  BookListResponse toBookListResponse(BookListResult result);
+
+  BookListResponse.BookItem toBookItem(BookListResult.BookResult bookResult);
 
   BookCreateResult toBookCreateResult(Book book);
 
@@ -61,6 +74,10 @@ public interface BookMapper {
   @Mapping(target = "isbn", source = "isbn", qualifiedByName = "extractIsbn13")
   @Mapping(target = "thumbnailImage", source = "image")
   BookInfoByIsbnResult toBookInfoByIsbnResult(NaverBookSearchResponse.Item item);
+
+  BookListResult.BookResult toBookResult(Book book);
+
+  List<BookItem> toBookItemList(List<BookListResult.BookResult> bookResults);
 
   // Naver API가 반환하는 검색어의 HTML 태그 제거
   @Named("removeHtmlTags")

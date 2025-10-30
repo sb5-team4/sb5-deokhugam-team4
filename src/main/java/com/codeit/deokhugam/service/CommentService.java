@@ -123,4 +123,16 @@ public class CommentService {
     );
   }
 
+  // 댓글 상세 조회
+  @Transactional(readOnly = true)
+  public CommentResponse findCommentById(Long commentId) {
+
+    // commendID로 댓글 조회 (없으면 404 예외)
+    Comment comment = commentRepository.findById(commentId)
+        .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+    //Entity -> Response 변환
+    return commentMapper.toCommentListResponse(comment);
+  }
+
 }

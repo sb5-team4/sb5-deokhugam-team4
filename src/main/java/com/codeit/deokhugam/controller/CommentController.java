@@ -1,11 +1,14 @@
 package com.codeit.deokhugam.controller;
 
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
 import com.codeit.deokhugam.dto.request.comment.CommentCreateRequest;
+import com.codeit.deokhugam.dto.request.comment.CommentUpdateRequest;
 import com.codeit.deokhugam.dto.response.comment.CommentResponse;
 import com.codeit.deokhugam.dto.response.comment.CursorPageCommentResponse;
 import com.codeit.deokhugam.dto.result.comment.CommentCreateResult;
+import com.codeit.deokhugam.dto.result.comment.CommentUpdateResult;
 import com.codeit.deokhugam.dto.result.comment.CursorPageCommentResult;
 import com.codeit.deokhugam.mapper.CommentMapper;
 import com.codeit.deokhugam.service.CommentService;
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -96,5 +100,24 @@ public class CommentController {
     return ResponseEntity.ok(response);
   }
 
+  // 댓글 수정
+  @PatchMapping("/{commentId}")
+  public ResponseEntity<CommentResponse> updateComment(
+      @PathVariable Long commentId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long requestMemberId,
+      @Valid @RequestBody CommentUpdateRequest request
+  ) {
+    // mapper를 통해 request -> command로 변환
+    CommentUpdateCommand command = commentMapper.toCommentUpdateCommand(request, commentId,  requestMemberId);
+
+    // command를 대입하여 service update 로직 호출(service update 로직에서 수정,404,403 수행후 매퍼를 통해 result로 반환)
+    CommentUpdateResult result = commentService.updateComment(command);
+
+    // mapper를 통해 result -> response로 변환
+    CommentResponse response = commentMapper.toCommentUpdateResponse(result);
+
+    // 200 응답 반환
+    return ResponseEntity.ok(response);
+  }
 
 }

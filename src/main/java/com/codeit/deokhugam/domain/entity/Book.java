@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,10 +36,16 @@ public class Book extends BaseUpdatableEntity {
   private String isbn;
   @Column(name = "thumbnail_url", length = 500)
   private String thumbnailUrl;
+
+  @Builder.Default
   @Column(name = "review_count", nullable = false)
   private int reviewCount = 0;
+
+  @Builder.Default
   @Column(name = "rating", nullable = false, precision = 3, scale = 2)
   private BigDecimal rating = BigDecimal.ZERO;
+
+  @Builder.Default
   @Column(name = "deleted", nullable = false)
   private boolean deleted = false;
 

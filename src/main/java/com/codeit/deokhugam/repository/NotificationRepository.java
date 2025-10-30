@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
+public interface NotificationRepository
+    extends JpaRepository<Notification, Long>, NotificationQueryRepository {
 
   Optional<Notification> findByIdAndDeletedIsFalse(Long id);
 

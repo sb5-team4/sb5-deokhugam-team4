@@ -8,6 +8,9 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
+  #    url: jdbc:postgresql://localhost:5555/deokhugam
+  #    username: deokhugam_user
+  #    password: deokhugam1234
 
   jpa:
     hibernate:

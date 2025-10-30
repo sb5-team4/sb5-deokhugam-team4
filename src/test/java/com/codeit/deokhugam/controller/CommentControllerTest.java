@@ -10,9 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.codeit.deokhugam.common.exception.AuthorizationException;
 import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
-import com.codeit.deokhugam.dto.request.CommentCreateRequest;
-import com.codeit.deokhugam.dto.response.CommentResponse;
-import com.codeit.deokhugam.dto.result.CommentCreateResult;
+import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.request.comment.CommentCreateRequest;
+import com.codeit.deokhugam.dto.response.comment.CommentResponse;
+import com.codeit.deokhugam.dto.result.comment.CommentCreateResult;
 import com.codeit.deokhugam.mapper.CommentMapper;
 import com.codeit.deokhugam.service.CommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +66,7 @@ public class CommentControllerTest {
     when(commentMapper.toCommentCreateCommand(any(), any())).thenReturn(null);
 
     // Service에서 Command를 받아서 코멘트 생성후 Result 반환 가정
-    when(commentService.createComment(any())).thenReturn(commentCreateResult);
+    when(commentService.createComment(any(), any())).thenReturn(commentCreateResult);
 
     // Mapper를 통해 Result -> Response 변환 가정
     when(commentMapper.toCommentResponse(any())).thenReturn(commentResponse);
@@ -101,17 +102,24 @@ public class CommentControllerTest {
   @Test
   @DisplayName("댓글 생성 실패 - 권한 없음 (403 Forbidden)")
   void createCommentForbidden() throws Exception {
-    // 헤더 ID(1L)와 바디 ID(2L)가 다름
-    CommentCreateRequest commentCreateRequest = new CommentCreateRequest(11L, 2L, "테스트 댓글");
+    CommentCreateRequest req = new CommentCreateRequest(11L, 2L, "테스트 댓글");
 
+    when(commentMapper.toCommentCreateCommand(any(), any()))
+        .thenReturn(new CommentCreateCommand(11L, 2L, "테스트 댓글"));
+
+    // createComment(command, requestMemberId=1L) 호출 시 403 예외 던지기
+    // 컨트롤러는 그냥 서비스로 넘기므로, 서비스 목이 예외를 던지도록 스텁
+    when(commentService.createComment(any(), org.mockito.ArgumentMatchers.eq(1L)))
+        .thenThrow(new AuthorizationException("댓글 작성 권한이 없습니다."));
+
+    // 헤더는 1L(요청자), 바디는 2L(작성자)
     mockMvc.perform(post("/api/comments")
-            .header("Deokhugam-Request-User-ID", 1L) // 헤더 ID(1L)
+            .header("Deokhugam-Request-User-ID", 1L)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(commentCreateRequest)))
-
-        .andExpect(status().isForbidden()) // 바디 ID(2L)
+            .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isForbidden())
         .andExpect(result -> assertThat(result.getResolvedException())
-            .isInstanceOf(AuthorizationException.class)); // 발생한 예외가 맞는지 검증
+            .isInstanceOf(AuthorizationException.class));
   }
 
   @Test
@@ -120,7 +128,7 @@ public class CommentControllerTest {
     // Service가 404 예외를 던짐
     CommentCreateRequest request = new CommentCreateRequest(100L, 2L, "테스트 댓글");
 
-    when(commentService.createComment(any()))
+    when(commentService.createComment(any(), any()))
         .thenThrow(new ResourceNotFoundException("Review", 100L));
 
     mockMvc.perform(post("/api/comments")
@@ -137,7 +145,7 @@ public class CommentControllerTest {
     // Service가 404 예외를 던짐
     CommentCreateRequest request = new CommentCreateRequest(100L, 5L, "테스트 댓글");
 
-    when(commentService.createComment(any()))
+    when(commentService.createComment(any(), any()))
         .thenThrow(new ResourceNotFoundException("Member", 5L));
 
     mockMvc.perform(post("/api/comments")

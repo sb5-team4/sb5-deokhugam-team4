@@ -27,7 +27,7 @@ public class PopularReviewJobScheduler {
   // 1분마다 실행 (cron: "0 */1 * * * *")
   // @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
   // 매일 자정 0시 실행
-  @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
   public void runPopularReviewJob() {
     try {
       JobParameters jobParameters = new JobParametersBuilder()

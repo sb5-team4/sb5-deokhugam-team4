@@ -16,7 +16,6 @@ import com.codeit.deokhugam.dto.result.comment.CursorPageCommentResult;
 import java.time.Instant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
@@ -73,12 +72,10 @@ public interface CommentMapper {
   // service: entity -> CommentUpdateResult로 매핑
   @Mapping(source = "comment.review.id", target = "reviewId")
   @Mapping(source = "comment.member.id", target = "memberId")
+  @Mapping(source = "comment.member.nickname", target = "nickname")
   CommentUpdateResult toCommentUpdateResult(Comment comment);
 
   // controller: CommentUpdateResult -> CommentUpdateResponse로 매핑
   CommentResponse toCommentUpdateResponse(CommentUpdateResult result);
-
-  // service: CommentUpdateCommand -> 기존 entity로 update
-  void updateCommentFromCommand(CommentUpdateCommand command, @MappingTarget Comment comment);
 
 }

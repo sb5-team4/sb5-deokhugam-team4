@@ -90,10 +90,10 @@ FROM generate_series(1, 10) AS i;
 -- 7) NOTIFICATION 20개
 -----------------------------------------------------
 INSERT INTO notification (member_id, review_id, content, confirmed, created_at, deleted)
-SELECT ((i - 1) % 10) + 1, -- member 1~10 반복
-       ((i - 1) % 10) + 1, -- review 1~20 반복
+SELECT ((i - 1) % 1) + 101,                       -- member 1~10 반복
+       ((i - 1) % 20) + 1,                        -- review 1~20 반복
        'Notification content ' || i,
        FALSE,
-       NOW() - (i || ' minutes')::INTERVAL,
+       NOW() - ((i * 2) || ' minutes')::INTERVAL, -- 2분씩 차이 나게 설정
        FALSE
-FROM generate_series(1, 20) AS i;
+FROM generate_series(1, 100) AS i;

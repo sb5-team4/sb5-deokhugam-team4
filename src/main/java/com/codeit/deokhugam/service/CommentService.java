@@ -72,6 +72,13 @@ public class CommentService {
   public CursorPageCommentResult findCommentsByReviewId(CursorPageCommentCommand command) {
 
     int limit = command.commentLimit();
+    Long reviewId = command.reviewId(); // reviewId 가져오기
+
+
+    if (!reviewRepository.existsById(reviewId)) {
+      // 존재하지 않는 리뷰 ID로 조회 시 404 예외 발생
+      throw new ResourceNotFoundException("Review", reviewId);
+    }
 
     //Repository에서 limit+1개 조회
     List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(

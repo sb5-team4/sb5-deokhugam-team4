@@ -5,13 +5,18 @@ import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookInfoByIsbnCommand;
+import com.codeit.deokhugam.dto.command.BookListCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
+import com.codeit.deokhugam.dto.result.BookListResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
+import com.codeit.deokhugam.repository.impl.BookQueryRepositoryImpl;
+import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +30,7 @@ public class BookService {
   private final BookMapper bookMapper;
   private final S3Service s3Service;
   private final NaverApiService naverApiService;
+  private final BookQueryRepositoryImpl bookQueryRepository;
 
   @Transactional
   public BookCreateResult createBook(BookCreateCommand command, MultipartFile thumbnailImage) {
@@ -119,4 +125,53 @@ public class BookService {
     return naverApiService.getBookByIsbn(isbn);
   }
 
+  @Transactional(readOnly = true)
+  public BookListResult getBookList(BookListCommand command) {
+    String cursor = command.getCursor();
+    Instant after = command.getAfter();
+
+    List<Book> books = bookQueryRepository.findBooksWithCursor(
+        command.getKeyword(),
+        command.getOrderBy(),
+        command.getDirection(),
+        cursor,
+        after,
+        command.getLimit()
+    );
+
+    boolean hasNext = books.size() > command.getLimit();
+
+    List<Book> content = hasNext ? books.subList(0, command.getLimit()) : books;
+
+    List<BookListResult.BookResult> bookResults = content.stream()
+        .map(bookMapper::toBookResult).toList();
+
+    String nextCursor = null;
+    Instant nextAfter = null;
+
+    if (hasNext && !content.isEmpty()) {
+      Book lastBook = content.get(content.size() - 1);
+      nextCursor = getCursorValue(lastBook, command.getOrderBy());
+      nextAfter = lastBook.getCreatedAt();
+    }
+
+    return BookListResult.builder()
+        .content(bookResults)
+        .nextCursor(nextCursor)
+        .nextAfter(nextAfter)
+        .size(content.size())
+        .hasNext(hasNext)
+        .build();
+  }
+
+  private String getCursorValue(Book book, String orderBy) {
+    return switch (orderBy) {
+      case "title" -> book.getTitle();
+      case "publishedDate" -> book.getPublishedDate().toString();
+      case "rating" -> book.getRating().toString();
+      case "reviewCount" -> String.valueOf(book.getReviewCount());
+      default -> book.getTitle();
+    };
+
+  }
 }

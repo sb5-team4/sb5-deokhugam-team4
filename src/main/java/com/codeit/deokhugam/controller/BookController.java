@@ -2,13 +2,17 @@ package com.codeit.deokhugam.controller;
 
 import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookInfoByIsbnCommand;
+import com.codeit.deokhugam.dto.command.BookListCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
 import com.codeit.deokhugam.dto.request.BookCreateRequest;
+import com.codeit.deokhugam.dto.request.BookListRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
+import com.codeit.deokhugam.dto.response.BookListResponse;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.response.NaverBookResponse;
 import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
+import com.codeit.deokhugam.dto.result.BookListResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.service.BookService;
@@ -19,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -129,6 +134,22 @@ public class BookController {
 
     NaverBookResponse response = bookMapper.toNaverBookResponse(result);
 
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * 도서 목록 조회
+   *
+   * @param 검색/정렬/페이지네이션 조건
+   * @return 도서 목록
+   */
+  @GetMapping
+  public ResponseEntity<BookListResponse> getBookList(
+      @Valid @ModelAttribute BookListRequest request
+  ) {
+    BookListCommand command = bookMapper.toBookListCommand(request);
+    BookListResult result = bookService.getBookList(command);
+    BookListResponse response = bookMapper.toBookListResponse(result);
     return ResponseEntity.ok(response);
   }
 }

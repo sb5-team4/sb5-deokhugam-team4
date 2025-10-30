@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
+public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
   private final JPAQueryFactory queryFactory; // QuerydslConfig에서 Bean으로 등록됨
   private final QComment qComment = QComment.comment; // Q 클래스 인스턴스

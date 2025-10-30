@@ -1,7 +1,7 @@
 package com.codeit.deokhugam.service;
 
-import com.codeit.deokhugam.common.exception.AuthorizationException;
-import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -16,6 +16,7 @@ import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,17 +37,18 @@ public class CommentService {
   public CommentCreateResult createComment(CommentCreateCommand command, Long requestMemberId) {
 
     // 인가(Authorization) 검증: 요청자(헤더)와 작성자(Command)가 일치하는지 확인
+    // 403 커스텀 예외
     if (!requestMemberId.equals(command.memberId())) {
-      throw new AuthorizationException("댓글 작성 권한이 없습니다.");
+      throw new CustomException(ErrorCode.COMMENT_NOT_AUTHORIZED);
     }
 
     // 리뷰 조회 없으면 404 커스텀 예외
     Review review = reviewRepository.findById(command.reviewId())
-        .orElseThrow(() -> new ResourceNotFoundException("Review", command.reviewId()));
+        .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_REVIEW_NOT_FOUND));
 
     // 멤버 조회 없으면 404 커스텀 예외
     Member member = memberRepository.findById(command.memberId())
-        .orElseThrow(() -> new ResourceNotFoundException("Member", command.memberId()));
+        .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_USER_NOT_FOUND));
 
     //mapper에 있는 entity로 매핑해주는 메서드를 사용해서 entity로 변환
     Comment comment = commentMapper.toComment(command, review, member);
@@ -77,7 +79,7 @@ public class CommentService {
 
     if (!reviewRepository.existsById(reviewId)) {
       // 존재하지 않는 리뷰 ID로 조회 시 404 예외 발생
-      throw new ResourceNotFoundException("Review", reviewId);
+      throw new CustomException(ErrorCode.COMMENT_REVIEW_NOT_FOUND);
     }
 
     //Repository에서 limit+1개 조회
@@ -108,7 +110,7 @@ public class CommentService {
     // List<Comment> -> List<CommentResponse> 변환
     List<CommentResponse> commentListResponse = commentListAfter.stream()
         .map(commentMapper::toCommentListResponse)
-        .toList();
+        .collect(Collectors.toList());
 
     // Result 객체 생성 후 반환
     return new CursorPageCommentResult(

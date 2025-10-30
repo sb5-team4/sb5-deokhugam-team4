@@ -6,9 +6,11 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
 import com.codeit.deokhugam.dto.response.comment.CommentResponse;
 import com.codeit.deokhugam.dto.result.comment.CommentCreateResult;
+import com.codeit.deokhugam.dto.result.comment.CommentUpdateResult;
 import com.codeit.deokhugam.dto.result.comment.CursorPageCommentResult;
 import com.codeit.deokhugam.mapper.CommentMapper;
 import com.codeit.deokhugam.repository.CommentRepository;
@@ -133,6 +135,25 @@ public class CommentService {
 
     //Entity -> Response DTO 변환
     return commentMapper.toCommentListResponse(comment);
+  }
+  
+  // 댓글 수정
+  @Transactional
+  public CommentUpdateResult updateComment(CommentUpdateCommand command) {
+    
+    // 수정할 댓글을 commentId로 조회 (404)
+    Comment comment = commentRepository.findById(command.commentId())
+        .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+    
+    // 요청자 Id와 댓글 작성자 Id 일치 검증 (403)
+    if(!comment.getMember().getId().equals(command.requestMemberId())) {
+      throw new CustomException(ErrorCode.COMMENT_NOT_AUTHORIZED);
+    }
+    
+    // mapper를 사용해 엔티티 내용 업데이트
+    commentMapper.updateCommentFromCommand(command, comment);
+
+    return commentMapper.toCommentUpdateResult(comment);
   }
 
 }

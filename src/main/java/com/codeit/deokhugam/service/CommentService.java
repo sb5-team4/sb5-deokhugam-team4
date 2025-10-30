@@ -151,7 +151,7 @@ public class CommentService {
     }
     
     // mapper를 사용해 엔티티 내용 업데이트
-    commentMapper.updateCommentFromCommand(command, comment);
+    comment.updateComment(command.content());
 
     return commentMapper.toCommentUpdateResult(comment);
   }

@@ -2,6 +2,12 @@ spring:
   config:
     activate:
       on-profile: dev
+  batch:
+    job:
+      enabled: false  # 앱 시작 시 자동 실행 안 함
+    jdbc:
+      initialize-schema: always  # H2에서 테스트용으로만 생성
+
 
   datasource:
     # 인메모리 (권장)

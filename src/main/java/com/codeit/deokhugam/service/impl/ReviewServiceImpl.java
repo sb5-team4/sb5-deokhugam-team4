@@ -85,7 +85,7 @@ public class ReviewServiceImpl implements ReviewService {
 
   @Override
   @Transactional
-  public boolean softDelete(SoftDeleteReviewCommand command) { // todo softDelete cascade
+  public boolean softDelete(SoftDeleteReviewCommand command) {
     long memberId = command.getMemberId();
     long reviewId = command.getReviewId();
 

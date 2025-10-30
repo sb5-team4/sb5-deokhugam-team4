@@ -51,8 +51,8 @@ public class PopularReviewRepositoryTest extends DataBaseConnectionSupport {
   Review review2;
   Review review3;
 
-  BigDecimal score1 = BigDecimal.valueOf(1);
-  BigDecimal score2 = BigDecimal.valueOf(1);
+  BigDecimal score1 = BigDecimal.valueOf(3);
+  BigDecimal score2 = BigDecimal.valueOf(2);
   BigDecimal score3 = BigDecimal.valueOf(1);
 
   PopularReview popularReview1;
@@ -171,7 +171,7 @@ public class PopularReviewRepositoryTest extends DataBaseConnectionSupport {
     assertThat(result.getNextAfter())
         .isCloseTo(popularReview2.getCreatedAt(), within(1, ChronoUnit.MILLIS));
     assertThat(result.getSize()).isEqualTo(1);
-    assertThat(result.getTotalElements()).isEqualTo(3);
+    assertThat(result.getTotalElements()).isEqualTo(2);
     assertThat(result.getHasNext()).isTrue();
 
   }

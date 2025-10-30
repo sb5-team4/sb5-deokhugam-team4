@@ -5,6 +5,9 @@ spring:
     name: deokhugam
   profiles:
     active: dev   # dev, prod 선택 가능
+  batch:
+    jdbc:
+      initialize-schema: never
 
 # Naver API 설정 추가, .env 파일에서 주입받음, 환경변수 없을 시 테스트용 더미 사용
 naver:
@@ -20,3 +23,4 @@ aws:
     region: ${AWS_S3_REGION:ap-northeast-2}
     bucket: ${S3_BUCKET_NAME:deokhugam-thumbnails}
     base-url: https://${S3_BUCKET_NAME:deokhugam-thumbnails}.s3.ap-northeast-2.amazonaws.com
+

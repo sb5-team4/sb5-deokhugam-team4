@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ReviewController.class)
 @Import(GlobalExceptionHandler.class)
-public class LikeReviewControllerTest {
+public class LikeReviewControllerV2Test {
 
   @Autowired
   MockMvc mockMvc;

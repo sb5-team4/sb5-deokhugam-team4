@@ -30,7 +30,20 @@ public enum ErrorCode {
 
   // Notification 관련 에러 코드
   NOTIFICATION_NOT_AUTHORIZED(403, "알림 수정 권한 없음", HttpStatus.FORBIDDEN),
-  NOTIFICATION_NOT_FOUND(404, "해당하는 알림 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+  NOTIFICATION_NOT_FOUND(404, "해당하는 알림 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+
+
+  // Comment 관련 에러 코드
+  // 400 BAD_REQUEST: 잘못된 요청 (파라미터 누락, 타입 불일치 등)
+  INVALID_REQUEST_PARAMETERS(400, "요청 파라미터가 잘못되었습니다.", HttpStatus.BAD_REQUEST),
+
+  // 403 FORBIDDEN: 권한 없음 (댓글 생성/수정/삭제 시 사용)
+  COMMENT_NOT_AUTHORIZED(403, "댓글에 대한 권한이 없습니다.", HttpStatus.FORBIDDEN),
+
+  // 404 NOT_FOUND: 리소스 없음
+  COMMENT_REVIEW_NOT_FOUND(404, "해당 리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  COMMENT_NOT_FOUND(404, "해당 댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  COMMENT_USER_NOT_FOUND(404, "해당 사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
   private final int code;         // 에러 코드
   private final String message;      // 에러 메시지

@@ -9,6 +9,7 @@ import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.domain.enums.Period;
 import com.codeit.deokhugam.repository.CommentRepository;
 import com.codeit.deokhugam.repository.ReviewLikeRepository;
+import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
@@ -34,15 +35,21 @@ public class PopularReviewProcessor implements ItemProcessor<Review, List<Popula
   private static final BigDecimal COMMENT_WEIGHT = new BigDecimal("0.7");
   private static final int RESULT_SCALE = 2;
   private static final RoundingMode ROUNDING = RoundingMode.HALF_UP;
-  private static final Instant JOB_START_TIME = Instant.now();
 
   private final ReviewLikeRepository reviewLikeRepository;
   private final CommentRepository commentRepository;
 
+  private Instant jobStartTime;
+
+  @PostConstruct
+  public void init() {
+    this.jobStartTime = Instant.now(); // Job 실행 시점에 초기화
+  }
+
   @Override
   public List<PopularReview> process(Review item) {
 
-    ZonedDateTime zdt = JOB_START_TIME.atZone(ZoneId.of("Asia/Seoul"));
+    ZonedDateTime zdt = jobStartTime.atZone(ZoneId.of("Asia/Seoul"));
 
     // ===== 기간별 시작/끝 시점 계산 =====
     ZonedDateTime startOfYear = zdt.withDayOfYear(1).toLocalDate()
@@ -61,8 +68,8 @@ public class PopularReviewProcessor implements ItemProcessor<Review, List<Popula
         .atTime(LocalTime.MAX)
         .atZone(ZoneId.of("Asia/Seoul"));
 
-    ZonedDateTime startOfDay = zdt;
-    ZonedDateTime endOfDay = startOfDay.minusDays(1);
+    ZonedDateTime endOfDay = zdt;
+    ZonedDateTime startOfDay = endOfDay.minusDays(1);
 
     long reviewId = item.getId();
 

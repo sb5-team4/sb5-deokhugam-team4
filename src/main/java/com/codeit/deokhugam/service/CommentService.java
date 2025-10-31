@@ -86,7 +86,7 @@ public class CommentService {
     }
 
     //Repository에서 limit+1개 조회
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(
+    List<Comment> commentList = commentRepository.findByReviewId(
         command.reviewId(),
         command.direction(),
         command.after(),    // 보조 커서 (createdAt)

@@ -36,7 +36,16 @@ public class Comment extends BaseUpdatableEntity {
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 
+  // 댓글 수정 메서드
   public void updateComment(String newContent) {
     content = newContent;
   }
+
+  // 댓글 논리 삭제 메서드
+  public void softDelete() {
+    if (!this.deleted) {
+      this.deleted = true;
+    }
+  }
+
 }

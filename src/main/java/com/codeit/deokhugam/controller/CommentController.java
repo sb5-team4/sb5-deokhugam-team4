@@ -1,6 +1,7 @@
 package com.codeit.deokhugam.controller;
 
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
 import com.codeit.deokhugam.dto.request.comment.CommentCreateRequest;
@@ -17,6 +18,7 @@ import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -118,6 +120,20 @@ public class CommentController {
 
     // 200 응답 반환
     return ResponseEntity.ok(response);
+  }
+
+  // 논리 삭제
+  @DeleteMapping("/{commentId}")
+  public ResponseEntity<Void> deleteComment(
+      @PathVariable Long commentId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long requestMemberId
+  ) {
+
+    CommentSoftDeleteCommand command = commentMapper.toSoftDeleteCommand(commentId, requestMemberId);
+
+    commentService.softDeleteComment(command);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
 }

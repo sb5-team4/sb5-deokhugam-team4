@@ -6,6 +6,7 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
 import com.codeit.deokhugam.dto.response.comment.CommentResponse;
@@ -34,7 +35,7 @@ public class CommentService {
   private final CommentMapper commentMapper;
 
 
-  // 댓글 생성 기능
+  // 댓글 생성 기능 (기존 코드)
   @Transactional
   public CommentCreateResult createComment(CommentCreateCommand command, Long requestMemberId) {
 
@@ -63,20 +64,20 @@ public class CommentService {
     // 리뷰 작성자와 댓글 작성자가 다를 경우에만 알림 생성
     if (!review.getMember().getId().equals(member.getId())) {
 
-    // NotificationService의 create 메소드 호출
-    notificationService.create(review.getMember(), review, savedComment);
+      // NotificationService의 create 메소드 호출
+      notificationService.create(review.getMember(), review, savedComment);
     }
 
-  // mapper에 있는 Result로 매핑해주는 메서드를 사용해서 Result로 변환
+    // mapper에 있는 Result로 매핑해주는 메서드를 사용해서 Result로 변환
     return commentMapper.toCommentCreateResult(savedComment);
   }
 
-  //댓글 목록 조회 (커서 기반 페이지네이션 / 무한 스크롤)
+  //댓글 목록 조회
   @Transactional(readOnly = true)
   public CursorPageCommentResult findCommentsByReviewId(CursorPageCommentCommand command) {
 
     int limit = command.commentLimit();
-    Long reviewId = command.reviewId(); // reviewId 가져오기
+    Long reviewId = command.reviewId();
 
 
     if (!reviewRepository.existsById(reviewId)) {
@@ -133,27 +134,57 @@ public class CommentService {
     Comment comment = commentRepository.findById(commentId)
         .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
+    // 논리 삭제된 댓글인지 확인 (deleted == true)
+    if (comment.isDeleted()) {
+      throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+    }
+
     //Entity -> Response DTO 변환
     return commentMapper.toCommentListResponse(comment);
   }
-  
+
   // 댓글 수정
   @Transactional
   public CommentUpdateResult updateComment(CommentUpdateCommand command) {
-    
+
     // 수정할 댓글을 commentId로 조회 (404)
     Comment comment = commentRepository.findById(command.commentId())
         .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-    
+
     // 요청자 Id와 댓글 작성자 Id 일치 검증 (403)
     if(!comment.getMember().getId().equals(command.requestMemberId())) {
       throw new CustomException(ErrorCode.COMMENT_NOT_AUTHORIZED);
     }
-    
+
+    // 논리 삭제된 댓글인지 확인 (deleted == true)
+    if (comment.isDeleted()) {
+      throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+    }
+
     // mapper를 사용해 엔티티 내용 업데이트
     comment.updateComment(command.content());
 
     return commentMapper.toCommentUpdateResult(comment);
   }
 
+
+  // 댓글 논리 삭제
+  @Transactional
+  public void softDeleteComment(CommentSoftDeleteCommand command) {
+
+    Long commentId = command.commentId();
+    Long requestMemberId = command.requestMemberId();
+
+    // 댓글 조회 (404)
+    Comment comment = commentRepository.findById(commentId)
+        .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+    // 권한 검증 (403)
+    if(!comment.getMember().getId().equals(requestMemberId)) {
+      throw new CustomException(ErrorCode.COMMENT_NOT_AUTHORIZED);
+    }
+
+    // 엔티티의 softDelete() 메소드 호출 (deleted = true로 변경)
+    comment.softDelete();
+  }
 }

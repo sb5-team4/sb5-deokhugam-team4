@@ -53,9 +53,9 @@ FROM generate_series(1, 100) AS i;
 -- 4) REVIEW_LIKE 100개
 -----------------------------------------------------
 INSERT INTO review_like (review_id, member_id, created_at)
-SELECT ((i - 1) % 100) + 1, -- review 1~20 반복
+SELECT ((i - 1) % 30) + 1,  -- review 1~20 반복
        ((i - 1) % 100) + 1, -- member 1~10 반복
-       NOW() - (i || ' minutes')::INTERVAL
+       (NOW() + INTERVAL '9 hours') - (i || ' minutes')::INTERVAL
 FROM generate_series(1, 100) AS i;
 
 -----------------------------------------------------
@@ -72,9 +72,10 @@ FROM generate_series(1, 100) AS i;
 -----------------------------------------------------
 -- 6) POPULAR_REVIEW 100개
 -----------------------------------------------------
-INSERT INTO popular_review (review_id, rank, score, period, created_at)
+INSERT INTO popular_review (review_id, rank, ordered, score, period, created_at)
 SELECT i,
        ((i - 1) % 100) + 1, -- 1~5 반복 (각 기간별)
+       false,
        100 - i,
        CASE
            WHEN i <= 5 THEN 'DAILY'
@@ -90,8 +91,8 @@ FROM generate_series(1, 10) AS i;
 -- 7) NOTIFICATION 20개
 -----------------------------------------------------
 INSERT INTO notification (member_id, review_id, content, confirmed, created_at, deleted)
-SELECT ((i - 1) % 1) + 101,                       -- member 1~10 반복
-       ((i - 1) % 20) + 1,                        -- review 1~20 반복
+SELECT ((i - 1) % 1) + 10,                        -- member 1~10 반복
+       ((i - 1) % 20) + 10,                       -- review 1~20 반복
        'Notification content ' || i,
        FALSE,
        NOW() - ((i * 2) || ' minutes')::INTERVAL, -- 2분씩 차이 나게 설정

@@ -32,7 +32,6 @@ public enum ErrorCode {
   NOTIFICATION_NOT_AUTHORIZED(403, "알림 수정 권한 없음", HttpStatus.FORBIDDEN),
   NOTIFICATION_NOT_FOUND(404, "해당하는 알림 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND);
 
-
   private final int code;         // 에러 코드
   private final String message;      // 에러 메시지
   private final HttpStatus httpStatus; // HTTP 상태 코드

@@ -56,13 +56,10 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
     long startTime = Long.parseLong(MDC.get(REQUEST_START));
     long duration = System.currentTimeMillis() - startTime;
 
-    log.info("Request completed: method={}, uri={}, ip={}, status={}, duration={}ms, requestId={}",
-        MDC.get(REQUEST_METHOD),
-        MDC.get(REQUEST_URI),
-        MDC.get(REQUEST_IP),
+    log.info("Request completed: status={}, duration={}ms",
         response.getStatus(),
-        duration,
-        MDC.get(REQUEST_ID));
+        duration
+    );
 
     String requestId = MDC.get(REQUEST_ID);
     response.setHeader("X-Request-ID", requestId);

@@ -60,7 +60,6 @@ public class CommentController {
   // 댓글 목록 조회 GET
   @GetMapping
   public ResponseEntity<CursorPageCommentResponse> getAllComments(
-      // --- API 명세서 Parameters ---
       @RequestParam("reviewId")
       Long reviewId,
 

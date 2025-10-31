@@ -23,7 +23,7 @@ public class BookResponse {
   private LocalDate publishedDate;  // 출판일
   private String isbn;              // ISBN
   private String thumbnailUrl;      // 썸네일 URL
-  private Integer reviewCount;      // 리뷰수
+  private Long reviewCount;         // 리뷰수
   private BigDecimal rating;        // 평점 (0.00 ~ 5.00)
   private Instant createdAt;        // 생성 시간
   private Instant updatedAt;        // 수정 시간

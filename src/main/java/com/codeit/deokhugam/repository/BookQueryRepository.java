@@ -15,4 +15,6 @@ public interface BookQueryRepository {
       int limit
   );
 
+  long countBooksWithCursor(String keyword);
+
 }

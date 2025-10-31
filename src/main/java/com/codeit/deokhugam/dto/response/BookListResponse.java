@@ -19,6 +19,7 @@ public class BookListResponse {
   private String nextCursor;
   private Instant nextAfter;
   private int size;
+  private long totalElements;
   private boolean hasNext;
 
   @Getter

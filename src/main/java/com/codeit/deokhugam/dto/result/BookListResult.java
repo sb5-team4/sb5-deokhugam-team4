@@ -20,6 +20,7 @@ public class BookListResult {
   private String nextCursor;
   private Instant nextAfter;
   private int size;
+  private long totalElements;
   private boolean hasNext;
 
   @Getter

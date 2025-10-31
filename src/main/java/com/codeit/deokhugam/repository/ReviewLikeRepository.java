@@ -1,6 +1,7 @@
 package com.codeit.deokhugam.repository;
 
 import com.codeit.deokhugam.domain.entity.ReviewLike;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +22,9 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
           where r.member.id = :memberId
       """)
   Set<ReviewLike> findAllWithReviewByMemberId(@Param("memberId") Long memberId);
+
+  long countByReviewId(Long reviewId);
+
+  long countByReviewIdAndCreatedAtBetween(Long reviewId, Instant from, Instant to);
 
 }

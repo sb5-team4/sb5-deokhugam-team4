@@ -12,6 +12,8 @@ public interface PopularBookMapper {
   @Mapping(source = "book.title", target = "title")
   @Mapping(source = "book.author", target = "author")
   @Mapping(source = "book.thumbnailUrl", target = "thumbnailUrl")
+  @Mapping(source = "book.reviewCount", target = "reviewCount")
+  @Mapping(source = "book.rating", target = "rating")
   @Mapping(source = "rank", target = "rank")
   PopularBookResult toPopularBookResult(PopularBook popularBook);
 

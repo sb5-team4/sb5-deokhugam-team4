@@ -67,25 +67,24 @@ public class PopularBookQueryRepositoryImpl implements PopularBookQueryRepositor
     }
 
     Short rankCursor = cursor != null ? Short.parseShort(cursor) : null;
+    boolean isDesc = "DESC".equalsIgnoreCase(direction);
 
-    if ("ASC".equalsIgnoreCase(direction)) {
-      if (rankCursor != null && after != null) {
-        return popularBook.rank.gt(rankCursor)
-            .or(popularBook.rank.eq(rankCursor).and(popularBook.createdAt.gt(after)));
-      } else if (rankCursor != null) {
-        return popularBook.rank.gt(rankCursor);
-      } else {
-        return popularBook.createdAt.gt(after);
-      }
-    } else {
-      if (rankCursor != null && after != null) {
-        return popularBook.rank.lt(rankCursor)
-            .or(popularBook.rank.eq(rankCursor).and(popularBook.createdAt.gt(after)));
-      } else if (rankCursor != null) {
-        return popularBook.rank.lt(rankCursor);
-      } else {
-        return popularBook.createdAt.gt(after);
-      }
+    if (rankCursor != null && after != null) {
+      BooleanExpression rankCondition = isDesc
+          ? popularBook.rank.lt(rankCursor)
+          : popularBook.rank.gt(rankCursor);
+
+      return rankCondition.or(
+          popularBook.rank.eq(rankCursor).and(popularBook.createdAt.gt(after))
+      );
     }
+
+    if (rankCursor != null) {
+      return isDesc
+          ? popularBook.rank.lt(rankCursor)
+          : popularBook.rank.gt(rankCursor);
+    }
+
+    return popularBook.createdAt.gt(after);
   }
 }

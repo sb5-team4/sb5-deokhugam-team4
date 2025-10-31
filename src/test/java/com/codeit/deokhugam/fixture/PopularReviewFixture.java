@@ -22,6 +22,7 @@ public class PopularReviewFixture {
         .score(BigDecimal.valueOf(randomScore))
         .period(period.name())
         .review(review)
+        .ordered(true)
         .build();
   }
 }

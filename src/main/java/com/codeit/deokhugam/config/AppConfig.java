@@ -1,5 +1,23 @@
 package com.codeit.deokhugam.config;
 
-public class AppConfig {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class AppConfig implements WebMvcConfigurer {
+
+  @Bean
+  public MDCLoggingInterceptor mdcLoggingInterceptor() {
+    return new MDCLoggingInterceptor();
+  }
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(mdcLoggingInterceptor())
+        .addPathPatterns("/**"); // 모든 경로에 적용
+
+  }
 
 }

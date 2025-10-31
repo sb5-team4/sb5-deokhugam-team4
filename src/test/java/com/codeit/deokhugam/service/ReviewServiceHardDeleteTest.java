@@ -51,7 +51,7 @@ public class ReviewServiceHardDeleteTest {
   String content;
   CreateReviewCommand createReviewCommand;
   LocalDate publishDate;
-  int reviewCount;
+  long reviewCount;
   String isbn;
   String thumbnailUrl;
   BigDecimal ratingInBook;
@@ -69,7 +69,7 @@ public class ReviewServiceHardDeleteTest {
     description = "description";
     publisher = "publisher";
     publishDate = LocalDate.now();
-    reviewCount = 0;
+    reviewCount = 0L;
     ratingInBook = BigDecimal.valueOf(1.1);
     isbn = "isbn";
     thumbnailUrl = "thumbnailUrl";

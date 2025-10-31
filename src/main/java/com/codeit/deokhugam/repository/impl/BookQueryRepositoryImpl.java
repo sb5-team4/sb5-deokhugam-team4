@@ -27,9 +27,7 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
       String cursor, Instant after, int limit) {
 
     BooleanBuilder builder = new BooleanBuilder();
-
     builder.and(book.deleted.isFalse());
-
     if (keyword != null && !keyword.isBlank()) {
       builder.and(
           book.title.contains(keyword)
@@ -51,6 +49,27 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
         .orderBy(orderSpecifiers)
         .limit(limit + 1)
         .fetch();
+  }
+
+  @Override
+  public long countBooksWithCursor(String keyword) {
+
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(book.deleted.isFalse());
+    if (keyword != null && !keyword.isBlank()) {
+      builder.and(book.title.contains(keyword)
+          .or(book.author.contains(keyword))
+          .or(book.isbn.contains(keyword))
+      );
+    }
+
+    Long count = queryFactory
+        .select(book.count())
+        .from(book)
+        .where(builder)
+        .fetchOne();
+
+    return count != null ? count : 0L;
   }
 
   private OrderSpecifier<?>[] buildOrderSpecifiers(
@@ -136,7 +155,7 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
       String cursor,
       Instant after,
       boolean isDesc) {
-    Integer cursorCount = Integer.parseInt(cursor);
+    Long cursorCount = Long.parseLong(cursor);
 
     if (isDesc) {
       return book.reviewCount.lt(cursorCount)

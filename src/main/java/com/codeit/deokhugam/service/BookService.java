@@ -155,15 +155,21 @@ public class BookService {
       nextAfter = lastBook.getCreatedAt();
     }
 
+    long totalElements = bookQueryRepository.countBooksWithCursor(
+        command.getKeyword()
+    );
+
     return BookListResult.builder()
         .content(bookResults)
         .nextCursor(nextCursor)
         .nextAfter(nextAfter)
         .size(content.size())
+        .totalElements(totalElements)
         .hasNext(hasNext)
         .build();
   }
 
+  // 하드코딩되어 있는 값들을 없앨 수 있는지
   private String getCursorValue(Book book, String orderBy) {
     return switch (orderBy) {
       case "title" -> book.getTitle();

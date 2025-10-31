@@ -80,5 +80,5 @@ public interface CommentMapper {
   CommentResponse toCommentUpdateResponse(CommentUpdateResult result);
 
   // 댓글 논리 삭제-------------------------------------------------------------------------------------
-  CommentSoftDeleteCommand toSoftDeleteCommand(Long commentId, Long memberId);
+  CommentSoftDeleteCommand toSoftDeleteCommand(Long commentId, Long requestMemberId);
 }

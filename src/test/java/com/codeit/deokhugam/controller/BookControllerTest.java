@@ -54,7 +54,7 @@ class BookControllerTest {
         .publishedDate(LocalDate.of(1990, 12, 30))
         .isbn("1234567890123")
         .thumbnailUrl("testThumbnailUrl.png")
-        .reviewCount(5)
+        .reviewCount(5L)
         .rating(new BigDecimal("2.31"))
         .createdAt(Instant.now())
         .updatedAt(Instant.now())

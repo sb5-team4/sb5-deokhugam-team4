@@ -86,7 +86,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
         .description("description")
         .publisher("publisher")
         .publishedDate(LocalDate.now())
-        .reviewCount(0)
+        .reviewCount(0L)
         .rating(BigDecimal.valueOf(1.1))
         .deleted(false)
         .isbn("isbn")
@@ -151,7 +151,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
   @Test
   @DisplayName("리뷰 생성시 Book review_count 필드 증가 확인")
   void BookReviewCountUpTestWhenReviewCreate() {
-    int beforeCount = book.getReviewCount();
+    long beforeCount = book.getReviewCount();
 
     CreateReviewCommand command = CreateReviewCommand.builder()
         .bookId(book.getId())
@@ -164,7 +164,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    int afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
+    long afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
 
     assertThat(afterCount).isEqualTo(beforeCount + 1);
   }
@@ -179,7 +179,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    int beforeCount = book.getReviewCount();
+    long beforeCount = book.getReviewCount();
 
     SoftDeleteReviewCommand command = SoftDeleteReviewCommand.builder()
         .memberId(member.getId())
@@ -191,7 +191,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
 
     Review deletedReview = reviewRepository.findById(review.getId()).get();
 
-    int afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
+    long afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
 
     assertThat(deletedReview.isDeleted()).isTrue();
     assertThat(afterCount).isEqualTo(beforeCount - 1);
@@ -207,7 +207,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    int beforeCount = book.getReviewCount();
+    long beforeCount = book.getReviewCount();
 
     HardDeleteReviewCommand command = HardDeleteReviewCommand.builder()
         .memberId(member.getId())
@@ -217,7 +217,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    int afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
+    long afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
 
     assertThat(afterCount).isEqualTo(beforeCount - 1);
 
@@ -234,7 +234,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    int beforeCount = book.getReviewCount();
+    long beforeCount = book.getReviewCount();
 
     HardDeleteReviewCommand command = HardDeleteReviewCommand.builder()
         .memberId(member.getId())
@@ -244,7 +244,7 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     em.flush();
     em.clear();
 
-    int afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
+    long afterCount = bookRepository.findById(book.getId()).get().getReviewCount();
 
     assertThat(afterCount).isEqualTo(beforeCount);
   }

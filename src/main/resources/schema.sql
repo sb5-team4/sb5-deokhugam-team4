@@ -14,6 +14,7 @@ CREATE TABLE popular_review
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     review_id  BIGINT                                          NOT NULL,
     rank       BIGINT                                          NOT NULL,
+    ordered    BOOLEAN                                         NOT NULL,
     score      DECIMAL(10, 2)                                  NOT NULL,
     period     VARCHAR(10)                                     NOT NULL, -- 'DAILY, MONTLY, YEARLY, ALL'
     created_at timestamp with time zone                        NOT NULL,
@@ -39,7 +40,7 @@ CREATE TABLE power_member
     member_id        BIGINT                                          NOT NULL,
     period           VARCHAR(10)                                     NOT NULL,
     created_at       timestamp with time zone                        NOT NULL,
-    rank             SMALLINT                                        NOT NULL,
+    rank             BIGINT                                          NOT NULL,
     score            DECIMAL(10, 2)                                  NOT NULL,
     review_score_sum DECIMAL(3, 2)                                   NOT NULL,
     like_count       BIGINT                                          NOT NULL DEFAULT 0,

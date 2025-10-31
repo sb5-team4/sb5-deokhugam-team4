@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -80,6 +81,19 @@ public class GlobalExceptionHandler {
     ErrorResponse errorResponse = ErrorResponse.of(ex.getErrorCode(), ex.getErrorMessage());
 
     return new ResponseEntity<>(errorResponse, ex.getHttpStatus());
+  }
+
+
+  // @RequestParam 타입 불일치 (400 Bad Request)
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    log.warn("Parameter type mismatch: {} = {}", ex.getName(), ex.getValue());
+
+    String message = String.format("'%s' 파라미터가 잘못된 타입입니다. (값: '%s')",
+        ex.getName(), ex.getValue());
+    ErrorResponse response = ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), message);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
 }

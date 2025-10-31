@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.dto.request;
+package com.codeit.deokhugam.dto.request.comment;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

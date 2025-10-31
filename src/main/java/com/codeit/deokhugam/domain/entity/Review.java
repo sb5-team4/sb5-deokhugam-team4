@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,9 +29,12 @@ public class Review extends BaseUpdatableEntity {
   @Column(nullable = false)
   private String content;
 
-  @Column(nullable = false, columnDefinition = "Long default 0L")
+  @Builder.Default
+  @Column(nullable = false, columnDefinition = "bigint default 0")
   private Long likeCount = 0L;
-  @Column(nullable = false, columnDefinition = "Long default 0L")
+
+  @Builder.Default
+  @Column(nullable = false, columnDefinition = "bigint default 0")
   private Long commentCount = 0L;
 
   @ManyToOne

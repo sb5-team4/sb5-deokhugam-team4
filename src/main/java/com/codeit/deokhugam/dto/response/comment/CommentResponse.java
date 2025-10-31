@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.dto.response;
+package com.codeit.deokhugam.dto.response.comment;
 
 import java.time.Instant;
 

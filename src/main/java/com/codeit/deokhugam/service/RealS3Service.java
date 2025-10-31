@@ -40,7 +40,7 @@ public class RealS3Service implements S3Service {
     String FileName = nameWithoutExtension
         .replaceAll("[^a-zA-Z0-9가-힣]", "")
         .toLowerCase();
-
+    // 저장할때 UUID로 저장하고 불러올 때 도서 이름을 조회해서 client에게 던져줄 땐 도서 제목으로 치환해서 던져주는 방식
     String uploadedFileName = FileName + "_" + UUID.randomUUID().toString() + extension;
 
     try {

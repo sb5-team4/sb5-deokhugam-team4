@@ -16,7 +16,7 @@ public class BookFixture {
         .author("테스트 저자")
         .publisher("테스트 출판사")
         .publishedDate(LocalDate.of(2020, 1, 1))
-        .reviewCount(0)
+        .reviewCount(0L)
         .rating(BigDecimal.ZERO)
         .deleted(false)
         .build();
@@ -31,7 +31,7 @@ public class BookFixture {
       LocalDate publishedDate,
       String isbn,
       String thumbnailUrl,
-      int reviewCount,
+      long reviewCount,
       BigDecimal rating
   ) {
     return Book.builder()
@@ -58,7 +58,7 @@ public class BookFixture {
         .publishedDate(LocalDate.of(1990, 12, 30))
         .isbn("1234567890123")
         .thumbnailUrl("testThumbnailUrl.png")
-        .reviewCount(5)
+        .reviewCount(5L)
         .rating(new BigDecimal("2.31"))
         .deleted(false)
         .build();
@@ -71,7 +71,7 @@ public class BookFixture {
         .author("삭제된 저자")
         .publisher("삭제된 출판사")
         .publishedDate(LocalDate.of(2020, 1, 1))
-        .reviewCount(5)
+        .reviewCount(5L)
         .rating(new BigDecimal("4.5"))
         .deleted(true)
         .build();
@@ -85,7 +85,7 @@ public class BookFixture {
         .publisher("ISBN 테스트 출판사")
         .publishedDate(LocalDate.of(2020, 1, 1))
         .isbn("1234567890123")
-        .reviewCount(0)
+        .reviewCount(0L)
         .rating(BigDecimal.ZERO)
         .deleted(false)
         .build();

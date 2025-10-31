@@ -211,7 +211,7 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
 
     // when: 첫 페이지 조회 (after=null, cursorId=null, limit=2, DESC)
     int limitComment = 2;
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "DESC", null, null, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "DESC", null, null, limitComment);
 
     // then: limit+1개인 3개가 최신순(c3, c2, c1)으로 조회되어야 함
     assertThat(commentList).hasSize(limitComment + 1);
@@ -233,7 +233,7 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
     int limitComment = 2;
     Instant after = testComment2.getCreatedAt(); // 보조 커서 (시간)
     Long cursorId = testComment2.getId();     // 메인 커서 (ID)
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "DESC", after, cursorId, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "DESC", after, cursorId, limitComment);
 
     // then: 나머지 댓글 1개(c1)만 조회되어야 함
     assertThat(commentList).hasSize(1);
@@ -247,7 +247,7 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
     Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember, now.minus(1, ChronoUnit.HOURS));
 
     int limitComment = 2;
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "DESC", null, null, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "DESC", null, null, limitComment);
 
     assertThat(commentList).hasSize(1);
     assertThat(commentList.get(0).getId()).isEqualTo(testComment1.getId());
@@ -262,7 +262,7 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
     Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember, now.minus(1, ChronoUnit.HOURS)); // 가장 최신
 
     int limitComment = 2;
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "ASC", null, null, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "ASC", null, null, limitComment);
 
     assertThat(commentList).hasSize(limitComment + 1);
     assertThat(commentList.get(0).getId()).isEqualTo(testComment1.getId());
@@ -282,7 +282,7 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
     Instant after = testComment2 .getCreatedAt(); // 보조 커서 (시간)
     Long cursorId = testComment2.getId();      // 메인 커서 (ID)
     // [수정!] cursorId 파라미터 전달
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "ASC", after, cursorId, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "ASC", after, cursorId, limitComment);
 
     // then: 나머지 댓글 1개(c3)만 조회되어야 함
     assertThat(commentList).hasSize(1);

@@ -35,4 +35,8 @@ public class Comment extends BaseUpdatableEntity {
   @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
+
+  public void updateComment(String newContent) {
+    content = newContent;
+  }
 }

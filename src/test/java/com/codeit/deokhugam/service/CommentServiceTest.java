@@ -9,7 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -136,25 +137,27 @@ public class CommentServiceTest {
   @Test
   @DisplayName("댓글 생성 실패 - 리뷰를 찾을 수 없음 (404)")
   void createCommentNotFoundReview() {
-    // Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
+    // given (준비): Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
     when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.empty());
 
+    // when & then (실행 및 검증)
     assertThatThrownBy(() -> commentService.createComment(commentCreateCommand, commentWriter.getId()))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Review");
+        .isInstanceOf(CustomException.class)
+        .hasMessage(ErrorCode.COMMENT_REVIEW_NOT_FOUND.getMessage());
   }
 
   @Test
   @DisplayName("댓글 생성 실패 - 멤버(사용자)를 찾을 수 없음 (404)")
   void createCommentNotFoundMember() {
-    // Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
+    // given (준비): Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
     when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.of(review));
     // 그 다음 Member를 못 찾았다고 가정 when
     when(memberRepository.findById(commentCreateCommand.memberId())).thenReturn(Optional.empty());
 
+    // when & then (실행 및 검증)
     assertThatThrownBy(() -> commentService.createComment(commentCreateCommand,  commentWriter.getId()))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Member");
+        .isInstanceOf(CustomException.class)
+        .hasMessage(ErrorCode.COMMENT_USER_NOT_FOUND.getMessage());
   }
 
 }

@@ -3,8 +3,6 @@ package com.codeit.deokhugam.domain.entity;
 import com.codeit.deokhugam.domain.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +28,6 @@ public class Member extends BaseUpdatableEntity {
   private String password; // bcrypt
   @Column(nullable = false)
   private boolean deleted;
-  @OneToMany(orphanRemoval = true)
-  private List<PowerMember> powerMember;
 
   public void encodePassword(String encodedPw) {
     this.password = encodedPw;

@@ -15,6 +15,8 @@ public interface ReviewRepository
 
   Optional<Review> findByIdAndDeletedIsFalse(Long aLong);
 
+  List<Review> findAllByDeletedIsFalse();
+
   long countByMemberId(Long id);
 
   @Query("""

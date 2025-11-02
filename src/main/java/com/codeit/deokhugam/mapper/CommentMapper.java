@@ -4,6 +4,7 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentHardDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
@@ -81,4 +82,8 @@ public interface CommentMapper {
 
   // 댓글 논리 삭제-------------------------------------------------------------------------------------
   CommentSoftDeleteCommand toSoftDeleteCommand(Long commentId, Long requestMemberId);
+
+  // 댓글 물리 삭제-------------------------------------------------------------------------------------
+  CommentHardDeleteCommand toCommentHardDeleteCommand(Long commentId, Long requestMemberId);
+
 }

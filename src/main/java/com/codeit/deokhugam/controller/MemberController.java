@@ -130,4 +130,13 @@ public class MemberController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  //파워멤버 랭킹 배치시스템 테스트용
+  //요청,응답 데이터없음, 상태코드반환
+  @PostMapping("/batch")
+  public ResponseEntity<String> runBatch() throws Exception {
+    memberService.runPowerMemberJob();
+    return ResponseEntity.ok("🚀 PowerMember 배치 실행 요청 완료!");
+  }
+
+
 }

@@ -17,6 +17,10 @@ import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.impl.MemberQueryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -118,6 +122,19 @@ public class MemberService {
     }
 
     memberRepository.deleteById(id);
+  }
+
+  //batch 스케쥴링적용전 api테스트용
+  private final JobLauncher jobLauncher;
+  private final Job powerMemberJob;
+
+  public void runPowerMemberJob() throws Exception {
+    JobParameters jobParameters = new JobParametersBuilder()
+//        .addString("period", "ALL_TIME")
+        .addLong("timestamp", System.currentTimeMillis())
+        .toJobParameters();
+
+    jobLauncher.run(powerMemberJob, jobParameters);
   }
 
 

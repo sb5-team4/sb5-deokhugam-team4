@@ -4,10 +4,18 @@ import com.codeit.deokhugam.domain.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Builder
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PowerMember extends BaseEntity {
 
 
@@ -24,7 +32,7 @@ public class PowerMember extends BaseEntity {
   @Column(name = "comment_count", nullable = false)
   private Long commentCount;
 
-  @OneToOne(orphanRemoval = true)
+  @ManyToOne
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 }

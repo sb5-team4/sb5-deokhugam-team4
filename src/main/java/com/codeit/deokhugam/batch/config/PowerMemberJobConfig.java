@@ -1,12 +1,21 @@
 package com.codeit.deokhugam.batch.config;
 
-
+import com.codeit.deokhugam.batch.dto.PowerMemberScoreDto;
+import com.codeit.deokhugam.batch.processor.PowerMemberProcessor;
+import com.codeit.deokhugam.batch.reader.PowerMemberReader;
+import com.codeit.deokhugam.batch.repository.PowerMemberRepository;
+import com.codeit.deokhugam.batch.writer.PowerMemberWriter;
+import com.codeit.deokhugam.domain.entity.PowerMember;
+import com.codeit.deokhugam.repository.MemberRepository;
+import com.codeit.deokhugam.repository.ReviewRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -14,7 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Slf4j
+
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
@@ -22,29 +31,64 @@ public class PowerMemberJobConfig {
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
+  private final PowerMemberWriter powerMemberWriter;
+  private final PowerMemberRepository powerMemberRepository;
+  private final ReviewRepository reviewRepository;
+  private final MemberRepository memberRepository;
 
   @Bean
-  public Job ExampleJob() {
-    return new JobBuilder("exampleJob", jobRepository) //JobBuilder → exampleJob이라는 이름의 Job을 만듦
-        .start(Step()) //실행할 첫 번째 Step을 등록
+  public Job powerMemberJob(Step powerMemberClearStep, Step powerMemberStep,
+      Step powerMemberRankingStep) {
+    return new JobBuilder("powerMemberJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(powerMemberClearStep)
+        .next(powerMemberStep)
+        .next(powerMemberRankingStep)
         .build();
   }
 
   @Bean
-  public Step Step() {
-    return new StepBuilder("step", jobRepository) //step이라는 이름의 Step 생성
-        //단일 작업 단위(Tasklet) 등록
-        .tasklet((contribution, chunkContext) -> { //Step 실행 컨텍스트
-          log.info("Step!!!!"); //콘솔에 “Step!!!!” 로그 출력
-          return RepeatStatus.FINISHED; //Step이 정상 종료되었다는 신호
-        }, transactionManager)  //트랜잭션 관리 (롤백, 커밋 담당)
+  public Step powerMemberClearStep() {
+    return new StepBuilder("powerMemberClearStep", jobRepository)
+        .tasklet((contribution, chunkContext) -> {
+          powerMemberRepository.deleteAllInBatch();
+          return RepeatStatus.FINISHED;
+        }, transactionManager)
+        .build();
+  }
+
+  @Bean
+  public Step powerMemberStep(PowerMemberReader powerMemberReader) {
+    return new StepBuilder("powerMemberStep", jobRepository)
+        .<PowerMemberScoreDto, PowerMember>chunk(100, transactionManager)
+        .reader(powerMemberReader)
+        .processor(new PowerMemberProcessor(memberRepository))
+        .writer(powerMemberWriter)
+        .build();
+  }
+
+  @Bean
+  @StepScope
+  public PowerMemberReader powerMemberReader() {
+    return new PowerMemberReader(reviewRepository);
+  }
+
+  @Bean
+  public Step powerMemberRankingStep() {
+    return new StepBuilder("powerMemberRankingStep", jobRepository)
+        .tasklet((contribution, chunkContext) -> {
+          String[] periods = {"DAILY", "WEEKLY", "MONTHLY", "ALL_TIME"};
+          for (String period : periods) {
+            List<PowerMember> members = powerMemberRepository.findAllByPeriodOrderByScoreDesc(
+                period);
+            long rank = 1;
+            for (PowerMember m : members) {
+              m.setRank(rank++);
+            }
+            powerMemberRepository.saveAll(members);
+          }
+          return RepeatStatus.FINISHED;
+        }, transactionManager)
         .build();
   }
 }
-
-
-
-
-
-
-

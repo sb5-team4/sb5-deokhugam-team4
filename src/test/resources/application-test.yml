@@ -2,7 +2,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-  config:
     activate:
       on-profile: test
   sql:

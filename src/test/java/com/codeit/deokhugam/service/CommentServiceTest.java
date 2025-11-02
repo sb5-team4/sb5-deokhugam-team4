@@ -9,12 +9,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
-import com.codeit.deokhugam.dto.command.CommentCreateCommand;
-import com.codeit.deokhugam.dto.result.CommentCreateResult;
+import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.result.comment.CommentCreateResult;
 import com.codeit.deokhugam.mapper.CommentMapper;
 import com.codeit.deokhugam.repository.CommentRepository;
 import com.codeit.deokhugam.repository.MemberRepository;
@@ -96,7 +97,7 @@ public class CommentServiceTest {
     when(commentMapper.toCommentCreateResult(comment)).thenReturn(commentCreateResult);
 
     // when 실행 : 서비스 로직 호출
-    CommentCreateResult result = commentService.createComment(commentCreateCommand);
+    CommentCreateResult result = commentService.createComment(commentCreateCommand, commentWriter.getId());
 
     // then 검증 : 결과 확인
     // result.id() (생성된 댓글 ID, 22L)는 기대했던 commentCreateResult.id() (댓글 ID, 22L)와 비교한다.
@@ -127,7 +128,7 @@ public class CommentServiceTest {
 
     when(commentMapper.toCommentCreateResult(selfComment)).thenReturn(selfResult);
 
-    commentService.createComment(selfCommand);
+    commentService.createComment(selfCommand, selfCommentWriter.getId());
 
     //알림 서비스가 호출되지 않았는지 검증
     verify(notificationService, never()).create(any(), any(), any());
@@ -136,25 +137,27 @@ public class CommentServiceTest {
   @Test
   @DisplayName("댓글 생성 실패 - 리뷰를 찾을 수 없음 (404)")
   void createCommentNotFoundReview() {
-    // Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
+    // given (준비): Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
     when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Review");
+    // when & then (실행 및 검증)
+    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand, commentWriter.getId()))
+        .isInstanceOf(CustomException.class)
+        .hasMessage(ErrorCode.COMMENT_REVIEW_NOT_FOUND.getMessage());
   }
 
   @Test
   @DisplayName("댓글 생성 실패 - 멤버(사용자)를 찾을 수 없음 (404)")
   void createCommentNotFoundMember() {
-    // Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
+    // given (준비): Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
     when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.of(review));
     // 그 다음 Member를 못 찾았다고 가정 when
     when(memberRepository.findById(commentCreateCommand.memberId())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Member");
+    // when & then (실행 및 검증)
+    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand,  commentWriter.getId()))
+        .isInstanceOf(CustomException.class)
+        .hasMessage(ErrorCode.COMMENT_USER_NOT_FOUND.getMessage());
   }
 
 }

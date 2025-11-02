@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -21,6 +22,7 @@ public class Comment extends BaseUpdatableEntity {
   @Column(nullable = false)
   private String content;
 
+  @Builder.Default
   @Column(nullable = false)
   private boolean deleted = false; //기본값 설정
 
@@ -33,4 +35,8 @@ public class Comment extends BaseUpdatableEntity {
   @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
+
+  public void updateComment(String newContent) {
+    content = newContent;
+  }
 }

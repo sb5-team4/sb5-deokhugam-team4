@@ -9,12 +9,18 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Notification;
 import com.codeit.deokhugam.domain.entity.Review;
+import com.codeit.deokhugam.dto.command.GetNotificationCommand;
 import com.codeit.deokhugam.dto.command.ReadNotificationCommand;
+import com.codeit.deokhugam.dto.result.GetNotificationOneResult;
+import com.codeit.deokhugam.dto.result.GetNotificationResult;
+import com.codeit.deokhugam.dto.result.PaginatedResult;
 import com.codeit.deokhugam.dto.result.ReadNotificationResult;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.NotificationRepository;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,5 +96,24 @@ public class NotificationService {
       notification.read(confirmed);
     });
 
+  }
+
+  public GetNotificationResult getAll(GetNotificationCommand command) {
+    Long userId = command.getUserId();
+    Direction direction = command.getDirection();
+    Instant cursor = command.getCursor();
+    Instant after = command.getAfter();
+    Integer limit = command.getLimit();
+
+    PaginatedResult<Notification, Instant> entitiesResult = notificationRepository.searchWithCursor(
+        userId, direction, cursor, after, limit
+    );
+
+    List<GetNotificationOneResult> notificationDetailResult = entitiesResult.getContent()
+        .stream().map(notification
+            -> GetNotificationOneResult.from(userId, notification.getReview(), notification))
+        .toList();
+
+    return GetNotificationResult.from(entitiesResult, notificationDetailResult);
   }
 }

@@ -60,7 +60,8 @@ public class PopularReviewQueryRepositoryImpl implements PopularReviewQueryRepos
     }
 
     List<PopularReview> contents = queryFactory.selectFrom(pr)
-        .where(where)
+        .where(where.and(pr.ordered.isTrue()))
+        .where(pr.review.deleted.isFalse())
         .distinct()
         .join(pr.review).fetchJoin()
         .join(pr.review.book).fetchJoin()
@@ -83,7 +84,8 @@ public class PopularReviewQueryRepositoryImpl implements PopularReviewQueryRepos
     Long count = queryFactory
         .select(pr.count())
         .from(pr)
-        .where(pr.review.deleted.isFalse()) // review 가 삭제되지 않은 것만
+        .where(where.and(pr.ordered.isTrue()))
+        .where(pr.review.deleted.isFalse())
         .fetchOne();
 
     return PaginatedResult.<PopularReview, Long>builder()

@@ -7,11 +7,13 @@ import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookInfoByIsbnCommand;
 import com.codeit.deokhugam.dto.command.BookListCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.command.IsbnOcrCommand;
 import com.codeit.deokhugam.dto.response.BookResponse;
 import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
 import com.codeit.deokhugam.dto.result.BookListResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
+import com.codeit.deokhugam.dto.result.IsbnOcrResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.impl.BookQueryRepositoryImpl;
@@ -31,6 +33,7 @@ public class BookService {
   private final S3Service s3Service;
   private final NaverApiService naverApiService;
   private final BookQueryRepositoryImpl bookQueryRepository;
+  private final IsbnOcrService isbnOcrService;
 
   @Transactional
   public BookCreateResult createBook(BookCreateCommand command, MultipartFile thumbnailImage) {
@@ -179,5 +182,14 @@ public class BookService {
       default -> book.getTitle();
     };
 
+  }
+
+  @Transactional(readOnly = true)
+  public IsbnOcrResult recognizeIsbnByOcr(IsbnOcrCommand command) {
+    String isbn = isbnOcrService.extractIsbnFromImage(command.getImage());
+
+    return IsbnOcrResult.builder()
+        .isbn(isbn)
+        .build();
   }
 }

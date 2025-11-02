@@ -4,6 +4,7 @@ import com.codeit.deokhugam.dto.command.BookCreateCommand;
 import com.codeit.deokhugam.dto.command.BookInfoByIsbnCommand;
 import com.codeit.deokhugam.dto.command.BookListCommand;
 import com.codeit.deokhugam.dto.command.BookUpdateCommand;
+import com.codeit.deokhugam.dto.command.IsbnOcrCommand;
 import com.codeit.deokhugam.dto.request.BookCreateRequest;
 import com.codeit.deokhugam.dto.request.BookListRequest;
 import com.codeit.deokhugam.dto.request.BookUpdateRequest;
@@ -14,10 +15,12 @@ import com.codeit.deokhugam.dto.result.BookCreateResult;
 import com.codeit.deokhugam.dto.result.BookInfoByIsbnResult;
 import com.codeit.deokhugam.dto.result.BookListResult;
 import com.codeit.deokhugam.dto.result.BookUpdateResult;
+import com.codeit.deokhugam.dto.result.IsbnOcrResult;
 import com.codeit.deokhugam.mapper.BookMapper;
 import com.codeit.deokhugam.service.BookService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -140,7 +143,7 @@ public class BookController {
   /**
    * 도서 목록 조회
    *
-   * @param 검색/정렬/페이지네이션 조건
+   * @param /검색/정렬/페이지네이션 조건
    * @return 도서 목록
    */
   @GetMapping
@@ -151,5 +154,24 @@ public class BookController {
     BookListResult result = bookService.getBookList(command);
     BookListResponse response = bookMapper.toBookListResponse(result);
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * OCR 기반 ISBN 인식
+   *
+   * @param image 도서 이미지 파일
+   * @return ISBN 번호
+   */
+  @PostMapping("/isbn/ocr")
+  public ResponseEntity<String> recognizeIsbnByOcr(
+      @RequestParam("image") @NotNull(message = "이미지 파일은 필수입니다.") MultipartFile image) {
+
+    IsbnOcrCommand command = IsbnOcrCommand.builder()
+        .image(image)
+        .build();
+
+    IsbnOcrResult result = bookService.recognizeIsbnByOcr(command);
+
+    return ResponseEntity.ok(result.getIsbn());
   }
 }

@@ -89,7 +89,7 @@ CREATE TABLE notification
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     member_Id  BIGINT                                          NOT NULL,
     review_Id  BIGINT                                          NOT NULL,
-    comment_id BIGINT                                          NOT NULL,
+    comment_id BIGINT                                          NULL,
     content    VARCHAR(50)                                     NOT NULL,
     confirmed  BOOLEAN                                         NOT NULL,
     created_at timestamp with time zone                        NOT NULL,
@@ -220,7 +220,6 @@ ALTER TABLE notification
         REFERENCES review (
                            id
             )
-        ON DELETE CASCADE
 ;
 
 -- notification -> comment 외래 키 제약 조건 추가

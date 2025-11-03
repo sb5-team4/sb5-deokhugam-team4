@@ -1,7 +1,7 @@
 package com.codeit.deokhugam.fixture;
 
 import com.codeit.deokhugam.domain.entity.Book;
-import com.codeit.deokhugam.dto.result.BookCreateResult;
+import com.codeit.deokhugam.dto.result.book.BookCreateResult;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;

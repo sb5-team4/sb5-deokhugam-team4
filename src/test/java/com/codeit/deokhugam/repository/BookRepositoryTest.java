@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.fixture.BookFixture;
+import com.codeit.deokhugam.repository.book.BookRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;

@@ -1,6 +1,7 @@
 package com.codeit.deokhugam.controller;
 
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentHardDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
@@ -131,6 +132,20 @@ public class CommentController {
     CommentSoftDeleteCommand command = commentMapper.toSoftDeleteCommand(commentId, requestMemberId);
 
     commentService.softDeleteComment(command);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  // 물리 삭제
+  @DeleteMapping("/{commentId}/hard")
+  public ResponseEntity<Void> hardDeleteComment(
+      @PathVariable Long commentId,
+      @RequestHeader("Deokhugam-Request-User-ID") Long requestMemberId
+  ) {
+
+    CommentHardDeleteCommand command = commentMapper.toCommentHardDeleteCommand(commentId, requestMemberId);
+
+    commentService.hardDeleteComment(command);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

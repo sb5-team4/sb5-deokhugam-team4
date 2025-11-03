@@ -6,6 +6,7 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentHardDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
@@ -80,8 +81,8 @@ public class CommentService {
     Long reviewId = command.reviewId();
 
 
+    //404 예외
     if (!reviewRepository.existsById(reviewId)) {
-      // 존재하지 않는 리뷰 ID로 조회 시 404 예외 발생
       throw new CustomException(ErrorCode.COMMENT_REVIEW_NOT_FOUND);
     }
 
@@ -147,14 +148,8 @@ public class CommentService {
   @Transactional
   public CommentUpdateResult updateComment(CommentUpdateCommand command) {
 
-    // 수정할 댓글을 commentId로 조회 (404)
-    Comment comment = commentRepository.findById(command.commentId())
-        .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
-
-    // 요청자 Id와 댓글 작성자 Id 일치 검증 (403)
-    if(!comment.getMember().getId().equals(command.requestMemberId())) {
-      throw new CustomException(ErrorCode.COMMENT_NOT_AUTHORIZED);
-    }
+    // 요청자 소유자 체크 헬퍼 메소드로 수정함
+    Comment comment = findCommentAndCheckAuthority(command.commentId(), command.requestMemberId());
 
     // 논리 삭제된 댓글인지 확인 (deleted == true)
     if (comment.isDeleted()) {
@@ -167,24 +162,41 @@ public class CommentService {
     return commentMapper.toCommentUpdateResult(comment);
   }
 
-
   // 댓글 논리 삭제
   @Transactional
   public void softDeleteComment(CommentSoftDeleteCommand command) {
 
-    Long commentId = command.commentId();
-    Long requestMemberId = command.requestMemberId();
+    // 요청자 소유자 체크 헬퍼 메소드로 수정함
+    Comment comment = findCommentAndCheckAuthority(command.commentId(), command.requestMemberId());
 
+    // 2. 엔티티의 softDelete() 메소드 호출 (deleted = true로 변경)
+    comment.softDelete();
+  }
+
+  // 댓글 물리 삭제
+  @Transactional
+  public void hardDeleteComment(CommentHardDeleteCommand command) {
+
+    // 요청자 소유자 체크 헬퍼 메소드로 수정함
+    Comment comment = findCommentAndCheckAuthority(command.commentId(), command.requestMemberId());
+
+    // 물리 삭제 실행
+    commentRepository.delete(comment);
+  }
+
+
+
+  // 요청자 소유자 체크 헬퍼 메소드로 수정함
+  private Comment findCommentAndCheckAuthority(Long commentId, Long requestMemberId) {
     // 댓글 조회 (404)
     Comment comment = commentRepository.findById(commentId)
         .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
     // 권한 검증 (403)
-    if(!comment.getMember().getId().equals(requestMemberId)) {
+    if (!comment.getMember().getId().equals(requestMemberId)) {
       throw new CustomException(ErrorCode.COMMENT_NOT_AUTHORIZED);
     }
 
-    // 엔티티의 softDelete() 메소드 호출 (deleted = true로 변경)
-    comment.softDelete();
+    return comment;
   }
 }

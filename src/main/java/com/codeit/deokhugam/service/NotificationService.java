@@ -42,6 +42,7 @@ public class NotificationService {
     Notification notification = Notification.builder()
         .member(recipient) // 알림 받는 사람
         .review(review)
+        .comment(comment)
         .content(content)
         .confirmed(false)
         .deleted(false)

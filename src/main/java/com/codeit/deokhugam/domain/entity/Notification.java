@@ -36,6 +36,10 @@ public class Notification extends BaseUpdatableEntity {
   @JoinColumn(name = "review_id", nullable = false)
   private Review review;
 
+  @ManyToOne(cascade = CascadeType.REMOVE)
+  @JoinColumn(name = "comment_id", nullable = false)
+  private Comment comment;
+
   public void read(boolean confirmed) {
     this.confirmed = confirmed;
   }

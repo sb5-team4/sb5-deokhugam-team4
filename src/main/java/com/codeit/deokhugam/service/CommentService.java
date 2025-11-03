@@ -36,7 +36,7 @@ public class CommentService {
   private final CommentMapper commentMapper;
 
 
-  // 댓글 생성 기능
+  // 댓글 생성 기능 (기존 코드)
   @Transactional
   public CommentCreateResult createComment(CommentCreateCommand command, Long requestMemberId) {
 
@@ -79,6 +79,7 @@ public class CommentService {
 
     int limit = command.commentLimit();
     Long reviewId = command.reviewId();
+
 
     //404 예외
     if (!reviewRepository.existsById(reviewId)) {

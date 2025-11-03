@@ -19,7 +19,7 @@ public class PopularBookReader implements ItemReader<PopularBookDto> {
   private Iterator<PopularBookDto> bookIterator;
 
   /**
-   * 데이터 한 건씩 읽어서 반환하는 메서드 null이 리턴되면 배치 종료
+   * 데이터 한 건씩 읽어서 반환하는 메서드, null이 리턴되면 배치 종료
    */
   @Override
   public PopularBookDto read() {

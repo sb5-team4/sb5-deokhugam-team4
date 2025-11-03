@@ -43,6 +43,7 @@ FROM generate_series(1, 100) AS i;
 -- 3) REVIEW 100개
 -----------------------------------------------------
 INSERT INTO review (book_id, member_id, created_at, updated_at, deleted, rating, content)
+
 SELECT ((i - 1) % 100) + 1,
        ((i - 1) % 100) + 1,
        NOW() - INTERVAL '7 days', -- created_at 1주일 전
@@ -50,7 +51,7 @@ SELECT ((i - 1) % 100) + 1,
        (RANDOM() < 0.5),
        (i % 5) + 1,
        'content ' || i
-FROM generate_series(1, 100) AS i;
+FROM generate_series(1, 10) AS i;
 
 -----------------------------------------------------
 -- 4) REVIEW_LIKE 100개
@@ -60,6 +61,7 @@ SELECT ((i - 1) % 30) + 1,
        ((i - 1) % 100) + 1,
        NOW() - INTERVAL '7 days' -- created_at 1주일 전
 FROM generate_series(1, 100) AS i;
+
 
 -----------------------------------------------------
 -- 5) COMMENT 100개

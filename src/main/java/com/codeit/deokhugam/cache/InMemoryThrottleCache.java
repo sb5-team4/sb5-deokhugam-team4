@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class InMemoryDebounceCache implements DebounceCache {
+public class InMemoryThrottleCache implements ThrottleCache {
 
   private final Map<String, Long> cache = new ConcurrentHashMap<>();
 

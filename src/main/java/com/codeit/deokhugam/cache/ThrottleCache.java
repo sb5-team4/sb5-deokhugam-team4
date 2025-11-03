@@ -1,6 +1,6 @@
 package com.codeit.deokhugam.cache;
 
-public interface DebounceCache {
+public interface ThrottleCache {
 
   boolean tryAcquire(String key, long ttlMs);
 }

@@ -58,7 +58,7 @@ CREATE TABLE book
     published_date DATE                                            NOT NULL,
     isbn           VARCHAR(13)                                     NULL,
     thumbnail_url  VARCHAR(500)                                    NULL,
-    review_count   BIGINT                                             NOT NULL,
+    review_count   BIGINT                                          NOT NULL,
     rating         DECIMAL(3, 2)                                   NOT NULL,
     deleted        BOOLEAN                                         NOT NULL,
     created_at     timestamp with time zone                        NOT NULL,
@@ -112,12 +112,14 @@ CREATE TABLE member
 DROP TABLE IF EXISTS popular_book CASCADE;
 CREATE TABLE popular_book
 (
-    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
-    book_id    BIGINT                                          NOT NULL,
-    period     VARCHAR(20)                                     NOT NULL,
-    rank       SMALLINT                                        NOT NULL,
-    score      DECIMAL(10, 2)                                  NOT NULL,
-    created_at timestamp with time zone                        NOT NULL
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
+    book_id      BIGINT                                          NOT NULL,
+    period       VARCHAR(20)                                     NOT NULL,
+    rank         SMALLINT                                        NOT NULL,
+    rating       DECIMAL(10, 2)                                  NOT NULL,
+    review_count BIGINT                                          NOT NULL,
+    score        DECIMAL(10, 2)                                  NOT NULL,
+    created_at   timestamp with time zone                        NOT NULL
 );
 
 -- ALTER TABLE review_like
@@ -244,3 +246,35 @@ ALTER TABLE popular_book
         ON DELETE CASCADE
 ;
 
+-- 1️⃣ 개별 리뷰별 차이 계산
+WITH review_stats AS (SELECT r.id                          AS review_id,
+                             r.like_count                  AS review_like_count,
+                             COUNT(rl.id)                  AS actual_like_count,
+                             (r.like_count - COUNT(rl.id)) AS diff_count,
+                             ROUND(
+                                     CASE
+                                         WHEN COUNT(rl.id) = 0 THEN 0
+                                         ELSE
+                                             ((r.like_count - COUNT(rl.id))::decimal / COUNT(rl.id)) *
+                                             100
+                                         END, 2
+                             )                             AS diff_percent
+                      FROM review r
+                               LEFT JOIN review_like rl ON r.id = rl.review_id
+                      GROUP BY r.id, r.like_count)
+
+-- 2️⃣ 전체 합계/평균 추가
+SELECT *
+FROM review_stats
+
+UNION ALL
+
+SELECT NULL                        AS review_id,
+       SUM(review_like_count)      AS review_like_count,
+       SUM(actual_like_count)      AS actual_like_count,
+       SUM(diff_count)             AS diff_count,
+       ROUND(AVG(diff_percent), 2) AS diff_percent -- ✅ 평균만 계산
+
+FROM review_stats
+
+ORDER BY review_id NULLS LAST;

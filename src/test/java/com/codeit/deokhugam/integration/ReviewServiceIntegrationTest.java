@@ -366,4 +366,63 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
 
   }
 
+  @Test
+  @DisplayName("리뷰 좋아요 시 리뷰 테이블 좋아요 수 필드 count up")
+  void LikeReviewV2ThenReviewLikeCountUp() {
+    review.setLikeCount(1L);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    long beforeCount = review.getLikeCount();
+    System.out.println("@@@@");
+    System.out.println(member);
+    System.out.println(member.getId());
+
+    LikeReviewCommand command = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    likeReviewService.likeReviewV2(command);
+    em.flush();
+    em.clear();
+
+    long afterCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+
+    assertThat(afterCount).isEqualTo(beforeCount + 1);
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 취소시 리뷰 테이블 좋아요 수 필드 count down")
+  void UnlikeReviewV2ThenReviewLikeCountDown() {
+    // Given
+    review.setLikeCount(1L);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    LikeReviewCommand upCommand = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    LikeReviewCommand downCommand = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+
+    likeReviewService.likeReviewV2(upCommand);
+    em.flush();
+    em.clear();
+
+    // When
+    long beforeCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+    likeReviewService.likeReviewV2(downCommand);
+    em.flush();
+    em.clear();
+    long afterCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+
+    // Then
+    assertThat(afterCount).isEqualTo(beforeCount - 1);
+  }
+
 }

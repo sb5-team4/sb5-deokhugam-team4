@@ -33,8 +33,6 @@ public class PopularBookProcessor implements ItemProcessor<PopularBookDto, Popul
         .period(dto.getPeriod())
         .rank((short) 0)
         .score(score)
-        .reviewCount(dto.getReviewCount())
-        .rating(dto.getAverageRating())
         .build();
 
     return popularBook;

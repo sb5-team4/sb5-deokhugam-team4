@@ -58,7 +58,7 @@ CREATE TABLE book
     published_date DATE                                            NOT NULL,
     isbn           VARCHAR(13)                                     NULL,
     thumbnail_url  VARCHAR(500)                                    NULL,
-    review_count   INT                                             NOT NULL,
+    review_count   BIGINT                                             NOT NULL,
     rating         DECIMAL(3, 2)                                   NOT NULL,
     deleted        BOOLEAN                                         NOT NULL,
     created_at     timestamp with time zone                        NOT NULL,

@@ -13,6 +13,7 @@ import com.codeit.deokhugam.fixture.BookFixture;
 import com.codeit.deokhugam.fixture.MemberFixture;
 import com.codeit.deokhugam.fixture.PopularReviewFixture;
 import com.codeit.deokhugam.fixture.ReviewFixture;
+import com.codeit.deokhugam.repository.book.BookRepository;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.Instant;

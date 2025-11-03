@@ -184,7 +184,6 @@ public class BookService {
 
   }
 
-  @Transactional(readOnly = true)
   public IsbnOcrResult recognizeIsbnByOcr(IsbnOcrCommand command) {
     String isbn = isbnOcrService.extractIsbnFromImage(command.getImage());
 

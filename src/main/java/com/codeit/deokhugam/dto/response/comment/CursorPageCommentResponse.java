@@ -9,7 +9,7 @@ import java.util.List;
  */
 public record CursorPageCommentResponse(
     // 실제 댓글 리스트 호출
-    List<CommentResponse> comments,
+    List<CommentResponse> content,
 
     // 페이지네이션 정보
     String nextCursor,

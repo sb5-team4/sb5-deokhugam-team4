@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,5 +27,13 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
   long countByReviewId(Long reviewId);
 
   long countByReviewIdAndCreatedAtBetween(Long reviewId, Instant from, Instant to);
+
+  @Modifying
+  @Query(value = """
+      INSERT INTO review_like (review_id, member_id, created_at)
+      VALUES (:reviewId, :memberId, now())
+      ON CONFLICT (review_id, member_id) DO NOTHING
+      """, nativeQuery = true)
+  void insertIgnoreConflict(@Param("reviewId") Long reviewId, @Param("memberId") Long memberId);
 
 }

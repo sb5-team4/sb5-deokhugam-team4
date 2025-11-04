@@ -16,9 +16,16 @@ public interface ReviewRepository
   Optional<Review> findByIdAndDeletedIsFalse(Long aLong);
 
   List<Review> findAllByDeletedIsFalse();
-  
+
   @Modifying
   @Query("DELETE FROM Review r WHERE r.deleted = true AND r.updatedAt < :updatedAt")
   void hardDeleteAllBefore(@Param("updatedAt") Instant updatedAt);
 
+  @Modifying
+  @Query("UPDATE Review r SET r.likeCount = r.likeCount + 1 WHERE r.id = :reviewId")
+  int incrementLikeCount(@Param("reviewId") Long reviewId);
+
+  @Modifying
+  @Query("UPDATE Review r SET r.likeCount = r.likeCount -1 WHERE r.id = :reviewId")
+  int decrementLikeCount(@Param("reviewId") Long reviewId);
 }

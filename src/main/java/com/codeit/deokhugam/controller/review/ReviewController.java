@@ -98,7 +98,7 @@ public class ReviewController {
       @PathVariable Long reviewId,
       @RequestHeader("Deokhugam-Request-User-ID") Long memberId
   ) {
-    LikeReviewResult result = likeReviewService.likeReview(LikeReviewCommand.builder()
+    LikeReviewResult result = likeReviewService.likeReviewV2(LikeReviewCommand.builder()
         .reviewId(reviewId)
         .memberId(memberId)
         .build());

@@ -98,13 +98,14 @@ public class MemberService {
   @Transactional(readOnly = true)
   public PowerMemberFindResult findPowerMember(PowerMemberFindCommand command) {
     Slice<PowerMemberDto> slice = memberQueryRepository.findPowerMembers(command);
+    long totalCount = memberQueryRepository.countPowerMembers(command);
     PowerMemberFindResult result = new PowerMemberFindResult(
         slice.getContent(),
         slice.hasNext() ? slice.getContent().get(slice.getSize() - 1).rank() : null,
         slice.hasNext() && !slice.isEmpty() ? slice.getContent().get(slice.getSize() - 1)
             .createdAt() : null,
         slice.getSize(),
-        slice.getNumberOfElements(),
+        totalCount,
         slice.hasNext()
     );
 

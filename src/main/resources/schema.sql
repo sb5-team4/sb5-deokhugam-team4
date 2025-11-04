@@ -228,14 +228,14 @@ ALTER TABLE notification
 ;
 
 -- notification -> comment 외래 키 제약 조건 추가
-ALTER TABLE notification
-    ADD CONSTRAINT FK_comment_TO_notification_1 FOREIGN KEY (
-                                                             comment_id
-        )
-        REFERENCES comment (
-                            id
-            )
-        ON DELETE CASCADE
+-- ALTER TABLE notification
+--     ADD CONSTRAINT FK_comment_TO_notification_1 FOREIGN KEY (
+--                                                              comment_id
+--         )
+--         REFERENCES comment (
+--                             id
+--             )
+--         ON DELETE CASCADE
 ;
 
 ALTER TABLE popular_book

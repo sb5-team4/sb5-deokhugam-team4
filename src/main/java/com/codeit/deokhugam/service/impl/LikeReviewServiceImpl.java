@@ -14,11 +14,14 @@ import com.codeit.deokhugam.service.LikeReviewCommand;
 import com.codeit.deokhugam.service.LikeReviewResult;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.NotificationService;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LikeReviewServiceImpl implements LikeReviewService {
@@ -93,6 +96,11 @@ public class LikeReviewServiceImpl implements LikeReviewService {
    */
   @Override
   @Transactional
+  @Retryable(
+      retryFor = {ObjectOptimisticLockingFailureException.class},
+      maxAttempts = 10,
+      backoff = @Backoff(100)
+  )
   public LikeReviewResult likeReviewV2(LikeReviewCommand command) {
     long memberId = command.getMemberId();
     long reviewId = command.getReviewId();

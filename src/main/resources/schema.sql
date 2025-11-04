@@ -78,6 +78,8 @@ CREATE TABLE review
     content       VARCHAR(1000)                                   NOT NULL,
     like_count    BIGINT                                          NOT NULL DEFAULT 0,
     comment_count BIGINT                                          NOT NULL DEFAULT 0,
+    version       BIGINT                                          NOT NULL DEFAULT 0,
+
     CONSTRAINT uq_review UNIQUE (book_id, member_id)
 
 );

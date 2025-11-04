@@ -20,28 +20,28 @@ public class PopularBookScheduler {
   /**
    * 테스트용 메서드
    */
-  @Scheduled(cron = "0 * * * * *")
-  public void runPopularBookBatch() throws Exception {
-    log.info("===== 인기 도서 배치 시작 =====");
-
-    JobParameters jobParameters = new JobParametersBuilder()
-        .addLong("timestamp", System.currentTimeMillis())
-        .toJobParameters();
-
-    jobLauncher.run(popularBookJob, jobParameters);
-
-    log.info("===== 인기 도서 배치 완료 =====");
-  }
-
-//  /**
-//   * 실제 배포용: 매일 새벽 4시에 실행
-//   */
-//  @Scheduled(cron = "0 0 4 * * *")  // 매일 새벽 4시 실행
-//  public void runPopularBookBatchDaily() throws Exception {
+//  @Scheduled(cron = "0 * * * * *")
+//  public void runPopularBookBatch() throws Exception {
+//    log.info("===== 인기 도서 배치 시작 =====");
+//
 //    JobParameters jobParameters = new JobParametersBuilder()
 //        .addLong("timestamp", System.currentTimeMillis())
 //        .toJobParameters();
 //
 //    jobLauncher.run(popularBookJob, jobParameters);
+//
+//    log.info("===== 인기 도서 배치 완료 =====");
 //  }
+
+  /**
+   * 실제 배포용: 매일 새벽 4시에 실행
+   */
+  @Scheduled(cron = "0 0 4 * * *")  // 매일 새벽 4시 실행
+  public void runPopularBookBatchDaily() throws Exception {
+    JobParameters jobParameters = new JobParametersBuilder()
+        .addLong("timestamp", System.currentTimeMillis())
+        .toJobParameters();
+
+    jobLauncher.run(popularBookJob, jobParameters);
+  }
 }

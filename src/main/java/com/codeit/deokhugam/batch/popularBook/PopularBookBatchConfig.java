@@ -40,7 +40,6 @@ public class PopularBookBatchConfig {
     return new StepBuilder("cleanupStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
           popularBookRepository.deleteAllInBatch();
-          popularBookRepository.flush();
           return RepeatStatus.FINISHED;
         }, transactionManager)
         .build();

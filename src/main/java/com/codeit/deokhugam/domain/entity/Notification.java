@@ -7,15 +7,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @Getter
 @Setter
 @Entity
@@ -37,7 +37,7 @@ public class Notification extends BaseUpdatableEntity {
   private Review review;
 
   @ManyToOne(cascade = CascadeType.REMOVE)
-  @JoinColumn(name = "comment_id", nullable = false)
+  @JoinColumn(name = "comment_id", nullable = true)
   private Comment comment;
 
   public void read(boolean confirmed) {

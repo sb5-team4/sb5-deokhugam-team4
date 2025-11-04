@@ -38,10 +38,12 @@ public class PopularBookScheduler {
    */
   @Scheduled(cron = "0 0 4 * * *")  // 매일 새벽 4시 실행
   public void runPopularBookBatchDaily() throws Exception {
+    log.info("===== 인기 도서 배치 시작 =====");
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("timestamp", System.currentTimeMillis())
         .toJobParameters();
 
     jobLauncher.run(popularBookJob, jobParameters);
+    log.info("===== 인기 도서 배치 완료 =====");
   }
 }

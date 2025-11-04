@@ -17,8 +17,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookQueryRepo
 
   Optional<Book> findByIsbn(String Isbn);
 
-  boolean existsByIsbn(String Isbn);
-
   // 배치 작업용 메서드
   @Query("""
       SELECT new com.codeit.deokhugam.batch.popularBook.dto.PopularBookDto(

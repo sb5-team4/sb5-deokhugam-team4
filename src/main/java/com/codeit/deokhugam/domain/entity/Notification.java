@@ -36,7 +36,7 @@ public class Notification extends BaseUpdatableEntity {
   private Review review;
 
   @ManyToOne
-  @JoinColumn(name = "comment_id", nullable = false)
+  @JoinColumn(name = "comment_Id")
   private Comment comment;
 
   public void read(boolean confirmed) {

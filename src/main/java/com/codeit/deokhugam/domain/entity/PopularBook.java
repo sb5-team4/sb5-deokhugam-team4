@@ -29,10 +29,10 @@ public class PopularBook extends BaseEntity {
   @Column(name = "score", nullable = false, precision = 10, scale = 2)
   private BigDecimal score;
 
-  @Column(name = "review_count", nullable = false)
-  private Long reviewCount;
-  @Column(name = "rating", nullable = false, precision = 3, scale = 2)
-  private BigDecimal rating;
+//  @Column(name = "review_count", nullable = false)
+//  private Long reviewCount;
+//  @Column(name = "rating", nullable = false, precision = 3, scale = 2)
+//  private BigDecimal rating;
 
   // 하나의 Book이 기간별(DAILY, WEEKLY, MONTHLY, ALL_TIME) PopularBook을 가져야 하므로 ManyToOne
   @ManyToOne

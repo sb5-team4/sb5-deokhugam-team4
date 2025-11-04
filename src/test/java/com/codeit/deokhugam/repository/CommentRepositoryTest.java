@@ -9,6 +9,7 @@ import com.codeit.deokhugam.domain.entity.Book;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
+import com.codeit.deokhugam.repository.book.BookRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,7 +32,8 @@ import org.springframework.data.auditing.DateTimeProvider;
 
 // JPA 테스트 관련 설정 활성화 (@Transactional 포함되어 있음)
 @DataJpaTest
-@Import({QuerydslConfig.class, CommentRepositoryTest.TestAuditConfiguration.class}) // Querydsl 및 Auditing Mock 설정 Import
+@Import({QuerydslConfig.class, CommentRepositoryTest.TestAuditConfiguration.class})
+// Querydsl 및 Auditing Mock 설정 Import
 public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testcontainers 설정 상속
 
   // 테스트 시작 전 JVM 시간대 UTC로 설정
@@ -43,6 +45,7 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
   // --- Mock DateTimeProvider 설정을 위한 내부 클래스 ---
   @TestConfiguration
   static class TestAuditConfiguration {
+
     @Bean
     @Primary // 기본 DateTimeProvider 대신 이 Mock Bean을 사용
     public DateTimeProvider testDateTimeProvider() {
@@ -120,7 +123,8 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
   }
 
   // --- Helper Method (Auditing Mocking 방식) ---
-  private Comment createAndSaveComment(String content, Review review, Member member, Instant expectedCreatedAt) {
+  private Comment createAndSaveComment(String content, Review review, Member member,
+      Instant expectedCreatedAt) {
     Comment comment = Comment.builder()
         .content(content)
         .review(review)
@@ -137,7 +141,8 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
 
     // DB에서 다시 조회하여 createdAt이 확실히 반영된 객체를 반환
     return commentRepository.findById(savedId)
-        .orElseThrow(() -> new IllegalStateException("Failed to find saved comment with ID: " + savedId));
+        .orElseThrow(
+            () -> new IllegalStateException("Failed to find saved comment with ID: " + savedId));
   }
   // --- Helper Method 끝 ---
 
@@ -196,7 +201,6 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
     assertThat(foundOptional).isNotPresent();
   }
 
-
   // 2. GET 댓글 목록 조회 Test (cursorId 파라미터 추가) --------------------------------------------------
 
   @Test
@@ -205,13 +209,17 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
 
     // given: 헬퍼 메서드로 정확한 createdAt 값으로 데이터 생성
     Instant now = Instant.now();
-    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember, now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
-    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember, now.minus(2, ChronoUnit.HOURS));
-    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember, now.minus(1, ChronoUnit.HOURS)); // 가장 최신
+    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember,
+        now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
+    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember,
+        now.minus(2, ChronoUnit.HOURS));
+    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember,
+        now.minus(1, ChronoUnit.HOURS)); // 가장 최신
 
     // when: 첫 페이지 조회 (after=null, cursorId=null, limit=2, DESC)
     int limitComment = 2;
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "DESC", null, null, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "DESC", null,
+        null, limitComment);
 
     // then: limit+1개인 3개가 최신순(c3, c2, c1)으로 조회되어야 함
     assertThat(commentList).hasSize(limitComment + 1);
@@ -225,15 +233,19 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
   @DisplayName("댓글 목록 조회 - 다음 페이지(내림차순)")
   void findByCommentReviewIdWithCursorNextPageDesc() {
     Instant now = Instant.now();
-    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember, now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
-    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember, now.minus(2, ChronoUnit.HOURS));
-    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember, now.minus(1, ChronoUnit.HOURS)); // 가장 최신
+    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember,
+        now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
+    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember,
+        now.minus(2, ChronoUnit.HOURS));
+    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember,
+        now.minus(1, ChronoUnit.HOURS)); // 가장 최신
 
     // when: 두 번째 페이지 조회 (after=c2의 createdAt, cursorId=c2의 ID, limit=2, DESC)
     int limitComment = 2;
     Instant after = testComment2.getCreatedAt(); // 보조 커서 (시간)
     Long cursorId = testComment2.getId();     // 메인 커서 (ID)
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "DESC", after, cursorId, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "DESC", after,
+        cursorId, limitComment);
 
     // then: 나머지 댓글 1개(c1)만 조회되어야 함
     assertThat(commentList).hasSize(1);
@@ -244,10 +256,12 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
   @DisplayName("댓글 목록 조회 - 다음 페이지 없음 (내림차순)")
   void findByCommentReviewIdWithCursorNoNextPageDesc() {
     Instant now = Instant.now();
-    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember, now.minus(1, ChronoUnit.HOURS));
+    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember,
+        now.minus(1, ChronoUnit.HOURS));
 
     int limitComment = 2;
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "DESC", null, null, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "DESC", null,
+        null, limitComment);
 
     assertThat(commentList).hasSize(1);
     assertThat(commentList.get(0).getId()).isEqualTo(testComment1.getId());
@@ -255,14 +269,18 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
 
   @Test
   @DisplayName("댓글 목록 조회 - 첫 페이지(오름차순)")
-  void findByCommentReviewIdWithCursorFirstPageAsc(){
+  void findByCommentReviewIdWithCursorFirstPageAsc() {
     Instant now = Instant.now();
-    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember, now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
-    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember, now.minus(2, ChronoUnit.HOURS));
-    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember, now.minus(1, ChronoUnit.HOURS)); // 가장 최신
+    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember,
+        now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
+    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember,
+        now.minus(2, ChronoUnit.HOURS));
+    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember,
+        now.minus(1, ChronoUnit.HOURS)); // 가장 최신
 
     int limitComment = 2;
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "ASC", null, null, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "ASC", null,
+        null, limitComment);
 
     assertThat(commentList).hasSize(limitComment + 1);
     assertThat(commentList.get(0).getId()).isEqualTo(testComment1.getId());
@@ -272,17 +290,21 @@ public class CommentRepositoryTest extends DataBaseConnectionSupport { // Testco
 
   @Test
   @DisplayName("댓글 목록 조회 - 다음 페이지(오름차순)")
-  void findByCommentReviewIdWithCursorNextPageAsc(){
+  void findByCommentReviewIdWithCursorNextPageAsc() {
     Instant now = Instant.now();
-    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember, now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
-    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember, now.minus(2, ChronoUnit.HOURS));
-    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember, now.minus(1, ChronoUnit.HOURS)); // 가장 최신
+    Comment testComment1 = createAndSaveComment("댓글 1", testReview, testMember,
+        now.minus(3, ChronoUnit.HOURS)); // 가장 오래됨
+    Comment testComment2 = createAndSaveComment("댓글 2", testReview, testMember,
+        now.minus(2, ChronoUnit.HOURS));
+    Comment testComment3 = createAndSaveComment("댓글 3", testReview, testMember,
+        now.minus(1, ChronoUnit.HOURS)); // 가장 최신
 
     int limitComment = 2;
-    Instant after = testComment2 .getCreatedAt(); // 보조 커서 (시간)
+    Instant after = testComment2.getCreatedAt(); // 보조 커서 (시간)
     Long cursorId = testComment2.getId();      // 메인 커서 (ID)
     // [수정!] cursorId 파라미터 전달
-    List<Comment> commentList = commentRepository.findByCommentReviewIdWithCursor(testReview.getId(), "ASC", after, cursorId, limitComment);
+    List<Comment> commentList = commentRepository.findByReviewId(testReview.getId(), "ASC", after,
+        cursorId, limitComment);
 
     // then: 나머지 댓글 1개(c3)만 조회되어야 함
     assertThat(commentList).hasSize(1);

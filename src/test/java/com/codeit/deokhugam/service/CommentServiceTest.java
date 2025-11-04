@@ -9,7 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codeit.deokhugam.common.exception.ResourceNotFoundException;
+import com.codeit.deokhugam.common.exception.handler.CustomException;
+import com.codeit.deokhugam.common.exception.handler.ErrorCode;
 import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
@@ -63,10 +64,12 @@ public class CommentServiceTest {
     review = Review.builder().id(11L).member(reviewOwner).content("책 좋습니다").build();
 
     commentWriter = Member.builder().id(2L).nickname("댓글 쓴 사람").build();
-    comment = Comment.builder().id(22L).review(review).member(commentWriter).content("리뷰 좋았습니다.").build();
+    comment = Comment.builder().id(22L).review(review).member(commentWriter).content("리뷰 좋았습니다.")
+        .build();
 
     // command 객체 초기화
-    commentCreateCommand = new CommentCreateCommand(review.getId(), commentWriter.getId(), "리뷰 좋았습니다.");
+    commentCreateCommand = new CommentCreateCommand(review.getId(), commentWriter.getId(),
+        "리뷰 좋았습니다.");
 
     // Mapper를 통해 Request -> Command 변환 하는건 Controller의 영역이니까 Command로 변환은 잘된다고 판단
 
@@ -96,7 +99,8 @@ public class CommentServiceTest {
     when(commentMapper.toCommentCreateResult(comment)).thenReturn(commentCreateResult);
 
     // when 실행 : 서비스 로직 호출
-    CommentCreateResult result = commentService.createComment(commentCreateCommand, commentWriter.getId());
+    CommentCreateResult result = commentService.createComment(commentCreateCommand,
+        commentWriter.getId());
 
     // then 검증 : 결과 확인
     // result.id() (생성된 댓글 ID, 22L)는 기대했던 commentCreateResult.id() (댓글 ID, 22L)와 비교한다.
@@ -104,7 +108,7 @@ public class CommentServiceTest {
     assertThat(result.content()).isEqualTo(commentCreateResult.content());
 
     // NotificationService 1번 호출 확인
-    verify(notificationService, times(1)).create(reviewOwner, review, comment);
+    verify(notificationService, times(1)).createCommentNotification(reviewOwner, review, comment);
   }
 
   @Test
@@ -114,15 +118,18 @@ public class CommentServiceTest {
 
     Member selfCommentWriter = Member.builder().id(3L).nickname("리뷰 주인 이자 본인 리뷰에 댓글 쓴사람").build();
     Review selfReview = Review.builder().id(33L).member(selfCommentWriter).build();
-    Comment selfComment = Comment.builder().id(44L).review(selfReview).member(selfCommentWriter).content("내 리뷰 댓글").build();
+    Comment selfComment = Comment.builder().id(44L).review(selfReview).member(selfCommentWriter)
+        .content("내 리뷰 댓글").build();
 
     CommentCreateCommand selfCommand = new CommentCreateCommand(33L, 3L, "내 리뷰 댓글");
-    CommentCreateResult selfResult = new CommentCreateResult(44L, 33L, 3L, "리뷰 주인 이자 본인 리뷰에 댓글 쓴사람", "내 리뷰 댓글", null, null);
+    CommentCreateResult selfResult = new CommentCreateResult(44L, 33L, 3L, "리뷰 주인 이자 본인 리뷰에 댓글 쓴사람",
+        "내 리뷰 댓글", null, null);
 
-
-    when(memberRepository.findById(selfCommentWriter.getId())).thenReturn(Optional.of(selfCommentWriter));
+    when(memberRepository.findById(selfCommentWriter.getId())).thenReturn(
+        Optional.of(selfCommentWriter));
     when(reviewRepository.findById(selfReview.getId())).thenReturn(Optional.of(selfReview));
-    when(commentMapper.toComment(selfCommand, selfReview, selfCommentWriter)).thenReturn(selfComment);
+    when(commentMapper.toComment(selfCommand, selfReview, selfCommentWriter)).thenReturn(
+        selfComment);
     when(commentRepository.save(selfComment)).thenReturn(selfComment);
 
     when(commentMapper.toCommentCreateResult(selfComment)).thenReturn(selfResult);
@@ -130,31 +137,36 @@ public class CommentServiceTest {
     commentService.createComment(selfCommand, selfCommentWriter.getId());
 
     //알림 서비스가 호출되지 않았는지 검증
-    verify(notificationService, never()).create(any(), any(), any());
+    verify(notificationService, never()).createCommentNotification(any(), any(), any());
   }
 
   @Test
   @DisplayName("댓글 생성 실패 - 리뷰를 찾을 수 없음 (404)")
   void createCommentNotFoundReview() {
-    // Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
+    // given (준비): Service 로직은 Review부터 찾으므로, Review는 못찾았다고 가정 when
     when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand, commentWriter.getId()))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Review");
+    // when & then (실행 및 검증)
+    assertThatThrownBy(
+        () -> commentService.createComment(commentCreateCommand, commentWriter.getId()))
+        .isInstanceOf(CustomException.class)
+        .hasMessage(ErrorCode.COMMENT_REVIEW_NOT_FOUND.getMessage());
   }
 
   @Test
   @DisplayName("댓글 생성 실패 - 멤버(사용자)를 찾을 수 없음 (404)")
   void createCommentNotFoundMember() {
-    // Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
-    when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(Optional.of(review));
+    // given (준비): Service 로직은 Review부터 찾으므로, Review는 찾았다고 가정 when
+    when(reviewRepository.findById(commentCreateCommand.reviewId())).thenReturn(
+        Optional.of(review));
     // 그 다음 Member를 못 찾았다고 가정 when
     when(memberRepository.findById(commentCreateCommand.memberId())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> commentService.createComment(commentCreateCommand,  commentWriter.getId()))
-        .isInstanceOf(ResourceNotFoundException.class)
-        .hasMessageContaining("Member");
+    // when & then (실행 및 검증)
+    assertThatThrownBy(
+        () -> commentService.createComment(commentCreateCommand, commentWriter.getId()))
+        .isInstanceOf(CustomException.class)
+        .hasMessage(ErrorCode.COMMENT_USER_NOT_FOUND.getMessage());
   }
 
 }

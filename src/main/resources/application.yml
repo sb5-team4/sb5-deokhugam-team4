@@ -24,3 +24,7 @@ aws:
     bucket: ${S3_BUCKET_NAME:deokhugam-thumbnails}
     base-url: https://${S3_BUCKET_NAME:deokhugam-thumbnails}.s3.ap-northeast-2.amazonaws.com
 
+# Ocr API, 환경변수로 주입받음, 없을 시 테스트용 더미 사용
+ocr:
+  api:
+    key: ${OCR_API_KEY:mock-key}

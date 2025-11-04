@@ -13,7 +13,6 @@ import com.codeit.deokhugam.dto.command.CreateReviewCommand;
 import com.codeit.deokhugam.dto.command.HardDeleteReviewCommand;
 import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
-import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.CommentRepository;
 import com.codeit.deokhugam.repository.DataBaseConnectionSupport;
 import com.codeit.deokhugam.repository.MemberRepository;
@@ -21,6 +20,7 @@ import com.codeit.deokhugam.repository.NotificationRepository;
 import com.codeit.deokhugam.repository.PopularReviewRepository;
 import com.codeit.deokhugam.repository.ReviewLikeRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
+import com.codeit.deokhugam.repository.book.BookRepository;
 import com.codeit.deokhugam.service.LikeReviewCommand;
 import com.codeit.deokhugam.service.LikeReviewService;
 import com.codeit.deokhugam.service.ReviewService;
@@ -364,6 +364,65 @@ public class ReviewServiceIntegrationTest extends DataBaseConnectionSupport {
     assertThat(afterReview.getRating()).isNotEqualTo(beforeRating);
 
 
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 시 리뷰 테이블 좋아요 수 필드 count up")
+  void LikeReviewV2ThenReviewLikeCountUp() {
+    review.setLikeCount(1L);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    long beforeCount = review.getLikeCount();
+    System.out.println("@@@@");
+    System.out.println(member);
+    System.out.println(member.getId());
+
+    LikeReviewCommand command = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    likeReviewService.likeReviewV2(command);
+    em.flush();
+    em.clear();
+
+    long afterCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+
+    assertThat(afterCount).isEqualTo(beforeCount + 1);
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 취소시 리뷰 테이블 좋아요 수 필드 count down")
+  void UnlikeReviewV2ThenReviewLikeCountDown() {
+    // Given
+    review.setLikeCount(1L);
+    reviewRepository.save(review);
+    em.flush();
+    em.clear();
+
+    LikeReviewCommand upCommand = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+    LikeReviewCommand downCommand = LikeReviewCommand.builder()
+        .memberId(member.getId())
+        .reviewId(review.getId())
+        .build();
+
+    likeReviewService.likeReviewV2(upCommand);
+    em.flush();
+    em.clear();
+
+    // When
+    long beforeCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+    likeReviewService.likeReviewV2(downCommand);
+    em.flush();
+    em.clear();
+    long afterCount = reviewRepository.findById(review.getId()).get().getLikeCount();
+
+    // Then
+    assertThat(afterCount).isEqualTo(beforeCount - 1);
   }
 
 }

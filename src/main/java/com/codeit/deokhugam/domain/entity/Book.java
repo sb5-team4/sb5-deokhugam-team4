@@ -40,6 +40,8 @@ public class Book extends BaseUpdatableEntity {
   @Builder.Default
   @Column(name = "review_count", nullable = false)
   private Long reviewCount = 0L;
+
+  @Builder.Default
   @Column(name = "rating", nullable = false, precision = 3, scale = 2)
   private BigDecimal rating = BigDecimal.ZERO;
 

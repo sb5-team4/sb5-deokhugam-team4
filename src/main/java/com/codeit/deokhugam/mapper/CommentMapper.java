@@ -4,11 +4,16 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentHardDeleteCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
 import com.codeit.deokhugam.dto.request.comment.CommentCreateRequest;
+import com.codeit.deokhugam.dto.request.comment.CommentUpdateRequest;
 import com.codeit.deokhugam.dto.response.comment.CommentResponse;
 import com.codeit.deokhugam.dto.response.comment.CursorPageCommentResponse;
 import com.codeit.deokhugam.dto.result.comment.CommentCreateResult;
+import com.codeit.deokhugam.dto.result.comment.CommentUpdateResult;
 import com.codeit.deokhugam.dto.result.comment.CursorPageCommentResult;
 import java.time.Instant;
 import org.mapstruct.Mapper;
@@ -17,7 +22,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-  // 1. 댓글 생성 매퍼---------------------------------------------------------------------------------
+  // 댓글 생성 매퍼------------------------------------------------------------------------------------
   // CommentCreateRequest -> CommentCreateCommand로 매핑
   @Mapping(source = "request.reviewId", target = "reviewId")
   @Mapping(source = "request.content", target = "content")
@@ -43,7 +48,7 @@ public interface CommentMapper {
   // CommentCreateResult -> CommentResponse로 매핑
   CommentResponse toCommentResponse(CommentCreateResult result);
 
-  // --- 2. 댓글 목록 조회 흐름 ---
+  // 댓글 목록 조회 매퍼---------------------------------------------------------------------------------
 
   //Controller: Request Params -> Command (댓글 목록 조회)
   @Mapping(source = "limit", target = "commentLimit")
@@ -59,4 +64,26 @@ public interface CommentMapper {
 
   //Controller: Result -> Response (목록 조회)
   CursorPageCommentResponse toCursorPageCommentResponse(CursorPageCommentResult result);
+
+  // 댓글 수정----------------------------------------------------------------------------------------
+
+  // controller: CommentUpdateRequest -> CommentUpdateCommand로 매핑
+  @Mapping(source = "request.content", target = "content")
+  CommentUpdateCommand toCommentUpdateCommand(CommentUpdateRequest request, Long commentId, Long requestMemberId);
+
+  // service: entity -> CommentUpdateResult로 매핑
+  @Mapping(source = "comment.review.id", target = "reviewId")
+  @Mapping(source = "comment.member.id", target = "memberId")
+  @Mapping(source = "comment.member.nickname", target = "nickname")
+  CommentUpdateResult toCommentUpdateResult(Comment comment);
+
+  // controller: CommentUpdateResult -> CommentUpdateResponse로 매핑
+  CommentResponse toCommentUpdateResponse(CommentUpdateResult result);
+
+  // 댓글 논리 삭제-------------------------------------------------------------------------------------
+  CommentSoftDeleteCommand toSoftDeleteCommand(Long commentId, Long requestMemberId);
+
+  // 댓글 물리 삭제-------------------------------------------------------------------------------------
+  CommentHardDeleteCommand toCommentHardDeleteCommand(Long commentId, Long requestMemberId);
+
 }

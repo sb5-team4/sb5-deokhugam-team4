@@ -28,6 +28,9 @@ public class LikeReviewServiceTest {
 
   @InjectMocks
   private LikeReviewServiceImpl likeReviewService;
+
+  @Mock
+  private NotificationService notificationService;
   @Mock
   private ReviewLikeRepository reviewLikeRepository;
   @Mock
@@ -64,7 +67,8 @@ public class LikeReviewServiceTest {
     given(memberReviewRepository.findByIdAndDeletedIsFalse(any())).willReturn(Optional.of(member));
     given(reviewLikeRepository.findByMemberIdAndReviewId(any(), any()))
         .willReturn(Optional.empty());
-    given(reviewLikeRepository.save(any())).willReturn(reviewLike);
+    doNothing().when(reviewLikeRepository).insertIgnoreConflict(any(), any());
+    doNothing().when(notificationService).createLikeNotification(any(), any(), any());
 
     // When
     LikeReviewResult result = likeReviewService.likeReview(command);

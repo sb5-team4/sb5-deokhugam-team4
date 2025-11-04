@@ -12,9 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.codeit.deokhugam.common.exception.handler.CustomException;
 import com.codeit.deokhugam.common.exception.handler.ErrorCode;
-import com.codeit.deokhugam.dto.response.BookResponse;
-import com.codeit.deokhugam.mapper.BookMapper;
-import com.codeit.deokhugam.service.BookService;
+import com.codeit.deokhugam.controller.book.BookController;
+import com.codeit.deokhugam.dto.response.book.BookResponse;
+import com.codeit.deokhugam.mapper.book.BookMapper;
+import com.codeit.deokhugam.service.book.BookService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;

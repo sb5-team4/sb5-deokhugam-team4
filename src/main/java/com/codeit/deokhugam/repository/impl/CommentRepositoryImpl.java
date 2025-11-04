@@ -20,7 +20,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
   private final QComment qComment = QComment.comment; // Q 클래스 인스턴스
 
   @Override // 인터페이스 메서드 구현
-  public List<Comment> findByCommentReviewIdWithCursor(Long reviewId, String direction, Instant after, Long cursorId ,int limitComment) {
+  public List<Comment> findByReviewId(Long reviewId, String direction, Instant after, Long cursorId ,int limitComment) {
 
     List<OrderSpecifier<?>> orderSpecifiers = createOrderSpecifiers(direction); // 정렬 조건 생성
 

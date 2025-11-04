@@ -38,6 +38,7 @@ public interface BookMapper {
   void updateBookFromCommand(BookUpdateCommand command, @MappingTarget Book book);
 
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "thumbnailUrl", ignore = true)
   @Mapping(target = "reviewCount", expression = "java(0L)")
   @Mapping(target = "rating", expression = "java(java.math.BigDecimal.ZERO)")
   @Mapping(target = "deleted", expression = "java(false)")

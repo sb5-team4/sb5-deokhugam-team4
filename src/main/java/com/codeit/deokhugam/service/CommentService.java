@@ -59,6 +59,7 @@ public class CommentService {
 
     // 댓글 DB에 저장
     Comment savedComment = commentRepository.save(comment);
+    review.setCommentCount(review.getCommentCount() + 1);
 
     // 알림
     // 리뷰 작성자와 댓글 작성자가 다를 경우에만 알림 생성
@@ -164,7 +165,8 @@ public class CommentService {
 
     // 요청자 소유자 체크 헬퍼 메소드로 수정함
     Comment comment = findCommentAndCheckAuthority(command.commentId(), command.requestMemberId());
-
+    Review review = comment.getReview();
+    review.setCommentCount(review.getCommentCount() - 1);
     // 2. 엔티티의 softDelete() 메소드 호출 (deleted = true로 변경)
     comment.softDelete();
   }

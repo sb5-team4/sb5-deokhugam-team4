@@ -17,19 +17,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookQueryRepo
 
   Optional<Book> findByIsbn(String Isbn);
 
-  /**
-   * 도서의 평균 평점 계산 (논리 삭제된 리뷰 포함)
-   *
-   * @param bookId 도서 ID
-   * @return 평균 평점 (리뷰가 없으면 0.0)
-   */
-  @Query("""
-      SELECT COALESCE(AVG(CAST(r.rating AS double)), 0.0)
-      FROM Review r
-      WHERE r.book.id = :bookId
-      """)
-  Double calculateAverageRating(@Param("bookId") Long bookId);
-
   boolean existsByIsbn(String Isbn);
 
   // 배치 작업용 메서드

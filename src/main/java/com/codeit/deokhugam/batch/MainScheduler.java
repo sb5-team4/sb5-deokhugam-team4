@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -18,19 +19,23 @@ public class MainScheduler {
   private final JobLauncher jobLauncher;
   private final Job popularReviewJob;
   private final Job hardDeleteJob;
+  private final Job popularBookJob;
 
 
   // 애플리케이션 시작 시 1회 실행
   @PostConstruct
   public void runOnStartup() {
+    log.info("===== 애플리케이션 시작: 배치 작업 실행 시작 =====");
     runOrderedJobs();
+    log.info("===== 애플리케이션 시작: 배치 작업 실행 완료 =====");
   }
 
   //  매일 새벽 1시 실행
   @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
   public void runBatches() {
-
+    log.info("===== 스케줄 실행: 배치 작업 실행 시작 =====");
     runOrderedJobs();
+    log.info("===== 스케줄 실행: 배치 작업 실행 완료 =====");
   }
 
   private void runOrderedJobs() {
@@ -40,18 +45,32 @@ public class MainScheduler {
 
     // 1. hardDeleteJob
     try {
-      jobLauncher.run(hardDeleteJob, jobParameters);
+      log.info(">>> hardDeleteJob 시작");
+      JobExecution execution = jobLauncher.run(hardDeleteJob, jobParameters);
+      log.info("✅ hardDeleteJob 완료 - 상태: {}", execution.getStatus());
 
     } catch (Exception e) {
-      log.error("hardDeleteJob failed : {}", e.getMessage());
+      log.error("❌ hardDeleteJob 실패: {}", e.getMessage(), e);
     }
 
     // 2. popularReviewJob
     try {
-      jobLauncher.run(popularReviewJob, jobParameters);
+      log.info(">>> popularReviewJob 시작");
+      JobExecution execution = jobLauncher.run(popularReviewJob, jobParameters);
+      log.info("✅ popularReviewJob 완료 - 상태: {}", execution.getStatus());
 
     } catch (Exception e) {
-      log.error("popularReviewJob failed : {}", e.getMessage());
+      log.error("❌ popularReviewJob 실패: {}", e.getMessage(), e);
+    }
+
+    // 3. popularBookJob
+    try {
+      log.info(">>> popularBookJob 시작");
+      JobExecution execution = jobLauncher.run(popularBookJob, jobParameters);
+      log.info("✅ popularBookJob 완료 - 상태: {}", execution.getStatus());
+
+    } catch (Exception e) {
+      log.error("❌ popularBookJob 실패: {}", e.getMessage(), e);
     }
 
   }

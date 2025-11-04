@@ -16,8 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -34,9 +33,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration // absract class OR interface 둘중 모듈화 해줘야함
 @EnableBatchProcessing
 @RequiredArgsConstructor
-public class BatchConfig {
+@Slf4j
+public class PopularReviewBatchConfig {
 
-  private static final Logger log = LoggerFactory.getLogger(BatchConfig.class);
   private final PlatformTransactionManager transactionManager;
   private final PopularReviewReader popularReviewReader;
   private final PopularReviewProcessor popularReviewProcessor;
@@ -44,7 +43,7 @@ public class BatchConfig {
   private final PopularReviewRepository popularReviewRepository;
 
   @Bean
-  public JobExecutionListener jobExecutionListener() {
+  public JobExecutionListener popularReivewJobExecutionListener() {
 
     return new JobExecutionListener() {
       @Override
@@ -71,7 +70,7 @@ public class BatchConfig {
         .start(truncatePopularReviewStep(jobRepository, transactionManager))
         .next(setScorePopularReviewStep(jobRepository, transactionManager))
         .next(popularReviewRankingStep(jobRepository, transactionManager))
-        .listener(jobExecutionListener())
+        .listener(popularReivewJobExecutionListener())
         .build();
   }
 

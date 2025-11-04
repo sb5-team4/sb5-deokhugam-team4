@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.batch.popularReview;
+package com.codeit.deokhugam.batch;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -13,31 +13,47 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class PopularReviewJobScheduler {
+public class MainScheduler {
 
   private final JobLauncher jobLauncher;
   private final Job popularReviewJob;
+  private final Job hardDeleteJob;
+
 
   // 애플리케이션 시작 시 1회 실행
   @PostConstruct
   public void runOnStartup() {
-    runPopularReviewJob();
+    runOrderedJobs();
   }
 
-  //   1분마다 실행 (cron: "0 */1 * * * *")
-//  @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
-  // 매일 새벽 1시 실행
+  //  매일 새벽 1시 실행
   @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
-  public void runPopularReviewJob() {
-    try {
-      JobParameters jobParameters = new JobParametersBuilder()
-          .addLong("time", System.currentTimeMillis()) // JobInstance 구분용
-          .toJobParameters();
+  public void runBatches() {
 
-      jobLauncher.run(popularReviewJob, jobParameters);
-      log.info(" ✅ PopularReviewJob executed successfully!");
-    } catch (Exception e) {
-      log.info("❌ PopularReviewJob failed: {}", e.getMessage());
-    }
+    runOrderedJobs();
   }
+
+  private void runOrderedJobs() {
+    JobParameters jobParameters = new JobParametersBuilder()
+        .addLong("time", System.currentTimeMillis()) // JobInstance 구분용
+        .toJobParameters();
+
+    // 1. hardDeleteJob
+    try {
+      jobLauncher.run(hardDeleteJob, jobParameters);
+
+    } catch (Exception e) {
+      log.error("hardDeleteJob failed : {}", e.getMessage());
+    }
+
+    // 2. popularReviewJob
+    try {
+      jobLauncher.run(popularReviewJob, jobParameters);
+
+    } catch (Exception e) {
+      log.error("popularReviewJob failed : {}", e.getMessage());
+    }
+
+  }
+
 }

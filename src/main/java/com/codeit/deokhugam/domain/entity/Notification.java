@@ -1,7 +1,6 @@
 package com.codeit.deokhugam.domain.entity;
 
 import com.codeit.deokhugam.domain.entity.base.BaseUpdatableEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -36,8 +35,8 @@ public class Notification extends BaseUpdatableEntity {
   @JoinColumn(name = "review_id", nullable = false)
   private Review review;
 
-  @ManyToOne(cascade = CascadeType.REMOVE)
-  @JoinColumn(name = "comment_id", nullable = true)
+  @ManyToOne
+  @JoinColumn(name = "comment_Id")
   private Comment comment;
 
   public void read(boolean confirmed) {

@@ -78,6 +78,8 @@ CREATE TABLE review
     content       VARCHAR(1000)                                   NOT NULL,
     like_count    BIGINT                                          NOT NULL DEFAULT 0,
     comment_count BIGINT                                          NOT NULL DEFAULT 0,
+    version       BIGINT                                          NOT NULL DEFAULT 0,
+
     CONSTRAINT uq_review UNIQUE (book_id, member_id)
 
 );
@@ -247,34 +249,34 @@ ALTER TABLE popular_book
 ;
 
 -- 1️⃣ 개별 리뷰별 차이 계산
-WITH review_stats AS (SELECT r.id                          AS review_id,
-                             r.like_count                  AS review_like_count,
-                             COUNT(rl.id)                  AS actual_like_count,
-                             (r.like_count - COUNT(rl.id)) AS diff_count,
-                             ROUND(
-                                     CASE
-                                         WHEN COUNT(rl.id) = 0 THEN 0
-                                         ELSE
-                                             ((r.like_count - COUNT(rl.id))::decimal / COUNT(rl.id)) *
-                                             100
-                                         END, 2
-                             )                             AS diff_percent
-                      FROM review r
-                               LEFT JOIN review_like rl ON r.id = rl.review_id
-                      GROUP BY r.id, r.like_count)
+-- WITH review_stats AS (SELECT r.id                          AS review_id,
+--                              r.like_count                  AS review_like_count,
+--                              COUNT(rl.id)                  AS actual_like_count,
+--                              (r.like_count - COUNT(rl.id)) AS diff_count,
+--                              ROUND(
+--                                      CASE
+--                                          WHEN COUNT(rl.id) = 0 THEN 0
+--                                          ELSE
+--                                              ((r.like_count - COUNT(rl.id))::decimal / COUNT(rl.id)) *
+--                                              100
+--                                          END, 2
+--                              )                             AS diff_percent
+--                       FROM review r
+--                                LEFT JOIN review_like rl ON r.id = rl.review_id
+--                       GROUP BY r.id, r.like_count)
 
 -- 2️⃣ 전체 합계/평균 추가
-SELECT *
-FROM review_stats
-
-UNION ALL
-
-SELECT NULL                        AS review_id,
-       SUM(review_like_count)      AS review_like_count,
-       SUM(actual_like_count)      AS actual_like_count,
-       SUM(diff_count)             AS diff_count,
-       ROUND(AVG(diff_percent), 2) AS diff_percent -- ✅ 평균만 계산
-
-FROM review_stats
-
-ORDER BY review_id NULLS LAST;
+-- SELECT *
+-- FROM review_stats
+--
+-- UNION ALL
+--
+-- SELECT NULL                        AS review_id,
+--        SUM(review_like_count)      AS review_like_count,
+--        SUM(actual_like_count)      AS actual_like_count,
+--        SUM(diff_count)             AS diff_count,
+--        ROUND(AVG(diff_percent), 2) AS diff_percent -- ✅ 평균만 계산
+--
+-- FROM review_stats
+--
+-- ORDER BY review_id NULLS LAST;

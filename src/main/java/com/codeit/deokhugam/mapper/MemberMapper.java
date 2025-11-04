@@ -29,7 +29,7 @@ public abstract class MemberMapper {
 //  @Mapping(target = "createdAt", ignore = true)
 //  @Mapping(target = "updatedAt", ignore = true)
 
-  //create
+  //createCommentNotification
   public abstract MemberCreateCommand toMemberCreateCommand(
       MemberCreateRequest memberCreateRequest);
 

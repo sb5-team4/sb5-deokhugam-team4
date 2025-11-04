@@ -31,7 +31,8 @@ public enum ErrorCode {
   // Notification 관련 에러 코드
   NOTIFICATION_NOT_AUTHORIZED(403, "알림 수정 권한 없음", HttpStatus.FORBIDDEN),
   NOTIFICATION_NOT_FOUND(404, "해당하는 알림 ID가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-
+  NOTIFICATION_SEND_FAILED(1001, "알림 전송 실패", null),
+  
   // Comment 관련 에러 코드
   // 400 BAD_REQUEST: 잘못된 요청 (파라미터 누락, 타입 불일치 등)
   INVALID_REQUEST_PARAMETERS(400, "요청 파라미터가 잘못되었습니다.", HttpStatus.BAD_REQUEST),

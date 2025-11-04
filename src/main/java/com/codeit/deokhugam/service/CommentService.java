@@ -59,14 +59,13 @@ public class CommentService {
 
     // 댓글 DB에 저장
     Comment savedComment = commentRepository.save(comment);
-
+    review.setCommentCount(review.getCommentCount() + 1);
 
     // 알림
     // 리뷰 작성자와 댓글 작성자가 다를 경우에만 알림 생성
     if (!review.getMember().getId().equals(member.getId())) {
-
-      // NotificationService의 create 메소드 호출
-      notificationService.create(review.getMember(), review, savedComment);
+      // NotificationService의 createCommentNotification 메소드 호출
+      notificationService.createCommentNotification(review.getMember(), review, savedComment);
     }
 
     // mapper에 있는 Result로 매핑해주는 메서드를 사용해서 Result로 변환
@@ -79,7 +78,6 @@ public class CommentService {
 
     int limit = command.commentLimit();
     Long reviewId = command.reviewId();
-
 
     //404 예외
     if (!reviewRepository.existsById(reviewId)) {
@@ -100,7 +98,6 @@ public class CommentService {
 
     // 실제 반환할 리스트 (limit 개수만큼만 자르기)
     List<Comment> commentListAfter = hasNext ? commentList.subList(0, limit) : commentList;
-
 
     // 다음 커서(nextAfter, nextCursorId) 계산
     Instant nextAfter = null;
@@ -168,7 +165,8 @@ public class CommentService {
 
     // 요청자 소유자 체크 헬퍼 메소드로 수정함
     Comment comment = findCommentAndCheckAuthority(command.commentId(), command.requestMemberId());
-
+    Review review = comment.getReview();
+    review.setCommentCount(review.getCommentCount() - 1);
     // 2. 엔티티의 softDelete() 메소드 호출 (deleted = true로 변경)
     comment.softDelete();
   }
@@ -183,7 +181,6 @@ public class CommentService {
     // 물리 삭제 실행
     commentRepository.delete(comment);
   }
-
 
 
   // 요청자 소유자 체크 헬퍼 메소드로 수정함

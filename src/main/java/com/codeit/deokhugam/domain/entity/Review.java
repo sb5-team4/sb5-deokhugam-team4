@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,6 +44,10 @@ public class Review extends BaseUpdatableEntity {
   @ManyToOne
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
+
+  @Version
+  @Column(nullable = false)
+  private Long version;
 
   public void updateReview(String newContent, short newRating) {
     content = newContent;

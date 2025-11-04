@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ReviewController.class)
 @Import(GlobalExceptionHandler.class)
-public class PatchReviewControllerTest {
+public class PatchReviewControllerV2Test {
 
   @Autowired
   MockMvc mockMvc;

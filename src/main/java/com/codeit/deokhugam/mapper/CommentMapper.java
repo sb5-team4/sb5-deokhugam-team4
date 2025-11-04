@@ -46,17 +46,19 @@ public interface CommentMapper {
   CommentCreateResult toCommentCreateResult(Comment comment);
 
   // CommentCreateResult -> CommentResponse로 매핑
+  @Mapping(source = "result.memberId", target = "userId")
   CommentResponse toCommentResponse(CommentCreateResult result);
 
   // 댓글 목록 조회 매퍼---------------------------------------------------------------------------------
 
   //Controller: Request Params -> Command (댓글 목록 조회)
   @Mapping(source = "limit", target = "commentLimit")
-  CursorPageCommentCommand toCursorPageCommentCommand(Long reviewId, String direction, Instant after, Long cursorId, int limit);
+  CursorPageCommentCommand toCursorPageCommentCommand(Long reviewId, String direction,
+      Instant after, Long cursorId, int limit);
 
   //Service: Entity List -> DTO List (댓글 목록 조회)
   @Mapping(source = "comment.review.id", target = "reviewId")
-  @Mapping(source = "comment.member.id", target = "memberId")
+  @Mapping(source = "comment.member.id", target = "userId")
   @Mapping(source = "comment.member.nickname", target = "nickname")
   CommentResponse toCommentListResponse(Comment comment);
 
@@ -69,7 +71,8 @@ public interface CommentMapper {
 
   // controller: CommentUpdateRequest -> CommentUpdateCommand로 매핑
   @Mapping(source = "request.content", target = "content")
-  CommentUpdateCommand toCommentUpdateCommand(CommentUpdateRequest request, Long commentId, Long requestMemberId);
+  CommentUpdateCommand toCommentUpdateCommand(CommentUpdateRequest request, Long commentId,
+      Long requestMemberId);
 
   // service: entity -> CommentUpdateResult로 매핑
   @Mapping(source = "comment.review.id", target = "reviewId")

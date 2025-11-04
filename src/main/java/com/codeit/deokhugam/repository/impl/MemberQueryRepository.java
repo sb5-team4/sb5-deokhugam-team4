@@ -92,4 +92,23 @@ public class MemberQueryRepository {
     return new SliceImpl<>(contents, pageable, hasNext);
 
   }
+
+  public long countPowerMembers(PowerMemberFindCommand command) {
+    BooleanBuilder builder = new BooleanBuilder();
+    if (command.cursor() != null && command.cursor() > 0) {
+      if (command.direction() == Order.ASC) {
+        builder.and(p.rank.gt(command.cursor()));
+      } else {
+        builder.and(p.rank.lt(command.cursor()));
+      }
+    }
+    builder.and(p.period.eq(command.period().name()));
+
+    return queryFactory
+        .select(p.count())
+        .from(p)
+        .where(builder)
+        .fetchOne();
+  }
+
 }

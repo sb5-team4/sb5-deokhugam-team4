@@ -1,6 +1,9 @@
 package com.codeit.deokhugam.batch;
 
+import com.codeit.deokhugam.batch.log.LogUploadService;
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -20,6 +23,7 @@ public class MainScheduler {
   private final Job popularReviewJob;
   private final Job hardDeleteJob;
   private final Job popularBookJob;
+  private final LogUploadService logUploadService;
 
 
   // 애플리케이션 시작 시 1회 실행
@@ -73,6 +77,22 @@ public class MainScheduler {
       log.error("❌ popularBookJob 실패: {}", e.getMessage(), e);
     }
 
+    // 4. 로그 파일 S3 업로드
+    try {
+      log.info(">>> 로그 파일 S3 업로드 시작");
+
+      LocalDate yesterday = LocalDate.now().minusDays(1);
+      String targetDate = yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+      log.info("업로드 대상 날짜: {}", targetDate);
+
+      logUploadService.uploadLogFilesToS3(targetDate);
+
+      log.info("✅ 로그 파일 S3 업로드 완료");
+
+    } catch (Exception e) {
+      log.error("❌ 로그 파일 S3 업로드 실패: {}", e.getMessage(), e);
+    }
   }
 
 }

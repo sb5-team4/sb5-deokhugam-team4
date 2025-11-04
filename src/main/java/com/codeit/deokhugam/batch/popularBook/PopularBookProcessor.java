@@ -21,8 +21,7 @@ public class PopularBookProcessor implements ItemProcessor<PopularBookDto, Popul
   public PopularBook process(PopularBookDto dto) throws Exception {
 
     Long bookId = dto.getBookId();
-
-    Book book = bookRepository.findById(bookId)
+    Book book = bookRepository.findByIdAndDeletedIsFalse(bookId)
         .orElseThrow(
             () -> new BatchCustomException(BatchErrorCode.BOOK_NOT_FOUND_IN_BATCH, bookId));
 
@@ -31,7 +30,7 @@ public class PopularBookProcessor implements ItemProcessor<PopularBookDto, Popul
     PopularBook popularBook = PopularBook.builder()
         .book(book)
         .period(dto.getPeriod())
-        .rank((short) 0)
+        .rank(dto.getRank())
         .score(score)
         .build();
 

@@ -35,7 +35,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookQueryRepo
       WHERE b.deleted = false
       GROUP BY b.id, b.title, b.author, b.thumbnailUrl
       HAVING COUNT(r.id) > 0
-      ORDER BY COUNT(r.id) DESC
+      ORDER BY (COUNT(r.id) * 0.4 + COALESCE(AVG(CAST(r.rating AS double)), 0.0) * 0.6) DESC
       """)
   List<PopularBookDto> findPopularBooksForPeriod(
       @Param("startDate") Instant startDate,

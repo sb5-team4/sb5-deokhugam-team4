@@ -7,6 +7,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.stereotype.Component;
@@ -25,13 +28,11 @@ public class PopularBookReader implements ItemReader<PopularBookDto> {
   public PopularBookDto read() {
     if (bookIterator == null) {
       List<PopularBookDto> allBooks = fetchAllPeriodBooks();
+      assignRanks(allBooks);
       bookIterator = allBooks.iterator();
     }
-    if (bookIterator.hasNext()) {
-      return bookIterator.next();
-    } else {
-      return null;
-    }
+    // Iterator로 하나씩 반환 (null 반환 시 배치 종료)
+    return bookIterator.hasNext() ? bookIterator.next() : null;
   }
 
   private List<PopularBookDto> fetchAllPeriodBooks() {
@@ -75,9 +76,30 @@ public class PopularBookReader implements ItemReader<PopularBookDto> {
     List<PopularBookDto> allTimeBooks = bookRepository
         .findPopularBooksForPeriod(allTimeStart, allTimeEnd);
 
-    allTimeBooks.forEach(book -> book.setPeriod("ALLTIME"));
+    allTimeBooks.forEach(book -> book.setPeriod("ALL_TIME"));
     allBooks.addAll(allTimeBooks);
 
     return allBooks;
+  }
+
+  /**
+   * 기간별로 그룹화하여 순위 부여
+   *
+   * @param books 전체 인기 도서 목록 (이미 정렬됨)
+   */
+  private void assignRanks(List<PopularBookDto> books) {
+    Map<String, List<PopularBookDto>> groupedByPeriod = books.stream()
+        .collect(Collectors.groupingBy(PopularBookDto::getPeriod));
+
+    groupedByPeriod.forEach((period, periodBooks) -> {
+      periodBooks.sort((a, b) ->
+          b.calculateScore().compareTo(a.calculateScore())
+      );
+
+      AtomicInteger rank = new AtomicInteger(1);
+      periodBooks.forEach(book ->
+          book.setRank((short) rank.getAndIncrement())
+      );
+    });
   }
 }

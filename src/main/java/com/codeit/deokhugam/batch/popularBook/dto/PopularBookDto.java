@@ -21,6 +21,7 @@ public class PopularBookDto {
   private Long reviewCount;         // 해당 기간의 리뷰 수
   private BigDecimal averageRating; // 해당 기간의 평균 평점
   private String period;            // 기간 (DAILY, WEEKLY, MONTHLY, ALL_TIME)
+  private short rank;
 
 
   public PopularBookDto(Long bookId, String title, String author,

@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.batch.scheduler;
+package com.codeit.deokhugam.batch.powerMember;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

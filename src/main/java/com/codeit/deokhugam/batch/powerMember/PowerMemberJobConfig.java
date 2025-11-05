@@ -1,10 +1,6 @@
-package com.codeit.deokhugam.batch.config;
+package com.codeit.deokhugam.batch.powerMember;
 
-import com.codeit.deokhugam.batch.dto.PowerMemberScoreDto;
-import com.codeit.deokhugam.batch.processor.PowerMemberProcessor;
-import com.codeit.deokhugam.batch.reader.PowerMemberReader;
-import com.codeit.deokhugam.batch.repository.PowerMemberRepository;
-import com.codeit.deokhugam.batch.writer.PowerMemberWriter;
+import com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto;
 import com.codeit.deokhugam.domain.entity.PowerMember;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;

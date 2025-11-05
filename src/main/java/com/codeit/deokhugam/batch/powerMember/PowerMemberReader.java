@@ -1,6 +1,6 @@
-package com.codeit.deokhugam.batch.reader;
+package com.codeit.deokhugam.batch.powerMember;
 
-import com.codeit.deokhugam.batch.dto.PowerMemberScoreDto;
+import com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto;
 import com.codeit.deokhugam.repository.ReviewRepository;
 import java.time.DayOfWeek;
 import java.time.Instant;

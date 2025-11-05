@@ -1,6 +1,6 @@
-package com.codeit.deokhugam.batch.processor;
+package com.codeit.deokhugam.batch.powerMember;
 
-import com.codeit.deokhugam.batch.dto.PowerMemberScoreDto;
+import com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.PowerMember;
 import com.codeit.deokhugam.repository.MemberRepository;

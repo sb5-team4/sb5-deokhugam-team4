@@ -1,6 +1,5 @@
-package com.codeit.deokhugam.batch.writer;
+package com.codeit.deokhugam.batch.powerMember;
 
-import com.codeit.deokhugam.batch.repository.PowerMemberRepository;
 import com.codeit.deokhugam.domain.entity.PowerMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

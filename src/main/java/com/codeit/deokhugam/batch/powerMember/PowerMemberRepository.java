@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.batch.repository;
+package com.codeit.deokhugam.batch.powerMember;
 
 import com.codeit.deokhugam.domain.entity.PowerMember;
 import java.util.List;

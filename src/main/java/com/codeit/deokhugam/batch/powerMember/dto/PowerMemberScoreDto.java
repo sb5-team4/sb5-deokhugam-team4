@@ -1,4 +1,4 @@
-package com.codeit.deokhugam.batch.dto;
+package com.codeit.deokhugam.batch.powerMember.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -3,14 +3,20 @@ package com.codeit.deokhugam.repository.impl;
 import static com.codeit.deokhugam.domain.enums.ReviewOrderBy.createdAt;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
+import com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto;
+import com.codeit.deokhugam.domain.entity.QComment;
+import com.codeit.deokhugam.domain.entity.QPopularReview;
 import com.codeit.deokhugam.domain.entity.QReview;
+import com.codeit.deokhugam.domain.entity.QReviewLike;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.domain.enums.ReviewOrderBy;
 import com.codeit.deokhugam.dto.result.PaginatedResult;
 import com.codeit.deokhugam.repository.ReviewQueryRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +28,9 @@ public class ReviewQueryRepositoryImpl implements ReviewQueryRepository {
 
   private final JPAQueryFactory queryFactory;
   private final QReview rv = QReview.review;
+  private final QPopularReview pr = QPopularReview.popularReview;
+  private final QReviewLike rl = QReviewLike.reviewLike;
+  private final QComment c = QComment.comment;
 
   @Override
   public PaginatedResult<Review, String> searchWithCursor(
@@ -135,7 +144,29 @@ public class ReviewQueryRepositoryImpl implements ReviewQueryRepository {
         .totalElements(count)
         .hasNext(contents.size() > limit)
         .build();
+  }
 
-
+  @Override
+  public List<PowerMemberScoreDto> findPowerMemberScoreDto(Instant start, Instant end) {
+    return queryFactory
+        .select(Projections.constructor(
+            PowerMemberScoreDto.class,
+            rv.member.id,  // memberId
+            pr.score.sum().coalesce(BigDecimal.ZERO).longValue(),
+            // reviewScoreSum: 해당 기간 리뷰의 인기 점수 합계
+            rl.count(),     // likeCount: 참여한 좋아요 수 (내가 작성한 리뷰에 달린 좋아요)
+            c.count()       // commentCount: 참여한 댓글 수 (내가 작성한 리뷰에 달린 댓글)
+        ))
+        .from(rv)
+        .leftJoin(pr).on(pr.review.id.eq(rv.id))
+        .leftJoin(rl).on(rl.review.id.eq(rv.id)
+            .and(rl.createdAt.between(start, end)))
+        .leftJoin(c).on(c.review.id.eq(rv.id)
+            .and(c.deleted.isFalse())
+            .and(c.createdAt.between(start, end)))
+        .where(rv.createdAt.between(start, end)
+            .and(rv.deleted.isFalse()))
+        .groupBy(rv.member.id)
+        .fetch();
   }
 }

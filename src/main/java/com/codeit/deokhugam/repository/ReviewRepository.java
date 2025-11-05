@@ -33,7 +33,7 @@ public interface ReviewRepository
   long countByMemberId(Long id);
 
   @Query("""
-          SELECT new com.codeit.deokhugam.batch.dto.PowerMemberScoreDto(
+          SELECT new com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto(
               r.member.id,
               SUM(r.rating),
               SUM(r.likeCount),

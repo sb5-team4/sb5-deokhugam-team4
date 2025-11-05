@@ -19,8 +19,6 @@ public class PowerMemberWriter implements ItemWriter<PowerMember> {
     log.info("Writing {} PowerMembers", chunk.getItems().size());
     if (chunk != null && !chunk.isEmpty()) {
       powerMemberRepository.saveAll(chunk.getItems());
-      powerMemberRepository.flush();
-
     }
   }
 }

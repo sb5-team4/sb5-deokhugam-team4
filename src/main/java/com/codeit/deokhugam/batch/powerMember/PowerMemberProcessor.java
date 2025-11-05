@@ -5,17 +5,15 @@ import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.PowerMember;
 import com.codeit.deokhugam.repository.MemberRepository;
 import java.math.BigDecimal;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 
 @Slf4j
+@RequiredArgsConstructor
 public class PowerMemberProcessor implements ItemProcessor<PowerMemberScoreDto, PowerMember> {
 
   private final MemberRepository memberRepository;
-
-  public PowerMemberProcessor(MemberRepository memberRepository) {
-    this.memberRepository = memberRepository;
-  }
 
   @Override
   public PowerMember process(PowerMemberScoreDto dto) {

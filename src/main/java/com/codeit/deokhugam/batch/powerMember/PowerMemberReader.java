@@ -33,18 +33,28 @@ public class PowerMemberReader implements ItemReader<PowerMemberScoreDto> {
 
       Map<String, Instant[]> periods = Map.of(
           "DAILY",
-          new Instant[]{LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant(), now},
+          new Instant[]{
+              LocalDate.now().minusDays(1)
+                  .atStartOfDay(ZoneId.systemDefault()).toInstant(),
+              LocalDate.now()
+                  .atStartOfDay(ZoneId.systemDefault()).toInstant()
+          },
           "WEEKLY", new Instant[]{
               LocalDate.now().with(DayOfWeek.MONDAY)
                   .atStartOfDay(ZoneId.systemDefault()).toInstant(),
-              now},
+              Instant.now()
+          },
           "MONTHLY", new Instant[]{
-              LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant(),
-              now},
+              LocalDate.now().withDayOfMonth(1)
+                  .atStartOfDay(ZoneId.systemDefault()).toInstant(),
+              Instant.now()
+          },
           "ALL_TIME",
           new Instant[]{
-              LocalDateTime.of(1970, 1, 1, 0, 0).atZone(ZoneId.systemDefault()).toInstant(),
-              now}
+              LocalDateTime.of(1970, 1, 1, 0, 0)
+                  .atZone(ZoneId.systemDefault()).toInstant(),
+              Instant.now()
+          }
       );
 
       for (Map.Entry<String, Instant[]> entry : periods.entrySet()) {

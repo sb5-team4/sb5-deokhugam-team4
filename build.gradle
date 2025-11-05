@@ -82,6 +82,9 @@ dependencies {
     //bcrypt
     implementation 'org.springframework.security:spring-security-crypto'
 
+    //batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+
 }
 
 tasks.named('test') {

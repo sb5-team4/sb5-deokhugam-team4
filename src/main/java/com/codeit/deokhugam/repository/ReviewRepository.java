@@ -1,6 +1,7 @@
 package com.codeit.deokhugam.repository;
 
 
+import com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto;
 import com.codeit.deokhugam.domain.entity.Review;
 import java.time.Instant;
 import java.util.List;
@@ -28,4 +29,21 @@ public interface ReviewRepository
   @Modifying
   @Query("UPDATE Review r SET r.likeCount = r.likeCount -1 WHERE r.id = :reviewId")
   int decrementLikeCount(@Param("reviewId") Long reviewId);
+
+  long countByMemberId(Long id);
+
+  @Query("""
+          SELECT new com.codeit.deokhugam.batch.powerMember.dto.PowerMemberScoreDto(
+              r.member.id,
+              SUM(r.rating),
+              SUM(r.likeCount),
+              SUM(r.commentCount)
+          )
+          FROM Review r
+          WHERE r.createdAt BETWEEN :start AND :end
+          GROUP BY r.member.id
+      """)
+  List<PowerMemberScoreDto> findPowerMemberScoreDto(@Param("start") Instant start,
+      @Param("end") Instant end);
+
 }

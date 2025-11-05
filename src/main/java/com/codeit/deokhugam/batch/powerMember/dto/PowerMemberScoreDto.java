@@ -13,6 +13,7 @@ public class PowerMemberScoreDto {
   private long reviewScoreSum;
   private long likeCount;
   private long commentCount;
+  // period 세팅용 Setter
   private String period;
 
   // 반드시 이 생성자가 필요
@@ -24,8 +25,4 @@ public class PowerMemberScoreDto {
     this.commentCount = commentCount;
   }
 
-  // period 세팅용 Setter
-  public void setPeriod(String period) {
-    this.period = period;
-  }
 }

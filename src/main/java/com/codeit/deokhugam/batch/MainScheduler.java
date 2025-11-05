@@ -23,6 +23,7 @@ public class MainScheduler {
   private final Job popularReviewJob;
   private final Job hardDeleteJob;
   private final Job popularBookJob;
+  private final Job powerMemberJob;
   private final LogUploadService logUploadService;
 
 
@@ -75,6 +76,16 @@ public class MainScheduler {
 
     } catch (Exception e) {
       log.error("❌ popularBookJob 실패: {}", e.getMessage(), e);
+    }
+
+    // 4. powerMemberJob
+    try {
+      log.info(">>> powerMemberJob 시작");
+      JobExecution execution = jobLauncher.run(powerMemberJob, jobParameters);
+      log.info("✅ powerMemberJob 완료 - 상태: {}", execution.getStatus());
+
+    } catch (Exception e) {
+      log.error("❌ powerMemberJob 실패: {}", e.getMessage(), e);
     }
 
     // 4. 로그 파일 S3 업로드

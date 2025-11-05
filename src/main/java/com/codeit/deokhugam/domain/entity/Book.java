@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,5 +49,32 @@ public class Book extends BaseUpdatableEntity {
   @Builder.Default
   @Column(name = "deleted", nullable = false)
   private boolean deleted = false;
+
+  public void registerReview(Review review) {
+    BigDecimal newRating = BigDecimal.valueOf(review.getRating());
+    BigDecimal total = this.rating.multiply(BigDecimal.valueOf(this.reviewCount));
+
+    this.reviewCount += 1;
+    this.rating = total.add(newRating)
+        .divide(BigDecimal.valueOf(this.reviewCount), 2, RoundingMode.HALF_UP);
+  }
+
+  public void removeReview(Review review) {
+    if (this.reviewCount == 0) {
+      return;
+    }
+
+    BigDecimal removedRating = BigDecimal.valueOf(review.getRating());
+    BigDecimal total = this.rating.multiply(BigDecimal.valueOf(this.reviewCount));
+
+    this.reviewCount -= 1;
+    if (this.reviewCount == 0) {
+      this.rating = BigDecimal.ZERO;
+    } else {
+      this.rating = total.subtract(removedRating)
+          .divide(BigDecimal.valueOf(this.reviewCount), 2, RoundingMode.HALF_UP);
+    }
+  }
+
 
 }

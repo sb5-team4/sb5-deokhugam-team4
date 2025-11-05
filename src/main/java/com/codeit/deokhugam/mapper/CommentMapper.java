@@ -4,6 +4,8 @@ import com.codeit.deokhugam.domain.entity.Comment;
 import com.codeit.deokhugam.domain.entity.Member;
 import com.codeit.deokhugam.domain.entity.Review;
 import com.codeit.deokhugam.dto.command.comment.CommentCreateCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentHardDeleteCommand;
+import com.codeit.deokhugam.dto.command.comment.CommentSoftDeleteCommand;
 import com.codeit.deokhugam.dto.command.comment.CommentUpdateCommand;
 import com.codeit.deokhugam.dto.command.comment.CursorPageCommentCommand;
 import com.codeit.deokhugam.dto.request.comment.CommentCreateRequest;
@@ -44,17 +46,19 @@ public interface CommentMapper {
   CommentCreateResult toCommentCreateResult(Comment comment);
 
   // CommentCreateResult -> CommentResponse로 매핑
+  @Mapping(source = "result.memberId", target = "userId")
   CommentResponse toCommentResponse(CommentCreateResult result);
 
   // 댓글 목록 조회 매퍼---------------------------------------------------------------------------------
 
   //Controller: Request Params -> Command (댓글 목록 조회)
   @Mapping(source = "limit", target = "commentLimit")
-  CursorPageCommentCommand toCursorPageCommentCommand(Long reviewId, String direction, Instant after, Long cursorId, int limit);
+  CursorPageCommentCommand toCursorPageCommentCommand(Long reviewId, String direction,
+      Instant after, Long cursorId, int limit);
 
   //Service: Entity List -> DTO List (댓글 목록 조회)
   @Mapping(source = "comment.review.id", target = "reviewId")
-  @Mapping(source = "comment.member.id", target = "memberId")
+  @Mapping(source = "comment.member.id", target = "userId")
   @Mapping(source = "comment.member.nickname", target = "nickname")
   CommentResponse toCommentListResponse(Comment comment);
 
@@ -67,7 +71,8 @@ public interface CommentMapper {
 
   // controller: CommentUpdateRequest -> CommentUpdateCommand로 매핑
   @Mapping(source = "request.content", target = "content")
-  CommentUpdateCommand toCommentUpdateCommand(CommentUpdateRequest request, Long commentId, Long requestMemberId);
+  CommentUpdateCommand toCommentUpdateCommand(CommentUpdateRequest request, Long commentId,
+      Long requestMemberId);
 
   // service: entity -> CommentUpdateResult로 매핑
   @Mapping(source = "comment.review.id", target = "reviewId")
@@ -77,5 +82,11 @@ public interface CommentMapper {
 
   // controller: CommentUpdateResult -> CommentUpdateResponse로 매핑
   CommentResponse toCommentUpdateResponse(CommentUpdateResult result);
+
+  // 댓글 논리 삭제-------------------------------------------------------------------------------------
+  CommentSoftDeleteCommand toSoftDeleteCommand(Long commentId, Long requestMemberId);
+
+  // 댓글 물리 삭제-------------------------------------------------------------------------------------
+  CommentHardDeleteCommand toCommentHardDeleteCommand(Long commentId, Long requestMemberId);
 
 }

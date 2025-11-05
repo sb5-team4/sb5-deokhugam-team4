@@ -32,12 +32,29 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
 
-  //알림 생성 메서드
+  //댓글 알림 생성 메서드
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void create(Member recipient, Review review, Comment comment) {
+  public void createCommentNotification(Member recipient, Review review, Comment comment) {
 
-    // todo 알람 설정에 맞게 content 설정
     String content = comment.getMember().getNickname() + "님이 회원님의 리뷰에 댓글을 달았습니다.";
+
+    Notification notification = Notification.builder()
+        .member(recipient) // 알림 받는 사람
+        .review(review)
+        .comment(comment)
+        .content(content)
+        .confirmed(false)
+        .deleted(false)
+        .build();
+
+    notificationRepository.save(notification);
+  }
+
+  //좋아요 알림 생성 메서드
+  @Transactional
+  public void createLikeNotification(Member recipient, Review review, Member sender) {
+
+    String content = sender.getNickname() + "님이 나의 리뷰를 좋아합니다.";
 
     Notification notification = Notification.builder()
         .member(recipient) // 알림 받는 사람

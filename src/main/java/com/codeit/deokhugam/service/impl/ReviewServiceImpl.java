@@ -11,10 +11,10 @@ import com.codeit.deokhugam.dto.command.PatchReviewCommand;
 import com.codeit.deokhugam.dto.command.SoftDeleteReviewCommand;
 import com.codeit.deokhugam.dto.result.CreateReviewResult;
 import com.codeit.deokhugam.dto.result.PatchReviewResult;
-import com.codeit.deokhugam.repository.BookRepository;
 import com.codeit.deokhugam.repository.MemberRepository;
 import com.codeit.deokhugam.repository.ReviewLikeRepository;
 import com.codeit.deokhugam.repository.ReviewRepository;
+import com.codeit.deokhugam.repository.book.BookRepository;
 import com.codeit.deokhugam.service.ReviewService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +37,6 @@ public class ReviewServiceImpl implements ReviewService {
     Long bookId = command.getBookId();
     Book book = bookRepository.findByIdAndDeletedIsFalse(bookId).orElseThrow(
         () -> new ResourceNotFoundException("bookId with" + bookId + " not found", bookId));
-    // book의 review_count 증가
-    book.setReviewCount(book.getReviewCount() + 1);
 
     Long memberId = command.getUserId();
     Member member = memberRepository.findByIdAndDeletedIsFalse(memberId)
@@ -60,6 +58,9 @@ public class ReviewServiceImpl implements ReviewService {
         .likeCount(0L)
         .commentCount(0L)
         .build();
+
+    // book 에 리뷰 데이터 반영
+    book.registerReview(review);
 
     boolean isLikedByMe = reviewLikeRepository
         .findByMemberIdAndReviewId(memberId, review.getId())
@@ -98,7 +99,7 @@ public class ReviewServiceImpl implements ReviewService {
     targetReview.setDeleted(true);
 
     Book targetBook = targetReview.getBook();
-    targetBook.setReviewCount(targetBook.getReviewCount() - 1);
+    targetBook.removeReview(targetReview);
 
     return true;
   }
@@ -119,7 +120,7 @@ public class ReviewServiceImpl implements ReviewService {
     // 만약 review 가 "softDeleted 상태가 아니면" ReviewCount 감소
     if (!targetReview.isDeleted()) {
       Book targetBook = targetReview.getBook();
-      targetBook.setReviewCount(targetBook.getReviewCount() - 1);
+      targetBook.removeReview(targetReview);
     }
 
     reviewRepository.deleteById(reviewId);

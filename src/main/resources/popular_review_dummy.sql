@@ -13,19 +13,20 @@ TRUNCATE TABLE
 -----------------------------------------------------
 -- 1) MEMBER 100명
 -----------------------------------------------------
-INSERT INTO member (email, nickname, password, created_at, deleted)
+INSERT INTO member (email, nickname, password, created_at, updated_at, deleted)
 SELECT 'user' || i || '@test.com',
        'user' || i,
        'pass',
-       NOW(),
-       FALSE
+       NOW() - INTERVAL '7 days', -- created_at 1주일 전
+       NOW() - INTERVAL '3 days', -- updated_at 3일 전
+       (RANDOM() < 0.5)
 FROM generate_series(1, 100) AS i;
 
 -----------------------------------------------------
 -- 2) BOOK 100권
 -----------------------------------------------------
 INSERT INTO book (title, author, description, publisher, published_date,
-                  review_count, rating, deleted, created_at)
+                  review_count, rating, deleted, created_at, updated_at)
 SELECT 'Book' || i,
        'Author' || i,
        'DESC',
@@ -33,40 +34,45 @@ SELECT 'Book' || i,
        CURRENT_DATE,
        0,
        (4.0 + (i::float / 100)),
-       FALSE,
-       NOW()
+       (RANDOM() < 0.5),
+       NOW() - INTERVAL '7 days', -- created_at 1주일 전
+       NOW() - INTERVAL '3 days'  -- updated_at 3일 전
 FROM generate_series(1, 100) AS i;
 
 -----------------------------------------------------
 -- 3) REVIEW 100개
 -----------------------------------------------------
-INSERT INTO review (book_id, member_id, created_at, deleted, rating, content)
-SELECT ((i - 1) % 100) + 1, -- 1~10 반복
+INSERT INTO review (book_id, member_id, created_at, updated_at, deleted, rating, content)
+
+SELECT ((i - 1) % 100) + 1,
        ((i - 1) % 100) + 1,
-       NOW() - (i || ' hours')::INTERVAL,
-       FALSE,
+       NOW() - INTERVAL '7 days', -- created_at 1주일 전
+       NOW() - INTERVAL '3 days', -- updated_at 3일 전
+       (RANDOM() < 0.5),
        (i % 5) + 1,
        'content ' || i
-FROM generate_series(1, 100) AS i;
+FROM generate_series(1, 10) AS i;
 
 -----------------------------------------------------
 -- 4) REVIEW_LIKE 100개
 -----------------------------------------------------
 INSERT INTO review_like (review_id, member_id, created_at)
-SELECT ((i - 1) % 30) + 1,  -- review 1~20 반복
-       ((i - 1) % 100) + 1, -- member 1~10 반복
-       (NOW() + INTERVAL '9 hours') - (i || ' minutes')::INTERVAL
+SELECT ((i - 1) % 30) + 1,
+       ((i - 1) % 100) + 1,
+       NOW() - INTERVAL '7 days' -- created_at 1주일 전
 FROM generate_series(1, 100) AS i;
+
 
 -----------------------------------------------------
 -- 5) COMMENT 100개
 -----------------------------------------------------
-INSERT INTO comment (member_id, review_id, content, created_at, deleted)
+INSERT INTO comment (member_id, review_id, content, created_at, updated_at, deleted)
 SELECT ((i - 1) % 100) + 1,
        ((i - 1) % 100) + 1,
        'comment ' || i,
-       NOW() - (i || ' minutes')::INTERVAL,
-       FALSE
+       NOW() - INTERVAL '7 days', -- created_at 1주일 전
+       NOW() - INTERVAL '3 days', -- updated_at 3일 전
+       (RANDOM() < 0.5)
 FROM generate_series(1, 100) AS i;
 
 -----------------------------------------------------
@@ -74,7 +80,7 @@ FROM generate_series(1, 100) AS i;
 -----------------------------------------------------
 INSERT INTO popular_review (review_id, rank, ordered, score, period, created_at)
 SELECT i,
-       ((i - 1) % 100) + 1, -- 1~5 반복 (각 기간별)
+       ((i - 1) % 100) + 1,
        false,
        100 - i,
        CASE
@@ -83,18 +89,18 @@ SELECT i,
            WHEN i <= 15 THEN 'MONTHLY'
            ELSE 'ALL_TIME'
            END,
-       NOW() - ((i / 5) || ' days')::INTERVAL
-
+       NOW() - INTERVAL '7 days' -- created_at 1주일 전
 FROM generate_series(1, 10) AS i;
 
 -----------------------------------------------------
 -- 7) NOTIFICATION 20개
 -----------------------------------------------------
-INSERT INTO notification (member_id, review_id, content, confirmed, created_at, deleted)
-SELECT ((i - 1) % 1) + 10,                        -- member 1~10 반복
-       ((i - 1) % 20) + 10,                       -- review 1~20 반복
+INSERT INTO notification (member_id, review_id, content, confirmed, created_at, updated_at, deleted)
+SELECT ((i - 1) % 1) + 10,
+       ((i - 1) % 20) + 10,
        'Notification content ' || i,
-       FALSE,
-       NOW() - ((i * 2) || ' minutes')::INTERVAL, -- 2분씩 차이 나게 설정
-       FALSE
+       (RANDOM() < 0.5),
+       NOW() - INTERVAL '7 days', -- created_at 1주일 전
+       NOW() - INTERVAL '3 days', -- updated_at 3일 전
+       (RANDOM() < 0.5)
 FROM generate_series(1, 100) AS i;

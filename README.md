@@ -273,14 +273,14 @@ Controller → Service → Repository → Entity
                          │           ├── ErrorCode.class
                          │           ├── ErrorResponse.class
                          │           └── GlobalExceptionHandler.class
-                         ├── 🗂 config
+                         ├── 🗂️ config
                          │   ├── AppConfig.class
                          │   ├── MDCLoggingInterceptor.class
                          │   ├── PasswordEncoderConfig.class
                          │   ├── QuerydslConfig.class
                          │   ├── RestTemplateConfig.class
                          │   └── S3Config.class
-                         ├── 🗂 controller
+                         ├── 🗂️ controller
                          │   ├── CommentController.class
                          │   ├── MemberController.class
                          │   ├── 📂 book
@@ -292,7 +292,7 @@ Controller → Service → Repository → Entity
                          │   │   └── ReviewController.class
                          │   └── 📂 v2
                          │       └── ReviewControllerV2.class
-                         ├── 🗂 domain
+                         ├── 🗂️ domain
                          │   ├── 📂 entity
                          │   │   ├── Book$BookBuilder.class
                          │   │   ├── Book$BookBuilderImpl.class
@@ -336,7 +336,7 @@ Controller → Service → Repository → Entity
                          │   └── 📂 enums
                          │       ├── Period.class
                          │       └── ReviewOrderBy.class
-                         ├── 🗂 dto
+                         ├── 🗂️ dto
                          │   ├── 📂 command
                          │   │   ├── CreateReviewCommand$CreateReviewCommandBuilder.class
                          │   │   ├── CreateReviewCommand.class
@@ -487,7 +487,7 @@ Controller → Service → Repository → Entity
                          │           ├── MemberLoginResult.class
                          │           ├── MemberUpdateResult.class
                          │           └── PowerMemberFindResult.class
-                         ├── 🗂 mapper
+                         ├── 🗂️ mapper
                          │   ├── CommentMapper.class
                          │   ├── CommentMapperImpl.class
                          │   ├── MemberMapper.class
@@ -506,7 +506,7 @@ Controller → Service → Repository → Entity
                          │   └── 📂 review
                          │       ├── ReviewMapper.class
                          │       └── ReviewMapperImpl.class
-                         ├── 🗂 repository
+                         ├── 🗂️ repository
                          │   ├── CommentRepository.class
                          │   ├── MemberRepository.class
                          │   ├── NotificationQueryRepository.class
@@ -532,7 +532,7 @@ Controller → Service → Repository → Entity
                          │       ├── NotificationQueryRepositoryImpl.class
                          │       ├── PopularReviewQueryRepositoryImpl.class
                          │       └── ReviewQueryRepositoryImpl.class
-                         └── 🗂 service
+                         └── 🗂️ service
                              ├── CommentService.class
                              ├── GetPopularReviewsCommand$GetPopularReviewsCommandBuilder.class
                              ├── GetPopularReviewsCommand.class

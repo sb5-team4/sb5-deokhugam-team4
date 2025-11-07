@@ -72,6 +72,48 @@
 ![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)
 ![ZEP](https://img.shields.io/badge/ZEP-%236C5CE7.svg?style=for-the-badge&logo=zepeto&logoColor=white)
 
+## 🏗️ 시스템 아키텍처
+
+### 인프라 구성
+```
+                 ┌─────────────┐
+                 │    Client   │
+                 └──────┬──────┘
+                        │
+                        ▼
+               ┌─────────────────┐
+               │     AWS EC2     │
+               │     (Docker)    │
+               │  - Spring Boot  │
+               │  - Batch Jobs   │
+               └────────┬────────┘
+                        │
+                ┌───────┴───────┐
+                ▼               ▼
+         ┌────────────┐   ┌──────────┐
+         │  AWS RDS   │   │  AWS S3  │
+         │(PostgreSQL)│   │ (Images) │
+         └────────────┘   └──────────┘
+```
+
+### 애플리케이션 아키텍처
+**4-Layer Architecture**
+```
+Controller → Service → Repository → Entity
+     ↓           ↓
+  Request    Command
+  Response    Result
+```
+
+#### 계층별 역할
+- **Controller**: HTTP 요청/응답 처리
+- **Service**: 비즈니스 로직 처리
+- **Repository**: 데이터베이스 접근
+- **DTO 계층**:
+    - `Request` → `Command`: Controller → Service
+    - `Result` → `Response`: Service → Controller
+
+
 ## 주요 기능
 
 ### 🧑‍💻 1. 회원 관리 (User Management)
@@ -184,7 +226,7 @@
                  └── 📂 codeit
                      └── 📂 deokhugam
                          ├── DeokhugamApplication.class
-                         ├── 📂 batch
+                         ├── 🗂️ batch
                          │   ├── MainScheduler.class
                          │   ├── 📂 common
                          │   │   ├── BatchCustomException.class
@@ -231,14 +273,14 @@
                          │           ├── ErrorCode.class
                          │           ├── ErrorResponse.class
                          │           └── GlobalExceptionHandler.class
-                         ├── 📂 config
+                         ├── 🗂 config
                          │   ├── AppConfig.class
                          │   ├── MDCLoggingInterceptor.class
                          │   ├── PasswordEncoderConfig.class
                          │   ├── QuerydslConfig.class
                          │   ├── RestTemplateConfig.class
                          │   └── S3Config.class
-                         ├── 📂 controller
+                         ├── 🗂 controller
                          │   ├── CommentController.class
                          │   ├── MemberController.class
                          │   ├── 📂 book
@@ -250,7 +292,7 @@
                          │   │   └── ReviewController.class
                          │   └── 📂 v2
                          │       └── ReviewControllerV2.class
-                         ├── 📂 domain
+                         ├── 🗂 domain
                          │   ├── 📂 entity
                          │   │   ├── Book$BookBuilder.class
                          │   │   ├── Book$BookBuilderImpl.class
@@ -294,7 +336,7 @@
                          │   └── 📂 enums
                          │       ├── Period.class
                          │       └── ReviewOrderBy.class
-                         ├── 📂 dto
+                         ├── 🗂 dto
                          │   ├── 📂 command
                          │   │   ├── CreateReviewCommand$CreateReviewCommandBuilder.class
                          │   │   ├── CreateReviewCommand.class
@@ -445,7 +487,7 @@
                          │           ├── MemberLoginResult.class
                          │           ├── MemberUpdateResult.class
                          │           └── PowerMemberFindResult.class
-                         ├── 📂 mapper
+                         ├── 🗂 mapper
                          │   ├── CommentMapper.class
                          │   ├── CommentMapperImpl.class
                          │   ├── MemberMapper.class
@@ -464,7 +506,7 @@
                          │   └── 📂 review
                          │       ├── ReviewMapper.class
                          │       └── ReviewMapperImpl.class
-                         ├── 📂 repository
+                         ├── 🗂 repository
                          │   ├── CommentRepository.class
                          │   ├── MemberRepository.class
                          │   ├── NotificationQueryRepository.class
@@ -490,7 +532,7 @@
                          │       ├── NotificationQueryRepositoryImpl.class
                          │       ├── PopularReviewQueryRepositoryImpl.class
                          │       └── ReviewQueryRepositoryImpl.class
-                         └── 📂 service
+                         └── 🗂 service
                              ├── CommentService.class
                              ├── GetPopularReviewsCommand$GetPopularReviewsCommandBuilder.class
                              ├── GetPopularReviewsCommand.class

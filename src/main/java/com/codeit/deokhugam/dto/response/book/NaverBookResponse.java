@@ -7,17 +7,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)  // toBuilder 추가!
 @AllArgsConstructor
 @NoArgsConstructor
 public class NaverBookResponse {
 
-  private String title;             // 제목
-  private String author;            // 저자
-  private String description;       // 설명
-  private String publisher;         // 출판사
-  private LocalDate publishedDate;  // 출판일
-  private String isbn;              // ISBN
-  private String thumbnailUrl;      // 썸네일 URL
-
+  private String title;
+  private String author;
+  private String description;
+  private String publisher;
+  private LocalDate publishedDate;
+  private String isbn;
+  private String thumbnailUrl;
+  private String thumbnailImage;
 }

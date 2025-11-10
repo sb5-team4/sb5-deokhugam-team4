@@ -3,6 +3,7 @@ package com.codeit.deokhugam.dto.response.book;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class NaverBookSearchResponse {
 
   // Naver API 에서 땡겨오는 도서 상세 정보 필드들
   @Getter
+  @Setter
   @NoArgsConstructor
   public static class Item {
 

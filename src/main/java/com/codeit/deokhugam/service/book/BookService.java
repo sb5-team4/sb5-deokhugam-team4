@@ -9,8 +9,8 @@ import com.codeit.deokhugam.dto.command.book.BookListCommand;
 import com.codeit.deokhugam.dto.command.book.BookUpdateCommand;
 import com.codeit.deokhugam.dto.command.book.IsbnOcrCommand;
 import com.codeit.deokhugam.dto.response.book.BookResponse;
+import com.codeit.deokhugam.dto.response.book.NaverBookResponse;
 import com.codeit.deokhugam.dto.result.book.BookCreateResult;
-import com.codeit.deokhugam.dto.result.book.BookInfoByIsbnResult;
 import com.codeit.deokhugam.dto.result.book.BookListResult;
 import com.codeit.deokhugam.dto.result.book.BookUpdateResult;
 import com.codeit.deokhugam.dto.result.book.IsbnOcrResult;
@@ -118,7 +118,7 @@ public class BookService {
     bookRepository.delete(book);
   }
 
-  public BookInfoByIsbnResult getBookInfoByIsbn(BookInfoByIsbnCommand command) {
+  public NaverBookResponse getBookInfoByIsbn(BookInfoByIsbnCommand command) {
     String isbn = command.getIsbn();
 
     if (isbn == null || !isbn.matches("\\d{13}")) {

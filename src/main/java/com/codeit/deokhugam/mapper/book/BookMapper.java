@@ -73,7 +73,7 @@ public interface BookMapper {
   @Mapping(target = "author", source = "author", qualifiedByName = "removeHtmlTags")
   @Mapping(target = "publishedDate", source = "pubdate", qualifiedByName = "parsePublishedDate")
   @Mapping(target = "isbn", source = "isbn", qualifiedByName = "extractIsbn13")
-  @Mapping(target = "thumbnailImage", source = "image")
+  @Mapping(target = "thumbnailUrl", source = "image")
   BookInfoByIsbnResult toBookInfoByIsbnResult(NaverBookSearchResponse.Item item);
 
   BookListResult.BookResult toBookResult(Book book);

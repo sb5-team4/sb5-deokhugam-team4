@@ -12,7 +12,6 @@ import com.codeit.deokhugam.dto.response.book.BookListResponse;
 import com.codeit.deokhugam.dto.response.book.BookResponse;
 import com.codeit.deokhugam.dto.response.book.NaverBookResponse;
 import com.codeit.deokhugam.dto.result.book.BookCreateResult;
-import com.codeit.deokhugam.dto.result.book.BookInfoByIsbnResult;
 import com.codeit.deokhugam.dto.result.book.BookListResult;
 import com.codeit.deokhugam.dto.result.book.BookUpdateResult;
 import com.codeit.deokhugam.dto.result.book.IsbnOcrResult;
@@ -133,9 +132,7 @@ public class BookController {
         .isbn(isbn)
         .build();
 
-    BookInfoByIsbnResult result = bookService.getBookInfoByIsbn(command);
-
-    NaverBookResponse response = bookMapper.toNaverBookResponse(result);
+    NaverBookResponse response = bookService.getBookInfoByIsbn(command);
 
     return ResponseEntity.ok(response);
   }

@@ -42,7 +42,7 @@ CREATE TABLE power_member
     created_at       timestamp with time zone                        NOT NULL,
     rank             BIGINT                                          NOT NULL,
     score            DECIMAL(10, 2)                                  NOT NULL,
-    review_score_sum DECIMAL(10, 2)                                  NOT NULL,
+    review_score_sum DECIMAL(3, 2)                                   NOT NULL,
     like_count       BIGINT                                          NOT NULL DEFAULT 0,
     comment_count    BIGINT                                          NOT NULL DEFAULT 0
 );
@@ -51,7 +51,7 @@ DROP TABLE IF EXISTS book CASCADE;
 CREATE TABLE book
 (
     id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
-    title          TEXT COLLATE "ko-KR-x-icu"                      NOT NULL,
+    title          VARCHAR(255)                                    NOT NULL,
     author         VARCHAR(255)                                    NOT NULL,
     description    TEXT                                            NOT NULL,
     publisher      VARCHAR(255)                                    NOT NULL,
@@ -114,12 +114,14 @@ CREATE TABLE member
 DROP TABLE IF EXISTS popular_book CASCADE;
 CREATE TABLE popular_book
 (
-    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
-    book_id    BIGINT                                          NOT NULL,
-    period     VARCHAR(20)                                     NOT NULL,
-    rank       SMALLINT                                        NOT NULL,
-    score      DECIMAL(10, 2)                                  NOT NULL,
-    created_at timestamp with time zone                        NOT NULL
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
+    book_id      BIGINT                                          NOT NULL,
+    period       VARCHAR(20)                                     NOT NULL,
+    rank         SMALLINT                                        NOT NULL,
+    rating       DECIMAL(10, 2)                                  NOT NULL,
+    review_count BIGINT                                          NOT NULL,
+    score        DECIMAL(10, 2)                                  NOT NULL,
+    created_at   timestamp with time zone                        NOT NULL
 );
 
 -- ALTER TABLE review_like
